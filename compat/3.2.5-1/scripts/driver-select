@@ -1,0 +1,442 @@
+#!/bin/bash
+# Copyright 2009        Luis R. Rodriguez <mcgrof@gmail.com>
+#
+# This script allows you to select your compat-wireless driver and
+# reduce compilation time.
+
+DRIVERS_MAKEFILE="drivers/net/wireless/Makefile"
+ATH_MAKEFILE="drivers/net/wireless/ath/Makefile"
+ATH9K_MAKEFILE="drivers/net/wireless/ath/ath9k/Makefile"
+RT2X00_MAKEFILE="drivers/net/wireless/rt2x00/Makefile"
+NET_WIRELESS_MAKEFILE="net/wireless/Makefile"
+EEPROM_MAKEFILE="drivers/misc/eeprom/Makefile"
+DRIVERS_NET="drivers/net/Makefile"
+DRIVERS_NET_USB_MAKEFILE="drivers/net/usb/Makefile"
+SSB_MAKEFILE="drivers/ssb/Makefile"
+
+# used to backup files from foo to foo.${BACKUP_EXT}
+# If you change this also modify restore_compat() and
+# restore_file() below I couldn't find a way to use
+# the $BACKUP_EXT there.
+BACKUP_EXT="bk"
+
+# Pretty colors
+GREEN="\033[01;32m"
+YELLOW="\033[01;33m"
+NORMAL="\033[00m"
+BLUE="\033[34m"
+RED="\033[31m"
+PURPLE="\033[35m"
+CYAN="\033[36m"
+UNDERLINE="\033[02m"
+
+SUPPORTED_80211_DRIVERS="ath5k ath9k ath9k_htc carl9170 b43 zd1211rw rt2x00 wl1251 wl12xx"
+
+if [ -d drivers/staging/ath6kl ]; then
+	SUPPORTED_80211_DRIVERS="$SUPPORTED_80211_DRIVERS ath6kl"
+fi
+
+if [ -d drivers/staging/brcm80211 ]; then
+	SUPPORTED_80211_DRIVERS="$SUPPORTED_80211_DRIVERS brcm80211"
+fi
+
+# b43 needs some more work for driver-select, the SSB stuff, plus
+# what if you update b44 but not b43? It will bust.
+SUPPORTED_ETH_DRIVERS=""
+
+function usage {
+	echo -e "${GREEN}Usage${NORMAL}: ${BOLD}$0${NORMAL} [ ${PURPLE}<driver-name>${NORMAL} | ${CYAN}<driver-group-name>${NORMAL} | ${GREEN}restore${NORMAL} ]"
+
+	# These should match the switch below.
+	echo -e "Supported 802.11 drivers:"
+	for i in $SUPPORTED_80211_DRIVERS; do
+		echo -e "\t${PURPLE}${i}${NORMAL}"
+	done
+
+	# These should match the switch below.
+	echo -e "\nSupported group drivers:"
+	echo -e "\t${CYAN}atheros${NORMAL} < ${PURPLE} ath5k ath9k carl9170 zd1211rw ${NORMAL}>"
+	echo -e "\t${CYAN}ath${NORMAL} < ${PURPLE} ath5k ath9k carl9170 ${NORMAL}>"
+	echo -e "\t${CYAN}iwlagn${NORMAL} < ${PURPLE} iwlagn ${NORMAL}>"
+	echo -e "\t${CYAN}rtl818x${NORMAL} < ${PURPLE} rtl8180 rtl8187 ${NORMAL}>"
+	echo -e "\t${CYAN}rtlwifi${NORMAL} < ${PURPLE} rtl8188ee rtl8192ce rtl8192de rtl8192se ${NORMAL}>"
+	echo -e "\t${CYAN}wl12xx${NORMAL} < ${PURPLE} wl1251 wl12xx (SPI and SDIO)${NORMAL}>"
+	
+	echo -e "\nSupported group drivers: Bluetooth & Ethernet:"
+	echo -e "\t${CYAN}atlxx${NORMAL} < ${PURPLE} atl1 atl2 atl1e atl1c ${NORMAL}>"
+	echo -e "\t${CYAN}bt${NORMAL} < ${PURPLE} Linux bluetooth drivers ${NORMAL}>"
+
+	echo -e "Restoring compat-wireless:"
+	echo -e "\t${GREEN}restore${NORMAL}: you can use this option to restore compat-wireless to the original state"
+}
+
+function backup_file {
+	if [ -f $1.${BACKUP_EXT} ]; then
+		echo -e "Backup exists: ${CYAN}${1}.${BACKUP_EXT}${NORMAL}"
+		return
+	fi
+	echo -e "Backing up makefile: ${CYAN}${1}.${BACKUP_EXT}${NORMAL}"
+	cp $1 $1.bk
+}
+
+function disable_makefile
+{
+	backup_file $1
+	echo > $1
+}
+
+function select_driver 
+{
+	backup_file $DRIVERS_MAKEFILE
+	perl -i -ne 'print if /'$1'/ ' $DRIVERS_MAKEFILE
+}
+
+function select_drivers
+{
+	backup_file $DRIVERS_MAKEFILE
+	CONFIGS=""
+	COUNT=0
+	for i in $@; do
+		if [[ "$CONFIGS" = "" ]]; then
+			CONFIGS="$i"
+		else
+			CONFIGS="${CONFIGS}|$i"
+		fi
+	done
+	egrep "$CONFIGS" $DRIVERS_MAKEFILE > ${DRIVERS_MAKEFILE}.tmp
+	mv ${DRIVERS_MAKEFILE}.tmp ${DRIVERS_MAKEFILE}
+}
+
+function disable_lib80211
+{
+	backup_file $NET_WIRELESS_MAKEFILE
+	perl -i -ne 'print if ! /LIB80211/ ' $NET_WIRELESS_MAKEFILE
+}
+
+function disable_b44 {
+	backup_file $DRIVERS_NET
+	perl -i -ne 'print if ! /CONFIG_B44/ ' $DRIVERS_NET
+}
+
+function disable_ssb
+{
+	disable_b44
+	disable_makefile ${SSB_MAKEFILE}
+	perl -i -ne 'print if ! /drivers\/ssb\/ \\/ ' Makefile
+}
+
+function disable_rfkill
+{
+	backup_file Makefile
+	perl -i -ne 'print if ! /CONFIG_COMPAT_RFKILL/' Makefile
+}
+
+function disable_eeprom
+{
+	disable_makefile ${EEPROM_MAKEFILE}
+	perl -i -ne 'print if ! /drivers\/misc\/eeprom\/ \\/' Makefile
+}
+
+function disable_usbnet
+{
+	disable_makefile ${DRIVERS_NET_USB_MAKEFILE}
+	perl -i -ne 'print if ! /drivers\/net\/usb\/ \\/' Makefile
+}
+
+function disable_usbnet {
+	perl -i -ne 'print if ! /CONFIG_COMPAT_NET_USB_MODULES/' Makefile
+} 
+
+function disable_ethernet {
+	perl -i -ne 'print if ! /CONFIG_COMPAT_NETWORK_MODULES/' Makefile
+} 
+
+function disable_var_03 {
+	perl -i -ne 'print if ! /CONFIG_COMPAT_BLUETOOTH/' Makefile
+} 
+
+function disable_bt {
+	perl -i -ne 'print if ! /CONFIG_COMPAT_VAR_MODULES/' Makefile
+	perl -i -ne 'print if ! /CONFIG_COMPAT_BLUETOOTH/' Makefile
+} 
+
+function disable_80211 {
+	perl -i -ne 'print if ! /CONFIG_COMPAT_WIRELESS/' Makefile
+}
+
+function disable_bt_usb_ethernet_var {
+	backup_file Makefile
+	disable_usbnet
+	disable_ethernet
+	disable_var_03
+	disable_bt
+	disable_update-initramfs
+} 
+
+function enable_only_ethernet {
+	backup_file Makefile
+	backup_file $DRIVERS_NET
+	disable_staging
+	disable_usbnet
+	disable_var_03
+	disable_bt
+	# rfkill may be needed if you enable b44 as you may have b43
+	disable_rfkill
+	disable_80211
+}
+
+function disable_var {
+	disable_ssb
+	disable_usbnet
+	disable_eeprom
+	disable_update-initramfs
+} 
+
+function disable_var_01 {
+	disable_lib80211
+	disable_var
+}
+
+function disable_var_02 {
+	#var_01 with eeprom not disabled
+	disable_lib80211
+	disable_ssb
+	disable_usbnet
+	disable_update-initramfs
+}
+
+function disable_staging {
+	backup_file Makefile
+	perl -i -ne 'print if ! /CONFIG_COMPAT_STAGING/ ' Makefile
+}
+
+function disable_ath6kl {
+	backup_file Makefile
+	perl -i -ne 'print if ! /ath6kl/ ' Makefile
+}
+
+function disable_brcm80211 {
+	backup_file Makefile
+	perl -i -ne 'print if ! /brcm80211/ ' Makefile
+}
+
+function disable_update-initramfs
+{
+	backup_file Makefile
+	perl -i -ne 'print if ! /update-initramfs/' Makefile
+}
+
+function select_ath_driver 
+{
+	backup_file $ATH_MAKEFILE
+	perl -i -ne 'print if /'$1'/ || /CONFIG_ATH_/ || /ath-objs/ || /regd.o/ || /hw.o/ || /key.o/' $ATH_MAKEFILE
+	disable_var_01
+}
+
+function select_ath9k_driver
+{
+	select_ath_driver CONFIG_ATH9K_HW
+	# In the future here we'll add stuff to disable ath9k_htc
+}
+
+function restore_file {
+	#ORIG=$(shell ${1%%.${BACKUP_EXT}})
+	ORIG=${1%%.bk}
+	cp $1 $ORIG
+	rm -f $1
+	echo -e "Restored makefile: ${CYAN}${ORIG}${NORMAL} (and removed backup)"
+}
+
+function restore_compat {
+	#FILES=$(find ./ -type f -name *.$BACKUP_EXT)
+	FILES=$(find ./ -type f -name *.bk)
+	for i in $FILES; do
+		restore_file $i
+	done
+}
+
+if [ $# -ne 1 ]; then
+	usage
+	exit
+fi
+
+if [ ! -f compat_version ]; then
+	echo "Must run $0 from the compat-wireless top level directory"
+	exit
+fi
+
+if [[ ! -f built-in.o ]]; then
+	if [[ "$1" != "restore" ]]; then
+		echo -e "${PURPLE}Processing new driver-select request...${NORMAL}"
+	fi
+fi
+
+# Always backup the top level Makefile, unless restoring
+if [[ "$1" != "restore" ]]; then
+	backup_file Makefile
+fi
+
+# If a user selects a new driver make sure we clean up for them
+# first and also restore the backup makefiles then. Otherwise
+# we'll be trying to leave drivers on Makefiles which are not
+# already there from a previous run.
+if [ -f built-in.o ]; then
+	echo -e "${PURPLE}Old build found, going to clean this up first...${NORMAL}"
+	make clean
+	echo -e "${PURPLE}Restoring Makefiles...${NORMAL}"
+	./$0 restore
+fi
+
+case $1 in
+	restore)
+		restore_compat
+		;;
+# Group drivers
+	atheros)
+		select_drivers		CONFIG_ATH_COMMON \
+					CONFIG_COMPAT_ZD1211RW
+		disable_staging
+		disable_var_01
+		;;
+	ath)
+		disable_bt_usb_ethernet_var
+		disable_brcm80211
+		select_drivers		CONFIG_ATH_COMMON
+		disable_var_01
+		;;
+	intel)
+		select_drivers		CONFIG_COMPAT_IWLWIFI \
+					CONFIG_IPW
+		disable_staging
+		disable_var
+		disable_bt
+		disable_ethernet
+		disable_usbnet
+		;;
+	iwlagn)
+		select_driver		CONFIG_IWLAGN
+		disable_staging
+		disable_var_01
+		disable_bt
+		disable_ethernet
+		disable_usbnet
+		;;
+	rtl818x)
+		select_drivers		CONFIG_RTL8180 CONFIG_RTL8187
+		disable_staging
+		disable_var_02
+		;;
+	rtlwifi)
+		select_drivers		CONFIG_RTL8188EE CONFIG_RTL8192CE \
+					CONFIG_RTL8192DE CONFIG_RTL8192SE \
+					CONFIG_RTL8723E \
+					CONFIG_RTLWIFI
+		disable_staging
+		disable_bt_usb_ethernet_var
+		;;
+	wl12xx)
+		select_drivers		CONFIG_WL1251 \
+					CONFIG_WL12XX
+		disable_staging
+		disable_var_01
+		;;
+# Singular modules
+	ath5k)
+		disable_staging
+		disable_bt_usb_ethernet_var
+		select_driver		CONFIG_ATH_COMMON
+		select_ath_driver	CONFIG_ATH5K
+		#patch -p1 < enable-older-kernels/enable-2.6.23.patch
+		;;
+	ath9k)
+		disable_staging
+		disable_bt_usb_ethernet_var
+		select_driver		CONFIG_ATH_COMMON
+		select_ath9k_driver
+		;;
+	carl9170)
+		disable_staging
+		disable_bt_usb_ethernet_var
+		select_driver		CONFIG_ATH_COMMON
+		select_ath_driver	CONFIG_CARL9170
+		;;
+	ath9k_htc)
+		disable_staging
+		disable_bt_usb_ethernet_var
+		select_driver		CONFIG_ATH_COMMON
+		select_ath9k_driver
+		;;
+	ath6kl)
+		disable_bt_usb_ethernet_var
+		disable_brcm80211
+		select_driver		CONFIG_NOTHING
+		sed -e 's|net/mac80211/||' Makefile > Makefile.ath6kl
+		mv Makefile.ath6kl Makefile
+		;;
+	brcm80211)
+		disable_bt_usb_ethernet_var
+		disable_ath6kl
+		select_driver		CONFIG_NOTHING
+		;;
+	zd1211rw)
+		select_driver		CONFIG_COMPAT_ZD1211RW
+		disable_staging
+		disable_var_01
+		;;
+	b43)
+		disable_staging
+		disable_usbnet
+		disable_ethernet
+		disable_var_03
+		select_driver		CONFIG_B43
+		;;
+	rt2x00)
+		select_driver		CONFIG_RT2X00
+		disable_staging
+		disable_var_02
+		;;
+	wl1251)
+		select_drivers		CONFIG_WL1251
+		disable_staging
+		disable_var_01
+		;;
+	wl12xx)
+		select_drivers		CONFIG_WL12XX
+		disable_staging
+		disable_var_01
+		;;
+# Ethernet and Bluetooth drivers
+	atl1)
+		enable_only_ethernet
+		echo -e "obj-\$(CONFIG_ATL1) += atlx/" > $DRIVERS_NET
+		;;
+	atl2)
+		enable_only_ethernet
+		echo -e "obj-\$(CONFIG_ATL2) += atlx/" > $DRIVERS_NET
+		;;
+	atl1e)
+		enable_only_ethernet
+		echo -e "obj-\$(CONFIG_ATL1E) += atl1e/" > $DRIVERS_NET
+		;;
+	atl1c)
+		enable_only_ethernet
+		echo -e "obj-\$(CONFIG_ATL1C) += atl1c/" > $DRIVERS_NET
+		;;
+	atlxx)
+		select_drivers		CONFIG_ATL1 CONFIG_ATL2 CONFIG_ATL1E CONFIG_ATL1C
+		enable_only_ethernet
+		disable_b44
+		disable_update-initramfs
+		;;
+	bt)
+		select_driver 		CONFIG_BT
+		disable_var
+		disable_ethernet
+		disable_staging
+		disable_80211
+		;;
+	*)
+		echo "Unsupported driver"
+		exit
+		;;
+esac
