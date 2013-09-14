@@ -27,6 +27,11 @@
  *
  *****************************************************************************/
 
+#ifndef __devinit
+#define __devinit
+#define __devinitdata
+#endif
+
 #ifndef __RTL_PCI_H__
 #define __RTL_PCI_H__
 
