@@ -51,18 +51,18 @@ static struct country_code_to_enum_rd allCountries[] = {
  *scan on all world regulatory domains
  */
 #define RTL819x_2GHZ_CH01_11	\
-	REG_RULE(2412-10, 2462+10, 40, 0, 20, 0)
+	REG_RULE(2412-10, 2462+10, 40, 0, 33, 0)
 
 /*
  *We enable active scan on these a case
  *by case basis by regulatory domain
  */
 #define RTL819x_2GHZ_CH12_13	\
-	REG_RULE(2467-10, 2472+10, 40, 0, 20,\
+	REG_RULE(2467-10, 2472+10, 40, 0, 33,\
 	NL80211_RRF_PASSIVE_SCAN)
 
 #define RTL819x_2GHZ_CH14	\
-	REG_RULE(2484-10, 2484+10, 40, 0, 20, \
+	REG_RULE(2484-10, 2484+10, 40, 0, 33, \
 	NL80211_RRF_PASSIVE_SCAN | \
 	NL80211_RRF_NO_OFDM)
 
