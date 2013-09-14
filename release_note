@@ -1,0 +1,139 @@
+------------------------------------------------------------------------
+Release for Realtek linux mac80211 based driver
+
+------------------------------------------------------------------------
+Release date = 2011-01-05
+Operating system release = Ubuntu 10.10
+Kernel version = 2.6.35
+Release driver version = 0001.0105.2011
+Change history =
+	1. First Release for 8192CE/8188CE.
+	   Supported key features:
+	   B/G/N data rate,
+	   Infrastructure/Ad-hoc mode,
+	   RFkill function,
+	   CRDA function.
+	2. Supports kernel version:
+	   2.6.32 - 2.6.37
+	3. Supports linux distros:
+     	   Ubuntu 9.10/10.04/10.10, 
+	   Fedora Core, Debian, Mandriva, Open SUSE, Gentoo, 
+     	   MeeG0, android 2.2 (froyo-x86), etc.
+
+Release date = 2011-01-21
+Operating system release = Ubuntu 10.10
+Kernel version = 2.6.35
+Release driver version = 0002.0121.2011
+Change history =
+	1. First Release for 8191SE/RTL8192SE.
+	   Supported key features:
+	   B/G/N data rate,
+	   Infrastructure/Ad-hoc mode,
+	   RFkill function,
+	   CRDA function.
+	2. First Release for 8192DE.
+	   Supported key features:
+	   B/G/N data rate,
+	   Infrastructure/Ad-hoc mode,
+	   RFkill function,
+	   CRDA function.
+	   Dul Mac Dul Phy for RTL8192DE VC.
+	   Single Mac Dul Band for RTL8192DE VS.
+	3. Supports kernel version:
+	   2.6.32 - 2.6.38
+	4. Supports linux distros:
+     	   Ubuntu 9.10/10.04/10.10, 
+	   Fedora Core, Debian, Mandriva, Open SUSE, Gentoo, 
+     	   MeeGo, android 2.2 (froyo-x86), etc.
+
+Release date = 2011-03-29
+Operating system release = Ubuntu 10.10
+Kernel version = 2.6.35-2.6.38
+Release driver version = 0003.0329.2011
+Change history =
+	1. add softap support.
+	2. fix dis-auth issue when scan on 5G. 
+	3. fix rate show wrong issue in iwconfig.
+	4. fix adhoc TP issue.
+	5. fix crash issue on some platform.
+	6. fix crash issue caused by LPS ps-poll and null tx desc wrong.
+	7. fix ralink ap TP issue caused by DELBA.
+
+Release date = 2011-08-16
+Operating system release = Ubuntu 11.04
+Kernel version = 2.6.35-3.0
+Release driver version = 0004.0816.2011
+Change history =
+	1. add 92DE C-cut D-cut support.
+	2. add 92CE UMC version support.
+	3. Fix 92CE VID/DID issue.
+	4. Fix MeGoo crash issue.
+	5. Add compat wireless to support lower version kernel.
+	6. add connection monitor function.
+
+Release date = 2011-11-17
+Operating system release = Ubuntu 11.10
+Kernel version = 2.6.35-3.1
+Release driver version = 0005.1117.2011
+Change history =
+	1.fix_APmode_crash_issue_caused_by_roaming.
+	2.Fix_92se_adhoc_beacon_stuck_issue.
+	3.add IBSS RSN.
+	4.move_some_rx_stats_code_into_commen.
+	5.support_new_pci_pm_method_in_latest_kernel. 
+	6.to support 3.1
+
+Release date = 2012-05-09
+Operating system release = Ubuntu 11.10
+Kernel version = 2.6.35-3.2
+Release driver version = 0006.0509.2012
+Change history =
+    1. add 8723AE
+    2. add BT-Coexist for 8723AE.
+    3. to support 3.1
+
+Release date = 2012-10-19
+Operating system release = Ubuntu 12.04
+Kernel version = 3.2.0-23
+Release driver version = 0007.1019.2012
+Change history =
+    1. support RTL8188EE
+
+Release date = 2012-11-15
+Operating system release = Ubuntu 12.04
+Kernel version = 3.2.0-23
+Release driver version = 0008.1115.2012
+Change history =
+    1. modified conflict of old version for 88ce
+
+Release date = 2012-11-29
+Operating system release = Ubuntu 12.04
+Kernel version = 3.2.0-23
+Release driver version = 0009.1129.2012
+Change history =
+    1. add antenna diversity for 8188ee
+    2. support HP ID
+
+Release date = 2013-01-09
+Operating system release = Ubuntu 12.10
+Kernel version = 3.5.0
+Release driver version = 0010.0109.2013
+Change history =
+	1.support kernel 3.5.0
+
+Release date = 2013-01-28
+Operating system release = Ubuntu 12.10
+Kernel version = 3.8.0-rc2
+Release driver version = 0011.0128.2013
+Change history =
+	1.supported kernel 3.7 and kernel 3.8 rc2
+	2.fixed compile error in kernel 2.6.35
+
+Release date = 2013-02-07
+Operating system release = Ubuntu 12.10
+Kernel version = 3.8.0-rc2
+Release driver version = 0012.0207.2013
+Change history =
+        1.fixed 8723ae and 8188ee led
+	2.fiexd compile error in kernel 3.7.0 to 3.7.6
+	3.to support kernel 3.7.0 to 3.7.6 and kernel 3.8 rc2

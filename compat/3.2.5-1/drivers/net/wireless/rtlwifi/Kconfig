@@ -1,0 +1,58 @@
+config RTL8188EE
+	tristate "Realtek RTL8188EE Wireless Network Adapter"
+	depends on MAC80211 && PCI && EXPERIMENTAL
+	select FW_LOADER
+	select RTLWIFI
+	---help---
+	This is the driver for Realtek RTL8188EE 802.11n PCIe
+	wireless network adapters.
+
+	If you choose to build it as a module, it will be called rtl8188ee
+
+config RTL8192CE
+	tristate "Realtek RTL8192CE/RTL8188CE Wireless Network Adapter"
+	depends on MAC80211 && PCI && EXPERIMENTAL
+	select FW_LOADER
+	select RTLWIFI
+	---help---
+	This is the driver for Realtek RTL8192CE/RTL8188CE 802.11n PCIe
+	wireless network adapters.
+
+	If you choose to build it as a module, it will be called rtl8192ce
+
+config RTL8192DE
+        tristate "Realtek RTL8192DE Wireless Network Adapter"
+        depends on MAC80211 && PCI && EXPERIMENTAL
+        select FW_LOADER
+        select RTLWIFI
+        ---help---
+        This is the driver for Realtek RTL8192DE 802.11n PCIe
+        wireless network adapters.
+
+        If you choose to build it as a module, it will be called rtl8192de
+
+config RTL8192SE
+        tristate "Realtek RTL8192SE Wireless Network Adapter"
+        depends on MAC80211 && PCI && EXPERIMENTAL
+        select FW_LOADER
+        select RTLWIFI
+        ---help---
+        This is the driver for Realtek RTL8192SE 802.11n PCIe
+        wireless network adapters.
+
+        If you choose to build it as a module, it will be called rtl8192se
+
+config RTL8723E
+        tristate "Realtek RTL8723E Wireless Network Adapter"
+        depends on MAC80211 && PCI && EXPERIMENTAL
+        select FW_LOADER
+        select RTLWIFI
+        ---help---
+        This is the driver for Realtek RTL8723E 802.11n PCIe
+        wireless network adapters.
+        If you choose to build it as a module, it will be called rtl8723e
+config RTLWIFI
+	tristate
+	depends on RTL8188EE || RTL8192CE || RTL8192DE || RTL8192SE
+	default m
+
