@@ -882,8 +882,8 @@ bool rtl_action_proc(struct ieee80211_hw *hw, struct sk_buff *skb, u8 is_tx)
 				if (tid_data->agg.rx_agg_state == RTL_RX_AGG_START) {
 					skb_delba = rtl_make_del_ba(hw, hdr->addr2, hdr->addr3, tid);
 					if (skb_delba) {
-						rx_status.freq = hw->conf.channel->center_freq;
-						rx_status.band = hw->conf.channel->band;
+						rx_status.freq = hw->conf.chandef.chan->center_freq;
+						rx_status.band = hw->conf.chandef.chan->band;
 						rx_status.flag |= RX_FLAG_DECRYPTED;
 						rx_status.flag |= RX_FLAG_MACTIME_MPDU;
 						rx_status.rate_idx = 0;
@@ -1448,7 +1448,7 @@ int rtl_send_smps_action(struct ieee80211_hw *hw,
 		/* rtlpriv->cfg->ops->update_rate_tbl(hw, sta, 0); */
 
 		info->control.rates[0].idx = 0;
-		info->band = hw->conf.channel->band;
+		info->band = hw->conf.chandef.chan->band;
 /*<delete in kernel start>*/
 #if (LINUX_VERSION_CODE < KERNEL_VERSION(3,7,0))
 		info->control.sta = sta;
