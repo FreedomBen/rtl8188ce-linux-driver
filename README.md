@@ -1,6 +1,9 @@
 rtl8188ce-linux-driver
 ======================
 
+NOTE: It is known that this driver will not compile on Ubuntu 13.10 with kernel 3.11.0-12.  We are working on that.
+
+
 This slightly modified version of the driver fixes some issues with RealTek cards on Linux.  It also fixes a bug with ignoring CRDA restrictions
 
 
