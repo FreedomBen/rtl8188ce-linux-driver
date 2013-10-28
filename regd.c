@@ -174,8 +174,8 @@ static void _rtl_reg_apply_beaconing_flags(struct wiphy *wiphy,
 			    (ch->flags & IEEE80211_CHAN_RADAR))
 				continue;
 			if (initiator == NL80211_REGDOM_SET_BY_COUNTRY_IE) {
-				r = freq_reg_info(wiphy, ch->center_freq,
-						  bandwidth, &reg_rule);
+				r = freq_reg_info(wiphy, ch->center_freq);
+						  // bandwidth, &reg_rule);
 				if (r)
 					continue;
 
@@ -239,7 +239,7 @@ static void _rtl_reg_apply_active_scan_flags(struct wiphy *wiphy,
 	 */
 
 	ch = &sband->channels[11];	/* CH 12 */
-	r = freq_reg_info(wiphy, ch->center_freq, bandwidth, &reg_rule);
+	r = freq_reg_info(wiphy, ch->center_freq);//, bandwidth, &reg_rule);
 	if (!r) {
 		if (!(reg_rule->flags & NL80211_RRF_PASSIVE_SCAN))
 			if (ch->flags & IEEE80211_CHAN_PASSIVE_SCAN)
@@ -247,7 +247,7 @@ static void _rtl_reg_apply_active_scan_flags(struct wiphy *wiphy,
 	}
 
 	ch = &sband->channels[12];	/* CH 13 */
-	r = freq_reg_info(wiphy, ch->center_freq, bandwidth, &reg_rule);
+	r = freq_reg_info(wiphy, ch->center_freq);//, bandwidth, &reg_rule);
 	if (!r) {
 		if (!(reg_rule->flags & NL80211_RRF_PASSIVE_SCAN))
 			if (ch->flags & IEEE80211_CHAN_PASSIVE_SCAN)
