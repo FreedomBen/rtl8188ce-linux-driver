@@ -4084,7 +4084,7 @@ void _rtl92d_dualmac_reconfig_mgntinfo_forselfmac(struct ieee80211_hw *hw)
 			rtlpriv->cfg->ops->switch_channel(hw);
 			rtl92d_linked_set_reg(hw);
 			rtlpriv->cfg->ops->set_channel_access(hw);
-			rtlpriv->cfg->ops->set_bw_mode(hw, hw->conf.channel_type);
+			rtlpriv->cfg->ops->set_bw_mode(hw, cfg80211_get_chandef_type( &hw->conf.chandef ) );
 			rcu_read_lock();
 			sta = rtl_find_sta(hw, mac->bssid);
 			rtlpriv->cfg->ops->update_rate_tbl(hw, sta, 0);
@@ -4105,7 +4105,7 @@ void _rtl92d_dualmac_reconfig_mgntinfo_forselfmac(struct ieee80211_hw *hw)
 			rtlpriv->cfg->ops->switch_channel(hw);
 			rtlpriv->cfg->ops->set_channel_access(hw);
 			rtlpriv->cfg->ops->set_bw_mode(hw,
-				hw->conf.channel_type);
+		        cfg80211_get_chandef_type( &hw->conf.chandef ) );
 			/* rtl92d_linked_set_reg(hw); */
 		}
 	} else {
@@ -4143,7 +4143,7 @@ void _rtl92d_dualmac_reconfig_mgntinfo_foranothermac(struct ieee80211_hw *hw)
 		rtl92d_linked_set_reg(hw);
 		rtlpriv->cfg->ops->set_channel_access(hw);
 		rtlpriv->cfg->ops->set_bw_mode(hw,
-				buddy_hw->conf.channel_type);
+                                cfg80211_get_chandef_type( &buddy_hw->conf.chandef ) );
 		rcu_read_lock();
 		sta = rtl_find_sta(buddy_mac->hw, buddy_mac->bssid);
 		buddy_priv->cfg->ops->update_rate_tbl(buddy_hw, sta, 0);
