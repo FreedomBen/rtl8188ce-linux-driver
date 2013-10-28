@@ -1017,7 +1017,7 @@ static int rtl_op_ampdu_action(struct ieee80211_hw *hw,
 			 ("IEEE80211_AMPDU_TX_START: TID:%d\n", tid));
 		return rtl_tx_agg_start(hw, vif, sta, tid, ssn);
 		break;
-	case IEEE80211_AMPDU_TX_STOP:
+	case IEEE80211_AMPDU_TX_STOP_CONT:
 		RT_TRACE(COMP_MAC80211, DBG_TRACE,
 			 ("IEEE80211_AMPDU_TX_STOP: TID:%d\n", tid));
 		return rtl_tx_agg_stop(hw, vif, sta, tid);
