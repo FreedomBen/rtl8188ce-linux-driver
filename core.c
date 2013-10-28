@@ -391,7 +391,7 @@ static int rtl_op_config(struct ieee80211_hw *hw, u32 changed)
 	}
 
 	if (changed & IEEE80211_CONF_CHANGE_CHANNEL) {
-		struct ieee80211_channel *channel = hw->conf.channel;
+		struct ieee80211_channel *channel = hw->conf.chandef.chan;
 		u8 wide_chan = (u8) channel->hw_value;
 
 		if (mac->act_scanning)
