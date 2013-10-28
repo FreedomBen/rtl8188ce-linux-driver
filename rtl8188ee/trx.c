@@ -77,7 +77,7 @@ static int _rtl88ee_rate_mapping(struct ieee80211_hw *hw,
 	int rate_idx;
 
 	if (false == isht) {
-		if (IEEE80211_BAND_2GHZ == hw->conf.channel->band) {
+		if (IEEE80211_BAND_2GHZ == hw->conf.chandef.chan->band) {
 			switch (desc_rate) {
 			case DESC92C_RATE1M:
 				rate_idx = 0;
@@ -568,8 +568,8 @@ bool rtl88ee_rx_query_desc(struct ieee80211_hw *hw,
 	if (status->wake_match)
 		RT_TRACE(COMP_RXDESC,DBG_LOUD,
 		("GGGGGGGGGGGGGet Wakeup Packet!! WakeMatch=%d\n",status->wake_match ));
-	rx_status->freq = hw->conf.channel->center_freq;
-	rx_status->band = hw->conf.channel->band;
+	rx_status->freq = hw->conf.chandef.chan->center_freq;
+	rx_status->band = hw->conf.chandef.chan->band;
 
 
 	hdr = (struct ieee80211_hdr *)(skb->data + status->rx_drvinfo_size
