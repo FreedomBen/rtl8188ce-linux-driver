@@ -77,7 +77,7 @@ static int _rtl92se_rate_mapping(struct ieee80211_hw *hw,
 	int rate_idx;
 
 	if (false == isht) {
-		if (IEEE80211_BAND_2GHZ == hw->conf.channel->band) {
+		if (IEEE80211_BAND_2GHZ == hw->conf.chandef.chan->band) {
 			switch (desc_rate) {
 			case DESC92S_RATE1M:
 				rate_idx = 0;
@@ -429,8 +429,8 @@ bool rtl92se_rx_query_desc(struct ieee80211_hw *hw, struct rtl_stats *status,
 	if (status->b_hwerror)
 		return false;
 
-	rx_status->freq = hw->conf.channel->center_freq;
-	rx_status->band = hw->conf.channel->band;
+	rx_status->freq = hw->conf.chandef.chan->center_freq;
+	rx_status->band = hw->conf.chandef.chan->band;
 
 	hdr = (struct ieee80211_hdr *)(skb->data + status->rx_drvinfo_size
 	                        + status->rx_bufshift);
