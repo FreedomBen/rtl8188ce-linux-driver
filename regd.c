@@ -159,7 +159,7 @@ static void _rtl_reg_apply_beaconing_flags(struct wiphy *wiphy,
 	struct ieee80211_channel *ch;
 	unsigned int i;
 	u32 bandwidth = 0;
-	int r;
+	void *r;
 
 	for (band = 0; band < IEEE80211_NUM_BANDS; band++) {
 
