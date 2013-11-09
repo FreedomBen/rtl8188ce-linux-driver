@@ -24,6 +24,7 @@ PCI_MAIN_OBJS	:= base.o	\
 rtlwifi-objs += $(PCI_MAIN_OBJS)
 
 all: 
+	./verify_branch.sh
 	$(MAKE) -C $(KSRC) M=$(PWD) modules
 	@cp $(SYMBOL_FILE) rtl8192ce/
 	@make -C rtl8192ce/
