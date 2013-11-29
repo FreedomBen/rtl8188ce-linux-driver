@@ -11,6 +11,18 @@ Note:  These instructions were verified on Ubuntu 13.04 running kernel 3.8.0-27-
 
 Some instructions can be found here:  http://www.perseosblog.com/en/posts/solving-connection-problem-with-realtek-wifi-card-rtl8188ce-rtl8192ce-rtl8191se-and-rtl8192de-on-debian-ubuntu-and-derivatives/
 
+These commands should be typed in an open terminal.  I recommend you start in your home directory by typing "cd"
+
+0.  Clone this git repository:
+
+    Install git if necessary:
+
+    "sudo apt-get install git"
+
+    Clone the repo (Basically it makes a copy of the current source code)
+
+    "git clone https://github.com/FreedomBen/rtl8188ce-linux-driver.git"
+
 1.  Install build dependencies:
 
     "apt-get install gcc build-essential linux-headers-generic linux-headers-`uname -r`"
