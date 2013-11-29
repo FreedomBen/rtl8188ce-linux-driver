@@ -1,8 +1,6 @@
 rtl8188ce-linux-driver
 ======================
 
-NOTE: It is known that this driver will not compile on Ubuntu 13.10 with kernel 3.11.0-12.  We are working on that.
-
 
 This slightly modified version of the driver fixes some issues with RealTek cards on Linux.  It also fixes a bug with ignoring CRDA restrictions
 
@@ -17,14 +15,20 @@ Some instructions can be found here:  http://www.perseosblog.com/en/posts/solvin
 
     "apt-get install gcc build-essential linux-headers-generic linux-headers-`uname -r`"
 
-2. Make sure you are on the correct branch for your OS.  You can switch to the correct branch with:
+2. Make sure you are on the correct branch for your kernel version.  The branches are named after Ubuntu releases to which they commonly apply, but the most important factor is not the version of Ubuntu, it is the kernel version.  There is a script called "verify_branch" that will help you find the right branch based on your kernel version.  
+
+You can switch to the correct branch with:
 
     "git checkout <branch>"
     Ex: "git checkout ubuntu-13.04"
 
-    Ubuntu 12.04:  ubuntu-12.04
-    Ubuntu 13.04:  ubuntu-13.04
-    Ubuntu 13.10:  ubuntu-13.10
+    Release ver. | *Kernel ver.   |  Branch Name
+    --------------------------------------------
+    Ubuntu 12.04 | Kernel 3.2.x:  |  ubuntu-12.04
+    Ubuntu 13.04 | Kernel 3.8.x:  |  ubuntu-13.04
+    Ubuntu 13.10 | Kernel 3.11.x: |  ubuntu-13.10
+
+    * Note, if the Ubuntu release ver and your kernel ver conflict, go with the branch corresponding to your *kernel version*
 
     master is currently compiling on 13.10 but for the latest and greatest I recommend you use the specific branch for your OS
 
