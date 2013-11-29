@@ -3,7 +3,7 @@
 echo "Verifying a sane branch for your kernel version..."
 if $(uname -r | grep "3.11" > /dev/null); then
     # recommend branch ubuntu-13.10
-    if $(git st | grep "ubuntu-13.10" > /dev/null); then
+    if $(git status | grep "ubuntu-13.10" > /dev/null); then
         echo "Yes"
     else
         read -p "No.  Should I switch it for you?  (y/n)" input
@@ -15,7 +15,7 @@ if $(uname -r | grep "3.11" > /dev/null); then
     fi
 elif $(uname -r | grep "3.8" > /dev/null); then
     # recommend branch ubuntu-13.04
-    if $(git st | grep "ubuntu-13.04" > /dev/null); then
+    if $(git status | grep "ubuntu-13.04" > /dev/null); then
         echo "Yes"
     else
         read -p "No.  Should I switch it for you?  (y/n)" input
@@ -27,7 +27,7 @@ elif $(uname -r | grep "3.8" > /dev/null); then
     fi
 elif $(uname -r | grep "3.2" > /dev/null); then
     # recommend branch ubuntu-12.04
-    if $(git st | grep "ubuntu-12.04" > /dev/null); then
+    if $(git status | grep "ubuntu-12.04" > /dev/null); then
         echo "Yes"
     else
         read -p "No.  Should I switch it for you?  (y/n)" input
