@@ -27,7 +27,7 @@ Clone the repo (Basically it makes a copy of the current source code)
 git clone https://github.com/FreedomBen/rtl8188ce-linux-driver.git
 ```
 
-1\.  Install build dependencies:
+1\.  Install build dependencies (pay attention to the backticks!):
 
 
 ```bash
@@ -63,7 +63,7 @@ master is currently compiling on 13.10 but for the latest and greatest I recomme
 make
 ```
 
-4\. Remove existing kernel modules.  You may want to write these down before moving just in case.  Record the output of "lsmod | grep ^rtl":
+4\. Remove existing kernel modules.  You may want to write these down before moving just in case.  Record the output of "lsmod | grep ^rtl" (pay attention to the backticks!):
 
 
 ```bash
