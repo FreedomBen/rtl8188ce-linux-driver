@@ -13,26 +13,27 @@ Some instructions can be found here:  http://www.perseosblog.com/en/posts/solvin
 
 These commands should be typed in an open terminal.  I recommend you start in your home directory by typing "cd"
 
-0.  Clone this git repository:
+0\.  Clone this git repository:
 
-    Install git if necessary:
+Install git if necessary:
 
-    "sudo apt-get install git"
+    sudo apt-get install git
 
-    Clone the repo (Basically it makes a copy of the current source code)
+Clone the repo (Basically it makes a copy of the current source code)
 
-    "git clone https://github.com/FreedomBen/rtl8188ce-linux-driver.git"
+    git clone https://github.com/FreedomBen/rtl8188ce-linux-driver.git
 
-1.  Install build dependencies:
+1\.  Install build dependencies (pay attention to the backticks!):
 
-    "apt-get install gcc build-essential linux-headers-generic linux-headers-`uname -r`"
+    apt-get install gcc build-essential linux-headers-generic linux-headers-`uname -r`
 
-2. Make sure you are on the correct branch for your kernel version.  The branches are named after Ubuntu releases to which they commonly apply, but the most important factor is not the version of Ubuntu, it is the kernel version.  There is a script called "verify_branch" that will help you find the right branch based on your kernel version.  
+2\. Make sure you are on the correct branch for your kernel version.  The branches are named after Ubuntu releases to which they commonly apply, but the most important factor is not the version of Ubuntu, it is the kernel version.  There is a script called "verify_branch" that will help you find the right branch based on your kernel version.  
 
 You can switch to the correct branch with:
 
-    "git checkout <branch>"
-    Ex: "git checkout ubuntu-13.04"
+    git checkout <branch>
+    
+Ex: "git checkout ubuntu-13.04"
 
     Release ver. | *Kernel ver.   |  Branch Name
     --------------------------------------------
@@ -42,32 +43,34 @@ You can switch to the correct branch with:
 
     * Note, if the Ubuntu release ver and your kernel ver conflict, go with the branch corresponding to your *kernel version*
 
-    master is currently compiling on 13.10 but for the latest and greatest I recommend you use the specific branch for your OS
+master is currently compiling on 13.10 but for the latest and greatest I recommend you use the specific branch for your OS
 
-3. Compile:
+3\. Compile:
 
-    "make"
+    make
 
-4. Remove existing kernel modules.  You may want to write these down before moving just in case.  Record the output of "lsmod | grep ^rtl":
+4\. Remove existing kernel modules.  You may want to write these down before moving just in case.  Record the output of "lsmod | grep ^rtl" (pay attention to the backticks!):
 
-    "modprobe -r `lsmod | grep ^rtl`"
+    modprobe -r `lsmod | grep ^rtl`
 
-5. Install:
+5\. Install:
 
-    "make install"
+    make install
 
-6. Modprobe in the new driver:
+6\. Modprobe in the new driver:
 
-    "modprobe rtl8192ce" (This is the driver for rtl8188ce also)
+    modprobe rtl8192ce 
 
-7. You may need to modprobe back in the other modules too (I did).  Mine were: 
+(This is the driver for rtl8188ce also)
 
-    "rtl8192ce, rtlwifi, and rtl8192c_common"
 
-8. Make persistent by adding this to the end of /etc/modules:
+7\. You may need to modprobe back in the other modules too (I did).  Mine were: 
 
-    "rtl8192ce.ko"
+    rtl8192ce, rtlwifi, and rtl8192c_common
 
+8\. Make persistent by adding this to the end of /etc/modules:
+
+    rtl8192ce.ko
 
 You may want to verify your CRDA domain.  For example if you were in Bolivia it would be: "iw reg set BO"
 There is more information about CRDA available at: http://ttys1.wordpress.com/2012/04/12/fixing-regulatory-domain-crda-of-realtec-wireless-device-drivers/
