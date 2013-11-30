@@ -32,7 +32,8 @@ Clone the repo (Basically it makes a copy of the current source code)
 You can switch to the correct branch with:
 
     git checkout <branch>
-    Ex: git checkout ubuntu-13.04
+    
+Ex: "git checkout ubuntu-13.04"
 
     Release ver. | *Kernel ver.   |  Branch Name
     --------------------------------------------
