@@ -35,7 +35,6 @@ Other RealTek cards, kernel releases, and Linux flavors/releases are supported, 
 
 --This driver supports following Linux OSes:
 
-        Ubuntu
         Fedora Core
         Debian
         Mandriva
