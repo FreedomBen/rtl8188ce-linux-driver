@@ -4,6 +4,32 @@ rtl8188ce-linux-driver
 
 This slightly modified version of the driver fixes some issues with RealTek cards on Linux.  It also fixes a bug with ignoring CRDA restrictions
 
+From the original readme file:
+
+--This driver supports following RealTek PCIE Wireless LAN NICs:
+        RTL8188CE/RTL8192CE
+        RTL8191SE/RTL8192SE
+        RTL8192DE
+        RTL8723AE
+        RTL8188EE
+
+--This driver supports following Linux OSes:
+        Ubuntu
+        Fedora Core
+        Debian
+        Mandriva
+        Open SUSE
+        Gentoo
+        MeeGo
+        android 2.2 (froyo-x86), etc.
+        
+
+Please note though that I have only tested the driver on Ubuntu, though I know it does compile on Fedora 17.  If you are NOT using Ubuntu, pay close attention to your kernel version when selecting branches.  You also need to substitute your package manager whenever you see "apt-get install", so Fedora would be "yum install xxx".  Most package names are the same but there may be some difference.
+
+To check your kernel version:  
+
+    uname -r
+
 
 Instructions to install:
 
