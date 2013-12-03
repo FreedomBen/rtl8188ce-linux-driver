@@ -7,6 +7,7 @@ This slightly modified version of the driver fixes some issues with RealTek card
 From the original readme file:
 
 --This driver supports following RealTek PCIE Wireless LAN NICs:
+
         RTL8188CE/RTL8192CE
         RTL8191SE/RTL8192SE
         RTL8192DE
@@ -14,6 +15,7 @@ From the original readme file:
         RTL8188EE
 
 --This driver supports following Linux OSes:
+
         Ubuntu
         Fedora Core
         Debian
