@@ -74,9 +74,9 @@ Clone the repo (Basically it makes a copy of the current source code)
 
     apt-get install gcc build-essential linux-headers-generic linux-headers-`uname -r`
 
-2\. Make sure you are on the correct branch for your kernel version.  The branches are named after Ubuntu releases to which they commonly apply, but the most important factor is not the version of Ubuntu, it is the kernel version.  There is a script called "verify_branch" that will help you find the right branch based on your kernel version.  
+2\. (Skip unless your first build attempt fails) -> Make sure you are on the correct branch for your kernel version.  The branches are named after Ubuntu releases to which they commonly apply, but the most important factor is not the version of Ubuntu, it is the kernel version.  There is a script called "verify_branch" that will help you find the right branch based on your kernel version.  When you run "make", the script "verify_branch" will be automatically called for you.  It will recommend to you the best branch for your kernel version.  If you tried the recommended branch and your build failed, you may need to try a different one.  If so, decline the offer to automatically switch branches for you.
 
-You can switch to the correct branch with:
+If you need to, you can switch to the correct branch with:
 
     git checkout <branch>
     
@@ -88,9 +88,8 @@ Ex: "git checkout ubuntu-13.04"
     Ubuntu 13.04 | Kernel 3.8.x:  |  ubuntu-13.04
     Ubuntu 13.10 | Kernel 3.11.x: |  ubuntu-13.10
 
-    * Note, if the Ubuntu release ver and your kernel ver conflict, go with the branch corresponding to your *kernel version*
+    * Note, if the Ubuntu release ver and your kernel ver conflict, go with the branch corresponding to your *kernel version*!
 
-master is currently compiling on 13.10 but for the latest and greatest I recommend you use the specific branch for your OS
 
 3\. Compile:
 
