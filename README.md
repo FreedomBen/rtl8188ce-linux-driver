@@ -56,7 +56,6 @@ Instructions to install:
 
 Note:  These instructions were verified on Ubuntu 13.04 running kernel 3.8.0-27-generic #40 and on Ubuntu 13.10 running kernel 3.11
 
-Some instructions can be found here:  http://www.perseosblog.com/en/posts/solving-connection-problem-with-realtek-wifi-card-rtl8188ce-rtl8192ce-rtl8191se-and-rtl8192de-on-debian-ubuntu-and-derivatives/
 
 These commands should be typed in an open terminal.  I recommend you start in your home directory by typing "cd"
 
