@@ -119,3 +119,17 @@ Ex: "git checkout ubuntu-13.04"
 
 You may want to verify your CRDA domain.  For example if you were in Bolivia it would be: "iw reg set BO"
 There is more information about CRDA available at: http://ttys1.wordpress.com/2012/04/12/fixing-regulatory-domain-crda-of-realtec-wireless-device-drivers/
+
+Troubleshooting:
+
+1\. If you get the following error:
+    
+    FATAL: Error inserting rtl8192ce                 (/lib/modules/3.8.0-34-generic/kernel/drivers/net/wireless/rtlwifi/rtl8192ce/rtl8192ce.ko): Invalid argument
+
+After running: 
+
+    modprobe rtl8192ce 
+    
+It means you have invalid configuration options in /etc/modprobe.d/rtl8192ce.conf.  You can either remove the file or remove the debug option as it is no long supported.   
+
+
