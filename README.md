@@ -51,15 +51,15 @@ master is currently compiling on 13.10 but for the latest and greatest I recomme
 
 4\. Remove existing kernel modules.  You may want to write these down before moving just in case.  Record the output of "lsmod | grep ^rtl" (pay attention to the backticks!):
 
-    modprobe -r `lsmod | grep ^rtl`
+    sudo modprobe -r `lsmod | grep ^rtl`
 
 5\. Install:
 
-    make install
+    sudo make install
 
 6\. Modprobe in the new driver:
 
-    modprobe rtl8192ce 
+    sudo modprobe rtl8192ce 
 
 (This is the driver for rtl8188ce also)
 
