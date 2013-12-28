@@ -8,7 +8,7 @@ doSwitch ()
         echo "Yes"
     else
         read -p "No (Current branch $CUR_BRANCH).  Should I switch it to $BRANCH for you?  (y/n)" input
-        if [ "$input" == "y" ]; then
+        if [ "$input" = "y" ]; then
             git checkout -f $BRANCH
         else
             echo "OK, but if the build fails come back here and try again."
