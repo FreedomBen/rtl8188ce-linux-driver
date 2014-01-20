@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright(c) 2009-2010  Realtek Corporation.
+ * Copyright( c ) 2009-2010  Realtek Corporation.
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of version 2 of the GNU General Public License as
@@ -30,8 +30,8 @@
 #ifndef __RTL8723E_SW_H__
 #define __RTL8723E_SW_H__
 
-int rtl8723e_init_sw_vars(struct ieee80211_hw *hw);
-void rtl8723e_deinit_sw_vars(struct ieee80211_hw *hw);
-void rtl8723e_init_var_map(struct ieee80211_hw *hw);
+int rtl8723e_init_sw_vars( struct ieee80211_hw *hw );
+void rtl8723e_deinit_sw_vars( struct ieee80211_hw *hw );
+void rtl8723e_init_var_map( struct ieee80211_hw *hw );
 
 #endif

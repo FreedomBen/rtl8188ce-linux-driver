@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright(c) 2009-2010  Realtek Corporation.
+ * Copyright( c ) 2009-2010  Realtek Corporation.
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of version 2 of the GNU General Public License as
@@ -33,11 +33,11 @@
 #define RF6052_MAX_TX_PWR		0x3F
 #define RF6052_MAX_REG			0x3F
 
-extern void rtl92c_phy_rf6052_set_bandwidth(struct ieee80211_hw *hw,
-					    u8 bandwidth);
-extern void rtl92c_phy_rf6052_set_cck_txpower(struct ieee80211_hw *hw,
-					      u8 *ppowerlevel);
-extern void rtl92c_phy_rf6052_set_ofdm_txpower(struct ieee80211_hw *hw,
-					       u8 *ppowerlevel, u8 channel);
-extern bool rtl92c_phy_rf6052_config(struct ieee80211_hw *hw);
+extern void rtl92c_phy_rf6052_set_bandwidth( struct ieee80211_hw *hw,
+					    u8 bandwidth );
+extern void rtl92c_phy_rf6052_set_cck_txpower( struct ieee80211_hw *hw,
+					      u8 *ppowerlevel );
+extern void rtl92c_phy_rf6052_set_ofdm_txpower( struct ieee80211_hw *hw,
+					       u8 *ppowerlevel, u8 channel );
+extern bool rtl92c_phy_rf6052_config( struct ieee80211_hw *hw );
 #endif

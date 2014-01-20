@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright(c) 2009-2010  Realtek Corporation.
+ * Copyright( c ) 2009-2010  Realtek Corporation.
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of version 2 of the GNU General Public License as
@@ -27,9 +27,9 @@
 #ifndef __REALTEK_PCI92SE_SW_H__
 #define __REALTEK_PCI92SE_SW_H__
 
-int rtl92se_init_sw(struct ieee80211_hw *hw);
-void rtl92se_deinit_sw(struct ieee80211_hw *hw);
-void rtl92se_init_var_map(struct ieee80211_hw *hw);
+int rtl92se_init_sw( struct ieee80211_hw *hw );
+void rtl92se_deinit_sw( struct ieee80211_hw *hw );
+void rtl92se_init_var_map( struct ieee80211_hw *hw );
 
 #endif
 

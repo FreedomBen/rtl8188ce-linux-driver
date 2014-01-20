@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright(c) 2009-2010  Realtek Corporation.
+ * Copyright( c ) 2009-2010  Realtek Corporation.
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of version 2 of the GNU General Public License as
@@ -38,29 +38,29 @@
 /* support till 64 bit bus width OS */
 #define MAX_DEV_ADDR_SIZE				8
 #define MAX_FIRMWARE_INFORMATION_SIZE   32
-#define MAX_802_11_HEADER_LENGTH       	(40 + \
-										MAX_FIRMWARE_INFORMATION_SIZE)
+#define MAX_802_11_HEADER_LENGTH       	( 40 + \
+										MAX_FIRMWARE_INFORMATION_SIZE )
 #define ENCRYPTION_MAX_OVERHEAD			128
 #define MAX_FRAGMENT_COUNT				8
-#define MAX_TRANSMIT_BUFFER_SIZE  		(1600 + \
-										(MAX_802_11_HEADER_LENGTH + \
-										ENCRYPTION_MAX_OVERHEAD) *\
-										MAX_FRAGMENT_COUNT)
+#define MAX_TRANSMIT_BUFFER_SIZE  		( 1600 + \
+										( MAX_802_11_HEADER_LENGTH + \
+										ENCRYPTION_MAX_OVERHEAD ) *\
+										MAX_FRAGMENT_COUNT )
 
 #define H2C_TX_CMD_HDR_LEN				8
 
 /* The following DM control code are for Reg0x364, */
-#define	FW_DIG_ENABLE_CTL			BIT(0)
-#define	FW_HIGH_PWR_ENABLE_CTL		BIT(1)
-#define	FW_SS_CTL					BIT(2)
-#define	FW_RA_INIT_CTL				BIT(3)
-#define	FW_RA_BG_CTL				BIT(4)
-#define	FW_RA_N_CTL					BIT(5)
-#define	FW_PWR_TRK_CTL				BIT(6)
-#define	FW_IQK_CTL					BIT(7)
-#define	FW_FA_CTL					BIT(8)
-#define	FW_DRIVER_CTRL_DM_CTL		BIT(9)
-#define	FW_PAPE_CTL_BY_SW_HW		BIT(10)
+#define	FW_DIG_ENABLE_CTL			BIT( 0 )
+#define	FW_HIGH_PWR_ENABLE_CTL		BIT( 1 )
+#define	FW_SS_CTL					BIT( 2 )
+#define	FW_RA_INIT_CTL				BIT( 3 )
+#define	FW_RA_BG_CTL				BIT( 4 )
+#define	FW_RA_N_CTL					BIT( 5 )
+#define	FW_PWR_TRK_CTL				BIT( 6 )
+#define	FW_IQK_CTL					BIT( 7 )
+#define	FW_FA_CTL					BIT( 8 )
+#define	FW_DRIVER_CTRL_DM_CTL		BIT( 9 )
+#define	FW_PAPE_CTL_BY_SW_HW		BIT( 10 )
 #define	FW_DISABLE_ALL_DM			0
 #define	FW_PWR_TRK_PARAM_CLR		0x0000ffff
 #define	FW_RA_PARAM_CLR				0xffff0000
@@ -111,7 +111,7 @@ struct fw_priv {
 	/* 0x00: normal, 0x03: MACLBK, 0x01: PHYLBK */
 	u8 lbk_mode;
 	/* 1: for MP use, 0: for normal
-	 * driver (to be discussed) */
+	 * driver ( to be discussed ) */
 	u8 mp_mode;
 	u8 rsvd020;
 	u8 rsvd021;
@@ -229,7 +229,7 @@ struct h2c_set_pwrmode_parm {
  	u8 flag_dps_en;
  	u8 bcn_rx_en;
  	u8 bcn_pass_cnt;
-	/* beacon TO (ms). ¡§=0¡¨ no limit. */
+	/* beacon TO ( ms ). ¡§=0¡¨ no limit. */
  	u8 bcn_to;
  	u16	bcn_itv;
 	/* only for VOIP mode. */
@@ -249,14 +249,14 @@ struct h2c_joinbss_rpt_parm {
 } ;
 
 struct h2c_wpa_ptk {
-	/* EAPOL-Key Key Confirmation Key (KCK) */
+	/* EAPOL-Key Key Confirmation Key ( KCK ) */
  	u8 kck[16];
-	/* EAPOL-Key Key Encryption Key (KEK) */
+	/* EAPOL-Key Key Encryption Key ( KEK ) */
  	u8 kek[16];
-	/* Temporal Key 1 (TK1) */
+	/* Temporal Key 1 ( TK1 ) */
 	u8 tk1[16];
 	union {
-		/* Temporal Key 2 (TK2) */
+		/* Temporal Key 2 ( TK2 ) */
 		u8 tk2[16];
 		struct {
 			u8 tx_mic_key[8];
@@ -338,29 +338,29 @@ enum fw_h2c_cmd{
 
 /* The following macros are used for FW
  * CMD map and parameter updated. */
-#define FW_CMD_IO_CLR(rtlpriv, _Bit)		\
-	udelay(1000);	\
-	rtlpriv->rtlhal.fwcmd_iomap &= (~_Bit);
+#define FW_CMD_IO_CLR( rtlpriv, _Bit )		\
+	udelay( 1000 );	\
+	rtlpriv->rtlhal.fwcmd_iomap &= ( ~_Bit );
 
-#define FW_CMD_IO_UPDATE(rtlpriv, _val)		\
+#define FW_CMD_IO_UPDATE( rtlpriv, _val )		\
 	rtlpriv->rtlhal.fwcmd_iomap = _val;
 
-#define FW_CMD_IO_SET(rtlpriv, _val) 	\
-	rtl_write_word(rtlpriv, LBUS_MON_ADDR, (u16)_val);	\
-	FW_CMD_IO_UPDATE(rtlpriv, _val);\
+#define FW_CMD_IO_SET( rtlpriv, _val ) 	\
+	rtl_write_word( rtlpriv, LBUS_MON_ADDR, ( u16 )_val );	\
+	FW_CMD_IO_UPDATE( rtlpriv, _val );\
 
-#define FW_CMD_PARA_SET(rtlpriv, _val) 		\
-	rtl_write_dword(rtlpriv, LBUS_ADDR_MASK, _val);	\
+#define FW_CMD_PARA_SET( rtlpriv, _val ) 		\
+	rtl_write_dword( rtlpriv, LBUS_ADDR_MASK, _val );	\
 	rtlpriv->rtlhal.fwcmd_ioparam = _val;
 
-#define FW_CMD_IO_QUERY(rtlpriv)	\
-	(u16)(rtlpriv->rtlhal.fwcmd_iomap)
-#define FW_CMD_IO_PARA_QUERY(rtlpriv)	\
-	((u32)(rtlpriv->rtlhal.fwcmd_ioparam))
+#define FW_CMD_IO_QUERY( rtlpriv )	\
+	( u16 )( rtlpriv->rtlhal.fwcmd_iomap )
+#define FW_CMD_IO_PARA_QUERY( rtlpriv )	\
+	( ( u32 )( rtlpriv->rtlhal.fwcmd_ioparam ) )
 
-int rtl92s_download_fw(struct ieee80211_hw *hw);
-void rtl92s_set_fw_pwrmode_cmd(struct ieee80211_hw *hw, u8 mode);
-void rtl92s_set_fw_joinbss_report_cmd(struct ieee80211_hw *hw,
-		u8	mstatus, u8 ps_qosinfo);
+int rtl92s_download_fw( struct ieee80211_hw *hw );
+void rtl92s_set_fw_pwrmode_cmd( struct ieee80211_hw *hw, u8 mode );
+void rtl92s_set_fw_joinbss_report_cmd( struct ieee80211_hw *hw,
+		u8	mstatus, u8 ps_qosinfo );
 #endif
 
