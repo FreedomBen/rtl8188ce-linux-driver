@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright(c) 2009-2010  Realtek Corporation.
+ * Copyright( c ) 2009-2010  Realtek Corporation.
  *
  * Tmis program is free software; you can redistribute it and/or modify it
  * under the terms of version 2 of the GNU General Public License as
@@ -77,70 +77,70 @@
 /*--------------------------------------------------------------
 		Define the rt_trace components
 --------------------------------------------------------------*/
-#define COMP_ERR			BIT(0)
-#define COMP_FW				BIT(1)
-#define COMP_INIT			BIT(2)	/*For init/deinit */
-#define COMP_RECV			BIT(3)	/*For Rx. */
-#define COMP_SEND			BIT(4)	/*For Tx. */
-#define COMP_MLME			BIT(5)	/*For MLME. */
-#define COMP_SCAN			BIT(6)	/*For Scan. */
-#define COMP_INTR			BIT(7)	/*For interrupt Related. */
-#define COMP_LED			BIT(8)	/*For LED. */
-#define COMP_SEC			BIT(9)	/*For sec. */
-#define COMP_BEACON			BIT(10)	/*For beacon. */
-#define COMP_RATE			BIT(11)	/*For rate. */
-#define COMP_RXDESC			BIT(12)	/*For rx desc. */
-#define COMP_DIG			BIT(13)	/*For DIG */
-#define COMP_TXAGC			BIT(14)	/*For Tx power */
-#define COMP_HIPWR			BIT(15)	/*For High Power Mechanism */
-#define COMP_POWER			BIT(16)	/*For lps/ips/aspm. */
-#define COMP_POWER_TRACKING	BIT(17)	/*For TX POWER TRACKING */
-#define COMP_BB_POWERSAVING	BIT(18)
-#define COMP_SWAS			BIT(19)	/*For SW Antenna Switch */
-#define COMP_RF				BIT(20)	/*For RF. */
-#define COMP_TURBO			BIT(21)	/*For EDCA TURBO. */
-#define COMP_RATR			BIT(22)
-#define COMP_CMD			BIT(23)
-#define COMP_EFUSE			BIT(24)
-#define COMP_QOS			BIT(25)
-#define COMP_MAC80211		BIT(26)
-#define COMP_REGD			BIT(27)
-#define COMP_CHAN			BIT(28)
-#define COMP_EASY_CONCURRENT 		BIT(29)
-#define COMP_BT_COEXIST			BIT(30)
+#define COMP_ERR			BIT( 0 )
+#define COMP_FW				BIT( 1 )
+#define COMP_INIT			BIT( 2 )	/*For init/deinit */
+#define COMP_RECV			BIT( 3 )	/*For Rx. */
+#define COMP_SEND			BIT( 4 )	/*For Tx. */
+#define COMP_MLME			BIT( 5 )	/*For MLME. */
+#define COMP_SCAN			BIT( 6 )	/*For Scan. */
+#define COMP_INTR			BIT( 7 )	/*For interrupt Related. */
+#define COMP_LED			BIT( 8 )	/*For LED. */
+#define COMP_SEC			BIT( 9 )	/*For sec. */
+#define COMP_BEACON			BIT( 10 )	/*For beacon. */
+#define COMP_RATE			BIT( 11 )	/*For rate. */
+#define COMP_RXDESC			BIT( 12 )	/*For rx desc. */
+#define COMP_DIG			BIT( 13 )	/*For DIG */
+#define COMP_TXAGC			BIT( 14 )	/*For Tx power */
+#define COMP_HIPWR			BIT( 15 )	/*For High Power Mechanism */
+#define COMP_POWER			BIT( 16 )	/*For lps/ips/aspm. */
+#define COMP_POWER_TRACKING	BIT( 17 )	/*For TX POWER TRACKING */
+#define COMP_BB_POWERSAVING	BIT( 18 )
+#define COMP_SWAS			BIT( 19 )	/*For SW Antenna Switch */
+#define COMP_RF				BIT( 20 )	/*For RF. */
+#define COMP_TURBO			BIT( 21 )	/*For EDCA TURBO. */
+#define COMP_RATR			BIT( 22 )
+#define COMP_CMD			BIT( 23 )
+#define COMP_EFUSE			BIT( 24 )
+#define COMP_QOS			BIT( 25 )
+#define COMP_MAC80211		BIT( 26 )
+#define COMP_REGD			BIT( 27 )
+#define COMP_CHAN			BIT( 28 )
+#define COMP_EASY_CONCURRENT 		BIT( 29 )
+#define COMP_BT_COEXIST			BIT( 30 )
 
 /*--------------------------------------------------------------
 		Define the rt_print components
 --------------------------------------------------------------*/
 /* Define EEPROM and EFUSE  check module bit*/
-#define EEPROM_W			BIT(0)
-#define EFUSE_PG			BIT(1)
-#define EFUSE_READ_ALL		BIT(2)
+#define EEPROM_W			BIT( 0 )
+#define EFUSE_PG			BIT( 1 )
+#define EFUSE_READ_ALL		BIT( 2 )
 
 /* Define init check for module bit*/
-#define	INIT_EEPROM			BIT(0)
-#define	INIT_TxPower		BIT(1)
-#define	INIT_IQK			BIT(2)
-#define	INIT_RF				BIT(3)
+#define	INIT_EEPROM			BIT( 0 )
+#define	INIT_TxPower		BIT( 1 )
+#define	INIT_IQK			BIT( 2 )
+#define	INIT_RF				BIT( 3 )
 
 /* Define PHY-BB/RF/MAC check module bit */
-#define	PHY_BBR				BIT(0)
-#define	PHY_BBW				BIT(1)
-#define	PHY_RFR				BIT(2)
-#define	PHY_RFW				BIT(3)
-#define	PHY_MACR			BIT(4)
-#define	PHY_MACW			BIT(5)
-#define	PHY_ALLR			BIT(6)
-#define	PHY_ALLW			BIT(7)
-#define	PHY_TXPWR			BIT(8)
-#define	PHY_PWRDIFF			BIT(9)
+#define	PHY_BBR				BIT( 0 )
+#define	PHY_BBW				BIT( 1 )
+#define	PHY_RFR				BIT( 2 )
+#define	PHY_RFW				BIT( 3 )
+#define	PHY_MACR			BIT( 4 )
+#define	PHY_MACW			BIT( 5 )
+#define	PHY_ALLR			BIT( 6 )
+#define	PHY_ALLW			BIT( 7 )
+#define	PHY_TXPWR			BIT( 8 )
+#define	PHY_PWRDIFF			BIT( 9 )
 
 /* Define Dynamic Mechanism check module bit --> FDM */ 
-#define WA_IOT				BIT(0)
-#define DM_PWDB				BIT(1)
-#define DM_MONITOR			BIT(2)
-#define DM_DIG				BIT(3)
-#define DM_EDCA_TURBO		BIT(4)
+#define WA_IOT				BIT( 0 )
+#define DM_PWDB				BIT( 1 )
+#define DM_MONITOR			BIT( 2 )
+#define DM_DIG				BIT( 3 )
+#define DM_EDCA_TURBO		BIT( 4 )
 
 enum dbgp_flag_e {
 	FQOS = 0,
@@ -165,58 +165,58 @@ enum dbgp_flag_e {
 	DBGP_TYPE_MAX
 };
 
-#define RT_ASSERT(_exp,fmt)				\
+#define RT_ASSERT( _exp,fmt )				\
 	do { \
-		if(!(_exp))	{			\
-			printk(KERN_DEBUG "%s:%s(): ", KBUILD_MODNAME, \
-			__func__);	\
+		if( !( _exp ) )	{			\
+			printk( KERN_DEBUG "%s:%s(): ", KBUILD_MODNAME, \
+			__func__ );	\
 			printk fmt;			\
 		} \
-	} while(0);
+	} while( 0 );
 
-#define RT_TRACE(comp, level, fmt)\
+#define RT_TRACE( comp, level, fmt )\
 	do { \
-		if(unlikely(((comp) & rtlpriv->dbg.global_debugcomponents) && \
-			((level) <= rtlpriv->dbg.global_debuglevel))) {\
-			printk(KERN_DEBUG "%s-%d:%s():<%lx-%x> ", KBUILD_MODNAME, \
+		if( unlikely( ( ( comp ) & rtlpriv->dbg.global_debugcomponents ) && \
+			( ( level ) <= rtlpriv->dbg.global_debuglevel ) ) ) {\
+			printk( KERN_DEBUG "%s-%d:%s():<%lx-%x> ", KBUILD_MODNAME, \
 			rtlpriv->rtlhal.interfaceindex, __func__, \
-			in_interrupt(), in_atomic());	\
+			in_interrupt(), in_atomic() );	\
 			printk fmt; 			\
 		}\
-	} while(0);
+	} while( 0 );
 
-#define RTPRINT(rtlpriv, dbgtype, dbgflag, printstr)	\
+#define RTPRINT( rtlpriv, dbgtype, dbgflag, printstr )	\
 	do {						\
-		if (unlikely(rtlpriv->dbg.dbgp_type[dbgtype] & dbgflag)) { \
-			printk(KERN_DEBUG "%s: ", KBUILD_MODNAME);	\
+		if ( unlikely( rtlpriv->dbg.dbgp_type[dbgtype] & dbgflag ) ) { \
+			printk( KERN_DEBUG "%s: ", KBUILD_MODNAME );	\
 			printk printstr;		\
 		}					\
-	} while(0);
+	} while( 0 );
 
-#define RT_PRINT_DATA(rtlpriv, _comp, _level, _titlestring, _hexdata, \
-		_hexdatalen) \
+#define RT_PRINT_DATA( rtlpriv, _comp, _level, _titlestring, _hexdata, \
+		_hexdatalen ) \
 	do {\
-		if(unlikely(((_comp) & rtlpriv->dbg.global_debugcomponents ) && \
-			(_level <= rtlpriv->dbg.global_debuglevel )))	{ 	\
+		if( unlikely( ( ( _comp ) & rtlpriv->dbg.global_debugcomponents ) && \
+			( _level <= rtlpriv->dbg.global_debuglevel ) ) )	{ 	\
 			int __i;						\
-			u8*	ptr = (u8*)_hexdata;				\
-			printk(KERN_DEBUG "%s: ", KBUILD_MODNAME);	\
-			printk(KERN_DEBUG "In process \"%s\" (pid %i):", current->comm, 	\
-					current->pid); \
-			printk(_titlestring);		\
-			for( __i=0; __i<(int)_hexdatalen; __i++ ) {		\
-				printk("%02X%s", ptr[__i], (((__i + 1) % 4) 	\
-							== 0)?"  ":" ");	\
-				if (((__i + 1) % 16) == 0)	\
-					printk("\n");	\
+			u8*	ptr = ( u8* )_hexdata;				\
+			printk( KERN_DEBUG "%s: ", KBUILD_MODNAME );	\
+			printk( KERN_DEBUG "In process \"%s\" (pid %i):", current->comm, 	\
+					current->pid ); \
+			printk( _titlestring );		\
+			for( __i=0; __i<( int )_hexdatalen; __i++ ) {		\
+				printk( "%02X%s", ptr[__i], ( ( ( __i + 1 ) % 4 ) 	\
+							== 0 )?"  ":" " );	\
+				if ( ( ( __i + 1 ) % 16 ) == 0 )	\
+					printk( "\n" );	\
 			}				\
-			printk(KERN_DEBUG "\n");			\
+			printk( KERN_DEBUG "\n" );			\
 		} \
-	} while(0);
+	} while( 0 );
 
-void rtl_dbgp_flag_init(struct ieee80211_hw *hw);
-void rtl_proc_add_one(struct ieee80211_hw *hw);
-void rtl_proc_remove_one(struct ieee80211_hw *hw);
-void rtl_proc_add_topdir(void);
-void rtl_proc_remove_topdir(void);
+void rtl_dbgp_flag_init( struct ieee80211_hw *hw );
+void rtl_proc_add_one( struct ieee80211_hw *hw );
+void rtl_proc_remove_one( struct ieee80211_hw *hw );
+void rtl_proc_add_topdir( void );
+void rtl_proc_remove_topdir( void );
 #endif

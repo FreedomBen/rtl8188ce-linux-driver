@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright(c) 2009-2010  Realtek Corporation.
+ * Copyright( c ) 2009-2010  Realtek Corporation.
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of version 2 of the GNU General Public License as
@@ -41,8 +41,8 @@
 
 #define RESET_DELAY_8185					20
 
-#define RT_IBSS_INT_MASKS	(IMR_BCNINT | IMR_TBDOK | IMR_TBDER)
-#define RT_AC_INT_MASKS		(IMR_VIDOK | IMR_VODOK | IMR_BEDOK|IMR_BKDOK)
+#define RT_IBSS_INT_MASKS	( IMR_BCNINT | IMR_TBDOK | IMR_TBDER )
+#define RT_AC_INT_MASKS		( IMR_VIDOK | IMR_VODOK | IMR_BEDOK|IMR_BKDOK )
 
 #define NUM_OF_FIRMWARE_QUEUE				10
 #define NUM_OF_PAGES_IN_FW					0x100
@@ -84,35 +84,35 @@
 #define RX_MAX_QUEUE						2
 
 #define	C2H_RX_CMD_HDR_LEN					8
-#define	GET_C2H_CMD_CMD_LEN(__prxhdr)		\
-	LE_BITS_TO_4BYTE((__prxhdr), 0, 16)
-#define	GET_C2H_CMD_ELEMENT_ID(__prxhdr)	\
-	LE_BITS_TO_4BYTE((__prxhdr), 16, 8)
-#define	GET_C2H_CMD_CMD_SEQ(__prxhdr)		\
-	LE_BITS_TO_4BYTE((__prxhdr), 24, 7)
-#define	GET_C2H_CMD_CONTINUE(__prxhdr)		\
-	LE_BITS_TO_4BYTE((__prxhdr), 31, 1)
-#define	GET_C2H_CMD_CONTENT(__prxhdr)		\
-	((u8*)(__prxhdr) + C2H_RX_CMD_HDR_LEN)
+#define	GET_C2H_CMD_CMD_LEN( __prxhdr )		\
+	LE_BITS_TO_4BYTE( ( __prxhdr ), 0, 16 )
+#define	GET_C2H_CMD_ELEMENT_ID( __prxhdr )	\
+	LE_BITS_TO_4BYTE( ( __prxhdr ), 16, 8 )
+#define	GET_C2H_CMD_CMD_SEQ( __prxhdr )		\
+	LE_BITS_TO_4BYTE( ( __prxhdr ), 24, 7 )
+#define	GET_C2H_CMD_CONTINUE( __prxhdr )		\
+	LE_BITS_TO_4BYTE( ( __prxhdr ), 31, 1 )
+#define	GET_C2H_CMD_CONTENT( __prxhdr )		\
+	( ( u8* )( __prxhdr ) + C2H_RX_CMD_HDR_LEN )
 
-#define	GET_C2H_CMD_FEEDBACK_ELEMENT_ID(__pcmdfbhdr)	\
-	LE_BITS_TO_4BYTE((__pcmdfbhdr), 0, 8)
-#define	GET_C2H_CMD_FEEDBACK_CCX_LEN(__pcmdfbhdr)		\
-	LE_BITS_TO_4BYTE((__pcmdfbhdr), 8, 8)
-#define	GET_C2H_CMD_FEEDBACK_CCX_CMD_CNT(__pcmdfbhdr)	\
-	LE_BITS_TO_4BYTE((__pcmdfbhdr), 16, 16)
-#define	GET_C2H_CMD_FEEDBACK_CCX_MAC_ID(__pcmdfbhdr)	\
-	LE_BITS_TO_4BYTE(((__pcmdfbhdr) + 4), 0, 5)
-#define	GET_C2H_CMD_FEEDBACK_CCX_VALID(__pcmdfbhdr)		\
-	LE_BITS_TO_4BYTE(((__pcmdfbhdr) + 4), 7, 1)
-#define	GET_C2H_CMD_FEEDBACK_CCX_RETRY_CNT(__pcmdfbhdr)	\
-	LE_BITS_TO_4BYTE(((__pcmdfbhdr) + 4), 8, 5)
-#define	GET_C2H_CMD_FEEDBACK_CCX_TOK(__pcmdfbhdr)		\
-	LE_BITS_TO_4BYTE(((__pcmdfbhdr) + 4), 15, 1)
-#define	GET_C2H_CMD_FEEDBACK_CCX_QSEL(__pcmdfbhdr)		\
-	LE_BITS_TO_4BYTE(((__pcmdfbhdr) + 4), 16, 4)
-#define	GET_C2H_CMD_FEEDBACK_CCX_SEQ(__pcmdfbhdr)		\
-	LE_BITS_TO_4BYTE(((__pcmdfbhdr) + 4), 20, 12)
+#define	GET_C2H_CMD_FEEDBACK_ELEMENT_ID( __pcmdfbhdr )	\
+	LE_BITS_TO_4BYTE( ( __pcmdfbhdr ), 0, 8 )
+#define	GET_C2H_CMD_FEEDBACK_CCX_LEN( __pcmdfbhdr )		\
+	LE_BITS_TO_4BYTE( ( __pcmdfbhdr ), 8, 8 )
+#define	GET_C2H_CMD_FEEDBACK_CCX_CMD_CNT( __pcmdfbhdr )	\
+	LE_BITS_TO_4BYTE( ( __pcmdfbhdr ), 16, 16 )
+#define	GET_C2H_CMD_FEEDBACK_CCX_MAC_ID( __pcmdfbhdr )	\
+	LE_BITS_TO_4BYTE( ( ( __pcmdfbhdr ) + 4 ), 0, 5 )
+#define	GET_C2H_CMD_FEEDBACK_CCX_VALID( __pcmdfbhdr )		\
+	LE_BITS_TO_4BYTE( ( ( __pcmdfbhdr ) + 4 ), 7, 1 )
+#define	GET_C2H_CMD_FEEDBACK_CCX_RETRY_CNT( __pcmdfbhdr )	\
+	LE_BITS_TO_4BYTE( ( ( __pcmdfbhdr ) + 4 ), 8, 5 )
+#define	GET_C2H_CMD_FEEDBACK_CCX_TOK( __pcmdfbhdr )		\
+	LE_BITS_TO_4BYTE( ( ( __pcmdfbhdr ) + 4 ), 15, 1 )
+#define	GET_C2H_CMD_FEEDBACK_CCX_QSEL( __pcmdfbhdr )		\
+	LE_BITS_TO_4BYTE( ( ( __pcmdfbhdr ) + 4 ), 16, 4 )
+#define	GET_C2H_CMD_FEEDBACK_CCX_SEQ( __pcmdfbhdr )		\
+	LE_BITS_TO_4BYTE( ( ( __pcmdfbhdr ) + 4 ), 20, 12 )
 
 enum version_8192d {
 	VERSION_TEST_CHIP_88C = 0x0000,
@@ -142,57 +142,57 @@ enum version_8192d {
 };
 
 /* for 92D */
-#define CHIP_92D_SINGLEPHY				BIT(9)
-#define C_CUT_VERSION					BIT(13)
-#define D_CUT_VERSION					((BIT(12)|BIT(13)))
-#define E_CUT_VERSION					BIT(14)
+#define CHIP_92D_SINGLEPHY				BIT( 9 )
+#define C_CUT_VERSION					BIT( 13 )
+#define D_CUT_VERSION					( ( BIT( 12 )|BIT( 13 ) ) )
+#define E_CUT_VERSION					BIT( 14 )
 
 /* Chip specific */
-#define CHIP_BONDING_IDENTIFIER(_value)	(((_value)>>22)&0x3)
+#define CHIP_BONDING_IDENTIFIER( _value )	( ( ( _value )>>22 )&0x3 )
 #define CHIP_BONDING_92C_1T2R			0x1
 #define CHIP_BONDING_88C_USB_MCARD		0x2
 #define CHIP_BONDING_88C_USB_HP			0x1
 
-/* [15:12] IC version(CUT): A-cut=0, B-cut=1, C-cut=2, D-cut=3 */
+/* [15:12] IC version( CUT ): A-cut=0, B-cut=1, C-cut=2, D-cut=3 */
 /* [7] Manufacturer: TSMC=0, UMC=1 */
 /* [6:4] RF type: 1T1R=0, 1T2R=1, 2T2R=2 */
 /* [3] Chip type: TEST=0, NORMAL=1 */
 /* [2:0] IC type: 81xxC=0, 8723=1, 92D=2 */
-#define CHIP_8723						BIT(0)
-#define CHIP_92D						BIT(1)
-#define NORMAL_CHIP						BIT(3)
-#define RF_TYPE_1T1R					(~(BIT(4)|BIT(5)|BIT(6)))
-#define RF_TYPE_1T2R					BIT(4)
-#define RF_TYPE_2T2R					BIT(5)
-#define CHIP_VENDOR_UMC					BIT(7)
-#define B_CUT_VERSION					BIT(12)
+#define CHIP_8723						BIT( 0 )
+#define CHIP_92D						BIT( 1 )
+#define NORMAL_CHIP						BIT( 3 )
+#define RF_TYPE_1T1R					( ~( BIT( 4 )|BIT( 5 )|BIT( 6 ) ) )
+#define RF_TYPE_1T2R					BIT( 4 )
+#define RF_TYPE_2T2R					BIT( 5 )
+#define CHIP_VENDOR_UMC					BIT( 7 )
+#define B_CUT_VERSION					BIT( 12 )
 
 /* MASK */
-#define IC_TYPE_MASK					(BIT(0)|BIT(1)|BIT(2))
-#define CHIP_TYPE_MASK					BIT(3)
-#define RF_TYPE_MASK					(BIT(4)|BIT(5)|BIT(6))
-#define MANUFACTUER_MASK				BIT(7)
-#define ROM_VERSION_MASK				(BIT(11)|BIT(10)|BIT(9)|BIT(8))
-#define CUT_VERSION_MASK				(BIT(15)|BIT(14)|BIT(13)|BIT(12))
+#define IC_TYPE_MASK					( BIT( 0 )|BIT( 1 )|BIT( 2 ) )
+#define CHIP_TYPE_MASK					BIT( 3 )
+#define RF_TYPE_MASK					( BIT( 4 )|BIT( 5 )|BIT( 6 ) )
+#define MANUFACTUER_MASK				BIT( 7 )
+#define ROM_VERSION_MASK				( BIT( 11 )|BIT( 10 )|BIT( 9 )|BIT( 8 ) )
+#define CUT_VERSION_MASK				( BIT( 15 )|BIT( 14 )|BIT( 13 )|BIT( 12 ) )
 
 
 /* Get element */
-#define GET_CVID_IC_TYPE(version)		((version) & IC_TYPE_MASK)
-#define GET_CVID_CHIP_TYPE(version)		((version) & CHIP_TYPE_MASK)
-#define GET_CVID_RF_TYPE(version)		((version) & RF_TYPE_MASK)
-#define GET_CVID_MANUFACTUER(version)	((version) & MANUFACTUER_MASK)
-#define GET_CVID_ROM_VERSION(version)	((version) & ROM_VERSION_MASK)
-#define GET_CVID_CUT_VERSION(version)	((version) & CUT_VERSION_MASK)
+#define GET_CVID_IC_TYPE( version )		( ( version ) & IC_TYPE_MASK )
+#define GET_CVID_CHIP_TYPE( version )		( ( version ) & CHIP_TYPE_MASK )
+#define GET_CVID_RF_TYPE( version )		( ( version ) & RF_TYPE_MASK )
+#define GET_CVID_MANUFACTUER( version )	( ( version ) & MANUFACTUER_MASK )
+#define GET_CVID_ROM_VERSION( version )	( ( version ) & ROM_VERSION_MASK )
+#define GET_CVID_CUT_VERSION( version )	( ( version ) & CUT_VERSION_MASK )
 
-#define IS_1T1R(version)				((GET_CVID_RF_TYPE(version))? false : true)
-#define IS_1T2R(version)				((GET_CVID_RF_TYPE(version) == RF_TYPE_1T2R)? true : false)
-#define IS_2T2R(version)				((GET_CVID_RF_TYPE(version) == RF_TYPE_2T2R)? true : false)
+#define IS_1T1R( version )				( ( GET_CVID_RF_TYPE( version ) )? false : true )
+#define IS_1T2R( version )				( ( GET_CVID_RF_TYPE( version ) == RF_TYPE_1T2R )? true : false )
+#define IS_2T2R( version )				( ( GET_CVID_RF_TYPE( version ) == RF_TYPE_2T2R )? true : false )
 
-#define IS_92D_SINGLEPHY(version)		((IS_92D(version)) ? (IS_2T2R(version) ? true: false) : false)
-#define IS_92D(version)					((GET_CVID_IC_TYPE(version) == CHIP_92D) ? true : false)
-#define IS_92D_C_CUT(version)    		((IS_92D(version)) ? ((GET_CVID_CUT_VERSION(version) == 0x2000) ? true : false) : false)
-#define IS_92D_D_CUT(version)			((IS_92D(version)) ? ((GET_CVID_CUT_VERSION(version) == 0x3000) ? true : false) : false)
-#define IS_92D_E_CUT(version)			((IS_92D(version)) ? ((GET_CVID_CUT_VERSION(version) == 0x4000) ? true : false) : false)
+#define IS_92D_SINGLEPHY( version )		( ( IS_92D( version ) ) ? ( IS_2T2R( version ) ? true: false ) : false )
+#define IS_92D( version )					( ( GET_CVID_IC_TYPE( version ) == CHIP_92D ) ? true : false )
+#define IS_92D_C_CUT( version )    		( ( IS_92D( version ) ) ? ( ( GET_CVID_CUT_VERSION( version ) == 0x2000 ) ? true : false ) : false )
+#define IS_92D_D_CUT( version )			( ( IS_92D( version ) ) ? ( ( GET_CVID_CUT_VERSION( version ) == 0x3000 ) ? true : false ) : false )
+#define IS_92D_E_CUT( version )			( ( IS_92D( version ) ) ? ( ( GET_CVID_CUT_VERSION( version ) == 0x4000 ) ? true : false ) : false )
 
 enum rf_optype {
 	RF_OP_BY_SW_3WIRE = 0,

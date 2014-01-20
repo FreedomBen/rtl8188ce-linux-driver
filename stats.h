@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright(c) 2009-2010  Realtek Corporation.
+ * Copyright( c ) 2009-2010  Realtek Corporation.
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of version 2 of the GNU General Public License as
@@ -37,10 +37,10 @@
 /* Rx smooth factor */
 #define	RX_SMOOTH_FACTOR					20
 
-u8 rtl_query_rxpwrpercentage(char antpower);
-u8 rtl_evm_db_to_percentage(char value);
-long rtl_signal_scale_mapping(struct ieee80211_hw *hw, long currsig);
-void rtl_process_phyinfo(struct ieee80211_hw *hw, u8 *buffer,
-	struct rtl_stats *pstatus);
+u8 rtl_query_rxpwrpercentage( char antpower );
+u8 rtl_evm_db_to_percentage( char value );
+long rtl_signal_scale_mapping( struct ieee80211_hw *hw, long currsig );
+void rtl_process_phyinfo( struct ieee80211_hw *hw, u8 *buffer,
+	struct rtl_stats *pstatus );
 
 #endif

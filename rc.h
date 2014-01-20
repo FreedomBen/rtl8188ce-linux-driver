@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright(c) 2009-2010  Realtek Corporation.
+ * Copyright( c ) 2009-2010  Realtek Corporation.
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of version 2 of the GNU General Public License as
@@ -42,6 +42,6 @@ struct rtl_rate_priv {
 	u8 ht_cap;
 };
 
-int rtl_rate_control_register(void);
-void rtl_rate_control_unregister(void);
+int rtl_rate_control_register( void );
+void rtl_rate_control_unregister( void );
 #endif

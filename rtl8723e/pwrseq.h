@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright(c) 2009-2010  Realtek Corporation.
+ * Copyright( c ) 2009-2010  Realtek Corporation.
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of version 2 of the GNU General Public License as
@@ -68,19 +68,19 @@
 	/* format */																\
 	/* { offset, cut_msk, fab_msk|interface_msk, base|cmd, msk, value },  comments here*/								\
 	{0x0005, PWR_CUT_ALL_MSK, PWR_FAB_ALL_MSK, PWR_INTF_ALL_MSK,\
-		PWR_BASEADDR_MAC,PWR_CMD_WRITE, BIT(2), 0},/* disable SW LPS 0x04[10]=0*/	\
+		PWR_BASEADDR_MAC,PWR_CMD_WRITE, BIT( 2 ), 0},/* disable SW LPS 0x04[10]=0*/	\
 	{0x0006, PWR_CUT_ALL_MSK, PWR_FAB_ALL_MSK, PWR_INTF_ALL_MSK,\
-		PWR_BASEADDR_MAC,PWR_CMD_POLLING, BIT(1), BIT(1)},/* wait till 0x04[17] = 1    power ready*/	\
+		PWR_BASEADDR_MAC,PWR_CMD_POLLING, BIT( 1 ), BIT( 1 )},/* wait till 0x04[17] = 1    power ready*/	\
 	{0x0006, PWR_CUT_ALL_MSK, PWR_FAB_ALL_MSK, PWR_INTF_ALL_MSK,\
-		PWR_BASEADDR_MAC,PWR_CMD_WRITE, BIT(0), BIT(0)},/* release WLON reset  0x04[16]=1*/	\
+		PWR_BASEADDR_MAC,PWR_CMD_WRITE, BIT( 0 ), BIT( 0 )},/* release WLON reset  0x04[16]=1*/	\
 	{0x0005, PWR_CUT_ALL_MSK, PWR_FAB_ALL_MSK, PWR_INTF_ALL_MSK,\
-		PWR_BASEADDR_MAC,PWR_CMD_WRITE, BIT(7), 0},/* disable HWPDN 0x04[15]=0*/	\
+		PWR_BASEADDR_MAC,PWR_CMD_WRITE, BIT( 7 ), 0},/* disable HWPDN 0x04[15]=0*/	\
 	{0x0005, PWR_CUT_ALL_MSK, PWR_FAB_ALL_MSK, PWR_INTF_ALL_MSK,\
-		PWR_BASEADDR_MAC,PWR_CMD_WRITE, (BIT(4)|BIT(3)), 0},/* disable WL suspend*/	\
+		PWR_BASEADDR_MAC,PWR_CMD_WRITE, ( BIT( 4 )|BIT( 3 ) ), 0},/* disable WL suspend*/	\
 	{0x0005, PWR_CUT_ALL_MSK, PWR_FAB_ALL_MSK, PWR_INTF_ALL_MSK,\
-		PWR_BASEADDR_MAC,PWR_CMD_WRITE, BIT(0), BIT(0)},/* polling until return 0*/	\
+		PWR_BASEADDR_MAC,PWR_CMD_WRITE, BIT( 0 ), BIT( 0 )},/* polling until return 0*/	\
 	{0x0005, PWR_CUT_ALL_MSK, PWR_FAB_ALL_MSK, PWR_INTF_ALL_MSK,\
-		PWR_BASEADDR_MAC,PWR_CMD_POLLING, BIT(0), 0},/**/	\
+		PWR_BASEADDR_MAC,PWR_CMD_POLLING, BIT( 0 ), 0},/**/	\
 
 #define RTL8723A_TRANS_ACT_TO_CARDEMU													\
 	/* format */																\
@@ -88,58 +88,58 @@
 	{0x001F, PWR_CUT_ALL_MSK, PWR_FAB_ALL_MSK, PWR_INTF_ALL_MSK,\
 		PWR_BASEADDR_MAC,PWR_CMD_WRITE, 0xFF, 0},/*0x1F[7:0] = 0 turn off RF*/	\
 	{0x004E, PWR_CUT_ALL_MSK, PWR_FAB_ALL_MSK, PWR_INTF_ALL_MSK,\
-		PWR_BASEADDR_MAC,PWR_CMD_WRITE, BIT(7), 0},\
+		PWR_BASEADDR_MAC,PWR_CMD_WRITE, BIT( 7 ), 0},\
 	{0x0005, PWR_CUT_ALL_MSK, PWR_FAB_ALL_MSK, PWR_INTF_ALL_MSK,\
-		PWR_BASEADDR_MAC,PWR_CMD_WRITE, BIT(1), BIT(1)}, 	\
+		PWR_BASEADDR_MAC,PWR_CMD_WRITE, BIT( 1 ), BIT( 1 )}, 	\
 	{0x0005, PWR_CUT_ALL_MSK, PWR_FAB_ALL_MSK, PWR_INTF_ALL_MSK,\
-		PWR_BASEADDR_MAC,PWR_CMD_POLLING, BIT(1), 0}, 	\
+		PWR_BASEADDR_MAC,PWR_CMD_POLLING, BIT( 1 ), 0}, 	\
 
 #define RTL8723A_TRANS_CARDEMU_TO_SUS													\
 	/* format */																\
 	/* { offset, cut_msk, fab_msk|interface_msk, base|cmd, msk, value },  comments here*/								\
 	{0x0005, PWR_CUT_ALL_MSK, PWR_FAB_ALL_MSK, PWR_INTF_PCI_MSK,\
-		PWR_BASEADDR_MAC,PWR_CMD_WRITE, BIT(4)|BIT(3), (BIT(4)|BIT(3))},\
+		PWR_BASEADDR_MAC,PWR_CMD_WRITE, BIT( 4 )|BIT( 3 ), ( BIT( 4 )|BIT( 3 ) )},\
 		/*0x04[12:11] = 2b'11 enable WL suspend for PCIe*/	\
 	{0x0005, PWR_CUT_ALL_MSK, PWR_FAB_ALL_MSK, PWR_INTF_USB_MSK|PWR_INTF_SDIO_MSK,\
-		PWR_BASEADDR_MAC,PWR_CMD_WRITE, BIT(3)|BIT(4), BIT(3)}, /*0x04[12:11] = 2b'01 enable WL suspend*/	\
+		PWR_BASEADDR_MAC,PWR_CMD_WRITE, BIT( 3 )|BIT( 4 ), BIT( 3 )}, /*0x04[12:11] = 2b'01 enable WL suspend*/	\
 	{0x0005, PWR_CUT_ALL_MSK, PWR_FAB_ALL_MSK, PWR_INTF_PCI_MSK,PWR_BASEADDR_MAC,\
-		PWR_CMD_WRITE, BIT(3)|BIT(4), BIT(3)|BIT(4)}, /*0x04[12:11] = 2b'11 enable WL suspend for PCIe*/	\
+		PWR_CMD_WRITE, BIT( 3 )|BIT( 4 ), BIT( 3 )|BIT( 4 )}, /*0x04[12:11] = 2b'11 enable WL suspend for PCIe*/	\
 	{0x0086, PWR_CUT_ALL_MSK, PWR_FAB_ALL_MSK, PWR_INTF_SDIO_MSK,PWR_BASEADDR_SDIO,\
-		PWR_CMD_WRITE, BIT(0), BIT(0)}, /*Set SDIO suspend local register*/	\
+		PWR_CMD_WRITE, BIT( 0 ), BIT( 0 )}, /*Set SDIO suspend local register*/	\
 	{0x0086, PWR_CUT_ALL_MSK, PWR_FAB_ALL_MSK, PWR_INTF_SDIO_MSK,PWR_BASEADDR_SDIO,\
-		PWR_CMD_POLLING, BIT(1), 0}, /*wait power state to suspend*/
+		PWR_CMD_POLLING, BIT( 1 ), 0}, /*wait power state to suspend*/
 
 #define RTL8723A_TRANS_SUS_TO_CARDEMU													\
 	/* format */																\
 	/* { offset, cut_msk, fab_msk|interface_msk, base|cmd, msk, value }, */								\
 	{0x0086, PWR_CUT_ALL_MSK, PWR_FAB_ALL_MSK, PWR_INTF_SDIO_MSK,\
-		PWR_BASEADDR_SDIO,PWR_CMD_WRITE, BIT(0), 0}, /*Set SDIO suspend local register*/	\
+		PWR_BASEADDR_SDIO,PWR_CMD_WRITE, BIT( 0 ), 0}, /*Set SDIO suspend local register*/	\
 	{0x0086, PWR_CUT_ALL_MSK, PWR_FAB_ALL_MSK, PWR_INTF_SDIO_MSK,\
-		PWR_BASEADDR_SDIO,PWR_CMD_POLLING, BIT(1), BIT(1)}, /*wait power state to suspend*/\
+		PWR_BASEADDR_SDIO,PWR_CMD_POLLING, BIT( 1 ), BIT( 1 )}, /*wait power state to suspend*/\
 	{0x0005, PWR_CUT_ALL_MSK, PWR_FAB_ALL_MSK, PWR_INTF_ALL_MSK,\
-		PWR_BASEADDR_MAC,PWR_CMD_WRITE, BIT(3)|BIT(4), 0}, /*0x04[12:11] = 2b'01enable WL suspend*/
+		PWR_BASEADDR_MAC,PWR_CMD_WRITE, BIT( 3 )|BIT( 4 ), 0}, /*0x04[12:11] = 2b'01enable WL suspend*/
 
 #define RTL8723A_TRANS_CARDEMU_TO_CARDDIS													\
 	/* format */																\
 	/* { offset, cut_msk, fab_msk|interface_msk, base|cmd, msk, value }, */								\
 	{0x0005, PWR_CUT_ALL_MSK, PWR_FAB_ALL_MSK, PWR_INTF_USB_MSK|PWR_INTF_SDIO_MSK,\
-		PWR_BASEADDR_MAC,PWR_CMD_WRITE, BIT(3)|BIT(4), BIT(3)}, /*0x04[12:11] = 2b'01 enable WL suspend*/	\
+		PWR_BASEADDR_MAC,PWR_CMD_WRITE, BIT( 3 )|BIT( 4 ), BIT( 3 )}, /*0x04[12:11] = 2b'01 enable WL suspend*/	\
 	{0x0005, PWR_CUT_ALL_MSK, PWR_FAB_ALL_MSK, PWR_INTF_PCI_MSK,PWR_BASEADDR_MAC,\
-		PWR_CMD_WRITE, BIT(2), BIT(2)}, /*0x04[10] = 1, enable SW LPS*/	\
+		PWR_CMD_WRITE, BIT( 2 ), BIT( 2 )}, /*0x04[10] = 1, enable SW LPS*/	\
 	{0x0086, PWR_CUT_ALL_MSK, PWR_FAB_ALL_MSK, PWR_INTF_SDIO_MSK,PWR_BASEADDR_SDIO,\
-		PWR_CMD_WRITE, BIT(0), BIT(0)}, /*Set SDIO suspend local register*/	\
+		PWR_CMD_WRITE, BIT( 0 ), BIT( 0 )}, /*Set SDIO suspend local register*/	\
 	{0x0086, PWR_CUT_ALL_MSK, PWR_FAB_ALL_MSK, PWR_INTF_SDIO_MSK,PWR_BASEADDR_SDIO,\
-		PWR_CMD_POLLING, BIT(1), 0}, /*wait power state to suspend*/
+		PWR_CMD_POLLING, BIT( 1 ), 0}, /*wait power state to suspend*/
 
 #define RTL8723A_TRANS_CARDDIS_TO_CARDEMU													\
 	/* format */																\
 	/* { offset, cut_msk, fab_msk|interface_msk, base|cmd, msk, value }, */								\
 	{0x0086, PWR_CUT_ALL_MSK, PWR_FAB_ALL_MSK, PWR_INTF_SDIO_MSK,PWR_BASEADDR_SDIO,\
-		PWR_CMD_WRITE, BIT(0), 0}, /*Set SDIO suspend local register*/	\
+		PWR_CMD_WRITE, BIT( 0 ), 0}, /*Set SDIO suspend local register*/	\
 	{0x0086, PWR_CUT_ALL_MSK, PWR_FAB_ALL_MSK, PWR_INTF_SDIO_MSK,PWR_BASEADDR_SDIO,\
-		PWR_CMD_POLLING, BIT(1), BIT(1)}, /*wait power state to suspend*/\
+		PWR_CMD_POLLING, BIT( 1 ), BIT( 1 )}, /*wait power state to suspend*/\
 	{0x0005, PWR_CUT_ALL_MSK, PWR_FAB_ALL_MSK, PWR_INTF_ALL_MSK,PWR_BASEADDR_MAC,\
-		PWR_CMD_WRITE, BIT(3)|BIT(4), 0}, /*0x04[12:11] = 2b'00enable WL suspend*/\
+		PWR_CMD_WRITE, BIT( 3 )|BIT( 4 ), 0}, /*0x04[12:11] = 2b'00enable WL suspend*/\
 	{0x0301, PWR_CUT_ALL_MSK, PWR_FAB_ALL_MSK, PWR_INTF_ALL_MSK,PWR_BASEADDR_MAC,\
 		PWR_CMD_WRITE, 0xFF, 0},/*PCIe DMA start*/
 
@@ -147,15 +147,15 @@
 	/* format */																\
 	/* { offset, cut_msk, fab_msk|interface_msk, base|cmd, msk, value }, */								\
 	{0x0006, PWR_CUT_ALL_MSK, PWR_FAB_ALL_MSK, PWR_INTF_ALL_MSK,PWR_BASEADDR_MAC,\
-		PWR_CMD_WRITE, BIT(0), 0},/* 0x04[16] = 0*/\
+		PWR_CMD_WRITE, BIT( 0 ), 0},/* 0x04[16] = 0*/\
 	{0x0005, PWR_CUT_ALL_MSK, PWR_FAB_ALL_MSK, PWR_INTF_ALL_MSK,PWR_BASEADDR_MAC,\
-		PWR_CMD_WRITE, BIT(7), BIT(7)},/* 0x04[15] = 1*/
+		PWR_CMD_WRITE, BIT( 7 ), BIT( 7 )},/* 0x04[15] = 1*/
 
 #define RTL8723A_TRANS_PDN_TO_CARDEMU												\
 	/* format */																\
 	/* { offset, cut_msk, fab_msk|interface_msk, base|cmd, msk, value }, */								\
 	{0x0005, PWR_CUT_ALL_MSK, PWR_FAB_ALL_MSK, PWR_INTF_ALL_MSK,PWR_BASEADDR_MAC,\
-		PWR_CMD_WRITE, BIT(7), 0},/* 0x04[15] = 0*/
+		PWR_CMD_WRITE, BIT( 7 ), 0},/* 0x04[15] = 0*/
 
 #define RTL8723A_TRANS_ACT_TO_LPS														\
 	/* format */																\
@@ -173,17 +173,17 @@
 	{0x05FB, PWR_CUT_ALL_MSK, PWR_FAB_ALL_MSK, PWR_INTF_ALL_MSK,PWR_BASEADDR_MAC,\
 		PWR_CMD_POLLING, 0xFF, 0},/*Should be zero if no packet is transmitting*/	\
 	{0x0002, PWR_CUT_ALL_MSK, PWR_FAB_ALL_MSK, PWR_INTF_ALL_MSK,PWR_BASEADDR_MAC,\
-		PWR_CMD_WRITE, BIT(0), 0},/*CCK and OFDM are disabled,and clock are gated*/	\
+		PWR_CMD_WRITE, BIT( 0 ), 0},/*CCK and OFDM are disabled,and clock are gated*/	\
 	{0x0002, PWR_CUT_ALL_MSK, PWR_FAB_ALL_MSK, PWR_INTF_ALL_MSK,PWR_BASEADDR_MAC,\
 		PWR_CMD_DELAY, 0, PWRSEQ_DELAY_US},/*Delay 1us*/	\
 	{0x0002, PWR_CUT_ALL_MSK, PWR_FAB_ALL_MSK, PWR_INTF_ALL_MSK,PWR_BASEADDR_MAC,\
-		PWR_CMD_WRITE, BIT(1), 0},/*Whole BB is reset*/	\
+		PWR_CMD_WRITE, BIT( 1 ), 0},/*Whole BB is reset*/	\
 	{0x0100, PWR_CUT_ALL_MSK, PWR_FAB_ALL_MSK, PWR_INTF_ALL_MSK,PWR_BASEADDR_MAC,\
 		PWR_CMD_WRITE, 0xFF, 0x3F},/*Reset MAC TRX*/	\
 	{0x0101, PWR_CUT_ALL_MSK, PWR_FAB_ALL_MSK, PWR_INTF_ALL_MSK,PWR_BASEADDR_MAC,\
-		PWR_CMD_WRITE, BIT(1), 0},/*check if removed later*/	\
+		PWR_CMD_WRITE, BIT( 1 ), 0},/*check if removed later*/	\
 	{0x0553, PWR_CUT_ALL_MSK, PWR_FAB_ALL_MSK, PWR_INTF_ALL_MSK,PWR_BASEADDR_MAC,\
-		PWR_CMD_WRITE, BIT(5), BIT(5)},/*Respond TxOK to scheduler*/	\
+		PWR_CMD_WRITE, BIT( 5 ), BIT( 5 )},/*Respond TxOK to scheduler*/	\
 
 #define RTL8723A_TRANS_LPS_TO_ACT															\
 	/* format */																\
@@ -197,17 +197,17 @@
 	{0x0002, PWR_CUT_ALL_MSK, PWR_FAB_ALL_MSK, PWR_INTF_ALL_MSK,PWR_BASEADDR_MAC,\
 		PWR_CMD_DELAY, 0, PWRSEQ_DELAY_MS}, /*Delay*/\
 	{0x0008, PWR_CUT_ALL_MSK, PWR_FAB_ALL_MSK, PWR_INTF_ALL_MSK,PWR_BASEADDR_MAC,\
-		PWR_CMD_WRITE, BIT(4), 0}, /*.	0x08[4] = 0		 switch TSF to 40M*/\
+		PWR_CMD_WRITE, BIT( 4 ), 0}, /*.	0x08[4] = 0		 switch TSF to 40M*/\
 	{0x0109, PWR_CUT_ALL_MSK, PWR_FAB_ALL_MSK, PWR_INTF_ALL_MSK,PWR_BASEADDR_MAC,\
-		PWR_CMD_POLLING, BIT(7), 0}, /*Polling 0x109[7]=0  TSF in 40M*/\
+		PWR_CMD_POLLING, BIT( 7 ), 0}, /*Polling 0x109[7]=0  TSF in 40M*/\
 	{0x0029, PWR_CUT_ALL_MSK, PWR_FAB_ALL_MSK, PWR_INTF_ALL_MSK,PWR_BASEADDR_MAC,\
-		PWR_CMD_WRITE, BIT(6)|BIT(7), 0}, /*.	0x29[7:6] = 2b'00	 enable BB clock*/\
+		PWR_CMD_WRITE, BIT( 6 )|BIT( 7 ), 0}, /*.	0x29[7:6] = 2b'00	 enable BB clock*/\
 	{0x0101, PWR_CUT_ALL_MSK, PWR_FAB_ALL_MSK, PWR_INTF_ALL_MSK,PWR_BASEADDR_MAC,\
-		PWR_CMD_WRITE, BIT(1), BIT(1)}, /*.	0x101[1] = 1*/\
+		PWR_CMD_WRITE, BIT( 1 ), BIT( 1 )}, /*.	0x101[1] = 1*/\
 	{0x0100, PWR_CUT_ALL_MSK, PWR_FAB_ALL_MSK, PWR_INTF_ALL_MSK,PWR_BASEADDR_MAC,\
 		PWR_CMD_WRITE, 0xFF, 0xFF}, /*.	0x100[7:0] = 0xFF	 enable WMAC TRX*/\
 	{0x0002, PWR_CUT_ALL_MSK, PWR_FAB_ALL_MSK, PWR_INTF_ALL_MSK,PWR_BASEADDR_MAC,\
-		PWR_CMD_WRITE, BIT(1)|BIT(0), BIT(1)|BIT(0)}, /*.	0x02[1:0] = 2b'11	 enable BB macro*/\
+		PWR_CMD_WRITE, BIT( 1 )|BIT( 0 ), BIT( 1 )|BIT( 0 )}, /*.	0x02[1:0] = 2b'11	 enable BB macro*/\
 	{0x0522, PWR_CUT_ALL_MSK, PWR_FAB_ALL_MSK, PWR_INTF_ALL_MSK,PWR_BASEADDR_MAC,\
 		PWR_CMD_WRITE, 0xFF, 0}, /*.	0x522 = 0*/
 

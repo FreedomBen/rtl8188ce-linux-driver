@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright(c) 2009-2010  Realtek Corporation.
+ * Copyright( c ) 2009-2010  Realtek Corporation.
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of version 2 of the GNU General Public License as
@@ -318,7 +318,7 @@
 #define	PCI_RPWM			0x0561
 #define	PCI_CPWM			0x0563
 
-/* Config register	(Offset 0x800-) */
+/* Config register	( Offset 0x800- ) */
 #define	PHY_CCA				0x803
 
 /* Min Spacing related settings. */
@@ -326,157 +326,157 @@
 #define	MAX_MSS_DENSITY_1T 	0x0A
 
 /* Rx DMA Control related settings */
-#define	RXDMA_AGG_EN		BIT(7)
+#define	RXDMA_AGG_EN		BIT( 7 )
 
 #define	RPWM				PCI_RPWM
 
 /* Regsiter Bit and Content definition  */
 
-#define	ISO_MD2PP			BIT(0)
-#define	ISO_PA2PCIE			BIT(3)
-#define	ISO_PLL2MD			BIT(4)
-#define	ISO_PWC_DV2RP		BIT(11)
-#define	ISO_PWC_RV2RP		BIT(12)
+#define	ISO_MD2PP			BIT( 0 )
+#define	ISO_PA2PCIE			BIT( 3 )
+#define	ISO_PLL2MD			BIT( 4 )
+#define	ISO_PWC_DV2RP		BIT( 11 )
+#define	ISO_PWC_RV2RP		BIT( 12 )
 
 
-#define	FEN_MREGEN			BIT(15)
-#define	FEN_DCORE			BIT(11)
-#define	FEN_CPUEN			BIT(10)
+#define	FEN_MREGEN			BIT( 15 )
+#define	FEN_DCORE			BIT( 11 )
+#define	FEN_CPUEN			BIT( 10 )
 
-#define	PAD_HWPD_IDN		BIT(22)
+#define	PAD_HWPD_IDN		BIT( 22 )
 
-#define	SYS_CLKSEL_80M		BIT(0)
-#define	SYS_PS_CLKSEL		BIT(1)
-#define	SYS_CPU_CLKSEL		BIT(2)
-#define	SYS_MAC_CLK_EN		BIT(11)
-#define	SYS_SWHW_SEL		BIT(14)
-#define	SYS_FWHW_SEL		BIT(15)
+#define	SYS_CLKSEL_80M		BIT( 0 )
+#define	SYS_PS_CLKSEL		BIT( 1 )
+#define	SYS_CPU_CLKSEL		BIT( 2 )
+#define	SYS_MAC_CLK_EN		BIT( 11 )
+#define	SYS_SWHW_SEL		BIT( 14 )
+#define	SYS_FWHW_SEL		BIT( 15 )
 
-#define	CmdEEPROM_En		BIT(5)
-#define	CmdEERPOMSEL		BIT(4)
-#define	Cmd9346CR_9356SEL	BIT(4)
+#define	CmdEEPROM_En		BIT( 5 )
+#define	CmdEERPOMSEL		BIT( 4 )
+#define	Cmd9346CR_9356SEL	BIT( 4 )
 
-#define	AFE_MBEN			BIT(1)
-#define	AFE_BGEN			BIT(0)
+#define	AFE_MBEN			BIT( 1 )
+#define	AFE_BGEN			BIT( 0 )
 
-#define	SPS1_SWEN			BIT(1)
-#define	SPS1_LDEN			BIT(0)
+#define	SPS1_SWEN			BIT( 1 )
+#define	SPS1_LDEN			BIT( 0 )
 
-#define	RF_EN				BIT(0)
-#define	RF_RSTB				BIT(1)
-#define	RF_SDMRSTB			BIT(2)
+#define	RF_EN				BIT( 0 )
+#define	RF_RSTB				BIT( 1 )
+#define	RF_SDMRSTB			BIT( 2 )
 
-#define	LDA15_EN			BIT(0)
+#define	LDA15_EN			BIT( 0 )
 
-#define	LDV12_EN			BIT(0)
-#define	LDV12_SDBY			BIT(1)
+#define	LDV12_EN			BIT( 0 )
+#define	LDV12_SDBY			BIT( 1 )
 
-#define	XTAL_GATE_AFE		BIT(10)
+#define	XTAL_GATE_AFE		BIT( 10 )
 
-#define	APLL_EN				BIT(0)
+#define	APLL_EN				BIT( 0 )
 
-#define	AFR_CardBEn			BIT(0)
-#define	AFR_CLKRUN_SEL		BIT(1)
-#define	AFR_FuncRegEn		BIT(2)
+#define	AFR_CardBEn			BIT( 0 )
+#define	AFR_CLKRUN_SEL		BIT( 1 )
+#define	AFR_FuncRegEn		BIT( 2 )
 
-#define	APSDOFF_STATUS		BIT(15)
-#define	APSDOFF				BIT(14)
-#define	BBRSTN				BIT(13)
-#define	BB_GLB_RSTN			BIT(12)
-#define	SCHEDULE_EN			BIT(10)
-#define	MACRXEN				BIT(9)
-#define	MACTXEN				BIT(8)
-#define	DDMA_EN				BIT(7)
-#define	FW2HW_EN			BIT(6)
-#define	RXDMA_EN			BIT(5)
-#define	TXDMA_EN			BIT(4)
-#define	HCI_RXDMA_EN		BIT(3)
-#define	HCI_TXDMA_EN		BIT(2)
+#define	APSDOFF_STATUS		BIT( 15 )
+#define	APSDOFF				BIT( 14 )
+#define	BBRSTN				BIT( 13 )
+#define	BB_GLB_RSTN			BIT( 12 )
+#define	SCHEDULE_EN			BIT( 10 )
+#define	MACRXEN				BIT( 9 )
+#define	MACTXEN				BIT( 8 )
+#define	DDMA_EN				BIT( 7 )
+#define	FW2HW_EN			BIT( 6 )
+#define	RXDMA_EN			BIT( 5 )
+#define	TXDMA_EN			BIT( 4 )
+#define	HCI_RXDMA_EN		BIT( 3 )
+#define	HCI_TXDMA_EN		BIT( 2 )
 
-#define	StopHCCA			BIT(6)
-#define	StopHigh			BIT(5)
-#define	StopMgt				BIT(4)
-#define	StopVO				BIT(3)
-#define	StopVI				BIT(2)
-#define	StopBE				BIT(1)
-#define	StopBK				BIT(0)
+#define	StopHCCA			BIT( 6 )
+#define	StopHigh			BIT( 5 )
+#define	StopMgt				BIT( 4 )
+#define	StopVO				BIT( 3 )
+#define	StopVI				BIT( 2 )
+#define	StopBE				BIT( 1 )
+#define	StopBK				BIT( 0 )
 
 #define	LBK_NORMAL			0x00
-#define	LBK_MAC_LB			(BIT(0)|BIT(1)|BIT(3))
-#define	LBK_MAC_DLB			(BIT(0)|BIT(1))
-#define	LBK_DMA_LB			(BIT(0)|BIT(1)|BIT(2))
+#define	LBK_MAC_LB			( BIT( 0 )|BIT( 1 )|BIT( 3 ) )
+#define	LBK_MAC_DLB			( BIT( 0 )|BIT( 1 ) )
+#define	LBK_DMA_LB			( BIT( 0 )|BIT( 1 )|BIT( 2 ) )
 
-#define	TCP_OFDL_EN			BIT(25)
-#define	HWPC_TX_EN			BIT(24)
-#define	TXDMAPRE2FULL		BIT(23)
-#define	DISCW				BIT(20)
-#define	TCRICV				BIT(19)
-#define	CfendForm			BIT(17)
-#define	TCRCRC				BIT(16)
-#define	FAKE_IMEM_EN		BIT(15)
-#define	TSFRST				BIT(9)
-#define	TSFEN				BIT(8)
-#define	FWALLRDY			(BIT(0)|BIT(1)|BIT(2)|BIT(3)|BIT(4)|BIT(5)|BIT(6)|BIT(7))
-#define	FWRDY				BIT(7)
-#define	BASECHG				BIT(6)
-#define	IMEM				BIT(5)
-#define	DMEM_CODE_DONE		BIT(4)
-#define	EXT_IMEM_CHK_RPT	BIT(3)
-#define	EXT_IMEM_CODE_DONE	BIT(2)
-#define	IMEM_CHK_RPT		BIT(1)
-#define	IMEM_CODE_DONE		BIT(0)
-#define	IMEM_CODE_DONE		BIT(0)
-#define	IMEM_CHK_RPT		BIT(1)
-#define	EMEM_CODE_DONE		BIT(2)
-#define	EMEM_CHK_RPT		BIT(3)
-#define	DMEM_CODE_DONE		BIT(4)
-#define	IMEM_RDY			BIT(5)
-#define	BASECHG				BIT(6)
-#define	FWRDY				BIT(7)
-#define	LOAD_FW_READY		(IMEM_CODE_DONE|IMEM_CHK_RPT|EMEM_CODE_DONE|\
+#define	TCP_OFDL_EN			BIT( 25 )
+#define	HWPC_TX_EN			BIT( 24 )
+#define	TXDMAPRE2FULL		BIT( 23 )
+#define	DISCW				BIT( 20 )
+#define	TCRICV				BIT( 19 )
+#define	CfendForm			BIT( 17 )
+#define	TCRCRC				BIT( 16 )
+#define	FAKE_IMEM_EN		BIT( 15 )
+#define	TSFRST				BIT( 9 )
+#define	TSFEN				BIT( 8 )
+#define	FWALLRDY			( BIT( 0 )|BIT( 1 )|BIT( 2 )|BIT( 3 )|BIT( 4 )|BIT( 5 )|BIT( 6 )|BIT( 7 ) )
+#define	FWRDY				BIT( 7 )
+#define	BASECHG				BIT( 6 )
+#define	IMEM				BIT( 5 )
+#define	DMEM_CODE_DONE		BIT( 4 )
+#define	EXT_IMEM_CHK_RPT	BIT( 3 )
+#define	EXT_IMEM_CODE_DONE	BIT( 2 )
+#define	IMEM_CHK_RPT		BIT( 1 )
+#define	IMEM_CODE_DONE		BIT( 0 )
+#define	IMEM_CODE_DONE		BIT( 0 )
+#define	IMEM_CHK_RPT		BIT( 1 )
+#define	EMEM_CODE_DONE		BIT( 2 )
+#define	EMEM_CHK_RPT		BIT( 3 )
+#define	DMEM_CODE_DONE		BIT( 4 )
+#define	IMEM_RDY			BIT( 5 )
+#define	BASECHG				BIT( 6 )
+#define	FWRDY				BIT( 7 )
+#define	LOAD_FW_READY		( IMEM_CODE_DONE|IMEM_CHK_RPT|EMEM_CODE_DONE|\
 							EMEM_CHK_RPT|DMEM_CODE_DONE|IMEM_RDY|BASECHG|\
-							FWRDY)
-#define	TCR_TSFEN			BIT(8)
-#define	TCR_TSFRST			BIT(9)
-#define	TCR_FAKE_IMEM_EN	BIT(15)
-#define	TCR_CRC				BIT(16)
-#define	TCR_ICV				BIT(19)
-#define	TCR_DISCW			BIT(20)
-#define	TCR_HWPC_TX_EN		BIT(24)
-#define	TCR_TCP_OFDL_EN		BIT(25)
-#define	TXDMA_INIT_VALUE	(IMEM_CHK_RPT|EXT_IMEM_CHK_RPT)
+							FWRDY )
+#define	TCR_TSFEN			BIT( 8 )
+#define	TCR_TSFRST			BIT( 9 )
+#define	TCR_FAKE_IMEM_EN	BIT( 15 )
+#define	TCR_CRC				BIT( 16 )
+#define	TCR_ICV				BIT( 19 )
+#define	TCR_DISCW			BIT( 20 )
+#define	TCR_HWPC_TX_EN		BIT( 24 )
+#define	TCR_TCP_OFDL_EN		BIT( 25 )
+#define	TXDMA_INIT_VALUE	( IMEM_CHK_RPT|EXT_IMEM_CHK_RPT )
 
-#define	RCR_APPFCS			BIT(31)
-#define	RCR_DIS_ENC_2BYTE	BIT(30)
-#define	RCR_DIS_AES_2BYTE	BIT(29)
-#define	RCR_HTC_LOC_CTRL	BIT(28)
-#define	RCR_ENMBID			BIT(27)
-#define	RCR_RX_TCPOFDL_EN	BIT(26)
-#define	RCR_APP_PHYST_RXFF	BIT(25)
-#define	RCR_APP_PHYST_STAFF	BIT(24)
-#define	RCR_CBSSID			BIT(23)
-#define	RCR_APWRMGT			BIT(22)
-#define	RCR_ADD3			BIT(21)
-#define	RCR_AMF				BIT(20)
-#define	RCR_ACF				BIT(19)
-#define	RCR_ADF				BIT(18)
-#define	RCR_APP_MIC			BIT(17)
-#define	RCR_APP_ICV			BIT(16)
-#define	RCR_RXFTH			BIT(13)
-#define	RCR_AICV			BIT(12)
-#define	RCR_RXDESC_LK_EN	BIT(11)
-#define	RCR_APP_BA_SSN		BIT(6)
-#define	RCR_ACRC32			BIT(5)
-#define	RCR_RXSHFT_EN		BIT(4)
-#define	RCR_AB				BIT(3)
-#define	RCR_AM				BIT(2)
-#define	RCR_APM				BIT(1)
-#define	RCR_AAP				BIT(0)
+#define	RCR_APPFCS			BIT( 31 )
+#define	RCR_DIS_ENC_2BYTE	BIT( 30 )
+#define	RCR_DIS_AES_2BYTE	BIT( 29 )
+#define	RCR_HTC_LOC_CTRL	BIT( 28 )
+#define	RCR_ENMBID			BIT( 27 )
+#define	RCR_RX_TCPOFDL_EN	BIT( 26 )
+#define	RCR_APP_PHYST_RXFF	BIT( 25 )
+#define	RCR_APP_PHYST_STAFF	BIT( 24 )
+#define	RCR_CBSSID			BIT( 23 )
+#define	RCR_APWRMGT			BIT( 22 )
+#define	RCR_ADD3			BIT( 21 )
+#define	RCR_AMF				BIT( 20 )
+#define	RCR_ACF				BIT( 19 )
+#define	RCR_ADF				BIT( 18 )
+#define	RCR_APP_MIC			BIT( 17 )
+#define	RCR_APP_ICV			BIT( 16 )
+#define	RCR_RXFTH			BIT( 13 )
+#define	RCR_AICV			BIT( 12 )
+#define	RCR_RXDESC_LK_EN	BIT( 11 )
+#define	RCR_APP_BA_SSN		BIT( 6 )
+#define	RCR_ACRC32			BIT( 5 )
+#define	RCR_RXSHFT_EN		BIT( 4 )
+#define	RCR_AB				BIT( 3 )
+#define	RCR_AM				BIT( 2 )
+#define	RCR_APM				BIT( 1 )
+#define	RCR_AAP				BIT( 0 )
 #define	RCR_MXDMA_OFFSET	8
 #define	RCR_FIFO_OFFSET		13
 
 
-#define MSR_LINK_MASK      	((1<<0)|(1<<1))
+#define MSR_LINK_MASK      	( ( 1<<0 )|( 1<<1 ) )
 #define MSR_LINK_MANAGED   	2
 #define MSR_LINK_NONE      	0
 #define MSR_LINK_SHIFT     	0
@@ -487,13 +487,13 @@
 #define	MSR_INFRA			0x02
 #define	MSR_AP				0x03
 
-#define	ENUART				BIT(7)
-#define	ENJTAG				BIT(3)
-#define	BTMODE				(BIT(2)|BIT(1))
-#define	ENBT				BIT(0)
+#define	ENUART				BIT( 7 )
+#define	ENJTAG				BIT( 3 )
+#define	BTMODE				( BIT( 2 )|BIT( 1 ) )
+#define	ENBT				BIT( 0 )
 
-#define	ENMBID				BIT(7)
-#define	BCNUM				(BIT(6)|BIT(5)|BIT(4))
+#define	ENMBID				BIT( 7 )
+#define	BCNUM				( BIT( 6 )|BIT( 5 )|BIT( 4 ) )
 
 #define	USTIME_EDCA			0xFF00
 #define	USTIME_TSF			0x00FF
@@ -501,7 +501,7 @@
 #define	SIFS_TRX			0xFF00
 #define	SIFS_CTX			0x00FF
 
-#define	ENSWBCN				BIT(15)
+#define	ENSWBCN				BIT( 15 )
 #define	DRVERLY_TU			0x0FF0
 #define	DRVERLY_US			0x000F
 #define	BCN_TCFG_CW_SHIFT	8
@@ -513,27 +513,27 @@
 #define	RRSR_RSC_UPSUBCHNL	0x400000
 #define	RRSR_RSC_LOWSUBCHNL	0x200000
 #define	RRSR_SHORT			0x800000
-#define	RRSR_1M				BIT(0)
-#define	RRSR_2M				BIT(1)
-#define	RRSR_5_5M			BIT(2)
-#define	RRSR_11M			BIT(3)
-#define	RRSR_6M				BIT(4)
-#define	RRSR_9M				BIT(5)
-#define	RRSR_12M			BIT(6)
-#define	RRSR_18M			BIT(7)
-#define	RRSR_24M			BIT(8)
-#define	RRSR_36M			BIT(9)
-#define	RRSR_48M			BIT(10)
-#define	RRSR_54M			BIT(11)
-#define	RRSR_MCS0			BIT(12)
-#define	RRSR_MCS1			BIT(13)
-#define	RRSR_MCS2			BIT(14)
-#define	RRSR_MCS3			BIT(15)
-#define	RRSR_MCS4			BIT(16)
-#define	RRSR_MCS5			BIT(17)
-#define	RRSR_MCS6			BIT(18)
-#define	RRSR_MCS7			BIT(19)
-#define	BRSR_AckShortPmb	BIT(23)
+#define	RRSR_1M				BIT( 0 )
+#define	RRSR_2M				BIT( 1 )
+#define	RRSR_5_5M			BIT( 2 )
+#define	RRSR_11M			BIT( 3 )
+#define	RRSR_6M				BIT( 4 )
+#define	RRSR_9M				BIT( 5 )
+#define	RRSR_12M			BIT( 6 )
+#define	RRSR_18M			BIT( 7 )
+#define	RRSR_24M			BIT( 8 )
+#define	RRSR_36M			BIT( 9 )
+#define	RRSR_48M			BIT( 10 )
+#define	RRSR_54M			BIT( 11 )
+#define	RRSR_MCS0			BIT( 12 )
+#define	RRSR_MCS1			BIT( 13 )
+#define	RRSR_MCS2			BIT( 14 )
+#define	RRSR_MCS3			BIT( 15 )
+#define	RRSR_MCS4			BIT( 16 )
+#define	RRSR_MCS5			BIT( 17 )
+#define	RRSR_MCS6			BIT( 18 )
+#define	RRSR_MCS7			BIT( 19 )
+#define	BRSR_AckShortPmb	BIT( 23 )
 
 #define	RATR_1M				0x00000001
 #define	RATR_2M				0x00000002
@@ -577,26 +577,26 @@
 #define	AC_PARAM_ECW_MIN_OFFSET			8
 #define	AC_PARAM_AIFS_OFFSET			0
 
-#define	AcmHw_HwEn				BIT(0)
-#define	AcmHw_BeqEn				BIT(1)
-#define	AcmHw_ViqEn				BIT(2)
-#define	AcmHw_VoqEn				BIT(3)
-#define	AcmHw_BeqStatus			BIT(4)
-#define	AcmHw_ViqStatus			BIT(5)
-#define	AcmHw_VoqStatus			BIT(6)
+#define	AcmHw_HwEn				BIT( 0 )
+#define	AcmHw_BeqEn				BIT( 1 )
+#define	AcmHw_ViqEn				BIT( 2 )
+#define	AcmHw_VoqEn				BIT( 3 )
+#define	AcmHw_BeqStatus			BIT( 4 )
+#define	AcmHw_ViqStatus			BIT( 5 )
+#define	AcmHw_VoqStatus			BIT( 6 )
 
 #define	RETRY_LIMIT_SHORT_SHIFT	8
 #define	RETRY_LIMIT_LONG_SHIFT	0
 
-#define	NAV_UPPER_EN			BIT(16)
+#define	NAV_UPPER_EN			BIT( 16 )
 #define	NAV_UPPER				0xFF00
 #define	NAV_RTSRST				0xFF
 
-#define	BW_OPMODE_20MHZ			BIT(2)
-#define	BW_OPMODE_5G			BIT(1)
-#define	BW_OPMODE_11J			BIT(0)
+#define	BW_OPMODE_20MHZ			BIT( 2 )
+#define	BW_OPMODE_5G			BIT( 1 )
+#define	BW_OPMODE_11J			BIT( 0 )
 
-#define	RXERR_RPT_RST			BIT(27)
+#define	RXERR_RPT_RST			BIT( 27 )
 #define	RXERR_OFDM_PPDU			0
 #define	RXERR_OFDM_FALSE_ALARM	1
 #define	RXERR_OFDM_MPDU_OK		2
@@ -612,16 +612,16 @@
 #define	RXERR_HT_MPDU_FAIL		12
 #define	RXERR_RX_FULL_DROP		15
 
-#define	SCR_TXUSEDK				BIT(0)
-#define	SCR_RXUSEDK				BIT(1)
-#define	SCR_TXENCENABLE			BIT(2)
-#define	SCR_RXENCENABLE			BIT(3)
-#define	SCR_SKBYA2				BIT(4)
-#define	SCR_NOSKMC				BIT(5)
+#define	SCR_TXUSEDK				BIT( 0 )
+#define	SCR_RXUSEDK				BIT( 1 )
+#define	SCR_TXENCENABLE			BIT( 2 )
+#define	SCR_RXENCENABLE			BIT( 3 )
+#define	SCR_SKBYA2				BIT( 4 )
+#define	SCR_NOSKMC				BIT( 5 )
 
-#define	CAM_VALID				BIT(15)
+#define	CAM_VALID				BIT( 15 )
 #define	CAM_NOTVALID			0x0000
-#define	CAM_USEDK				BIT(5)
+#define	CAM_USEDK				BIT( 5 )
 
 #define	CAM_NONE				0x0
 #define	CAM_WEP40				0x01
@@ -632,90 +632,90 @@
 #define	TOTAL_CAM_ENTRY			32
 #define	HALF_CAM_ENTRY			16
 
-#define	CAM_WRITE				BIT(16)
+#define	CAM_WRITE				BIT( 16 )
 #define	CAM_READ				0x00000000
-#define	CAM_POLLINIG			BIT(31)
+#define	CAM_POLLINIG			BIT( 31 )
 
-#define	WOW_PMEN			BIT(0)
-#define	WOW_WOMEN			BIT(1)
-#define	WOW_MAGIC			BIT(2)
-#define	WOW_UWF				BIT(3)
+#define	WOW_PMEN			BIT( 0 )
+#define	WOW_WOMEN			BIT( 1 )
+#define	WOW_MAGIC			BIT( 2 )
+#define	WOW_UWF				BIT( 3 )
 
-#define	GPIOMUX_EN			BIT(3)
+#define	GPIOMUX_EN			BIT( 3 )
 #define	GPIOSEL_GPIO		0
 #define	GPIOSEL_PHYDBG		1
 #define	GPIOSEL_BT			2
 #define	GPIOSEL_WLANDBG		3
-#define	GPIOSEL_GPIO_MASK	~(BIT(0)|BIT(1))
+#define	GPIOSEL_GPIO_MASK	~( BIT( 0 )|BIT( 1 ) )
 
-#define	HST_RDBUSY			BIT(0)
-#define	CPU_WTBUSY			BIT(1)
+#define	HST_RDBUSY			BIT( 0 )
+#define	CPU_WTBUSY			BIT( 1 )
 
 #define	IMR8190_DISABLED	0x0
-#define	IMR_CPUERR			BIT(5)
-#define	IMR_ATIMEND			BIT(4)
-#define	IMR_TBDOK			BIT(3)
-#define	IMR_TBDER			BIT(2)
-#define	IMR_BCNDMAINT8		BIT(1)
-#define	IMR_BCNDMAINT7		BIT(0)
-#define	IMR_BCNDMAINT6		BIT(31)
-#define	IMR_BCNDMAINT5		BIT(30)
-#define	IMR_BCNDMAINT4		BIT(29)
-#define	IMR_BCNDMAINT3		BIT(28)
-#define	IMR_BCNDMAINT2		BIT(27)
-#define	IMR_BCNDMAINT1		BIT(26)
-#define	IMR_BCNDOK8			BIT(25)
-#define	IMR_BCNDOK7			BIT(24)
-#define	IMR_BCNDOK6			BIT(23)
-#define	IMR_BCNDOK5			BIT(22)
-#define	IMR_BCNDOK4			BIT(21)
-#define	IMR_BCNDOK3			BIT(20)
-#define	IMR_BCNDOK2			BIT(19)
-#define	IMR_BCNDOK1			BIT(18)
-#define	IMR_TIMEOUT2		BIT(17)
-#define	IMR_TIMEOUT1		BIT(16)
-#define	IMR_TXFOVW			BIT(15)
-#define	IMR_PSTIMEOUT		BIT(14)
-#define	IMR_BCNINT			BIT(13)
-#define	IMR_RXFOVW			BIT(12)
-#define	IMR_RDU				BIT(11)
-#define	IMR_RXCMDOK			BIT(10)
-#define	IMR_BDOK			BIT(9)
-#define	IMR_HIGHDOK			BIT(8)
-#define	IMR_COMDOK			BIT(7)
-#define	IMR_MGNTDOK			BIT(6)
-#define	IMR_HCCADOK			BIT(5)
-#define	IMR_BKDOK			BIT(4)
-#define	IMR_BEDOK			BIT(3)
-#define	IMR_VIDOK			BIT(2)
-#define	IMR_VODOK			BIT(1)
-#define	IMR_ROK				BIT(0)
+#define	IMR_CPUERR			BIT( 5 )
+#define	IMR_ATIMEND			BIT( 4 )
+#define	IMR_TBDOK			BIT( 3 )
+#define	IMR_TBDER			BIT( 2 )
+#define	IMR_BCNDMAINT8		BIT( 1 )
+#define	IMR_BCNDMAINT7		BIT( 0 )
+#define	IMR_BCNDMAINT6		BIT( 31 )
+#define	IMR_BCNDMAINT5		BIT( 30 )
+#define	IMR_BCNDMAINT4		BIT( 29 )
+#define	IMR_BCNDMAINT3		BIT( 28 )
+#define	IMR_BCNDMAINT2		BIT( 27 )
+#define	IMR_BCNDMAINT1		BIT( 26 )
+#define	IMR_BCNDOK8			BIT( 25 )
+#define	IMR_BCNDOK7			BIT( 24 )
+#define	IMR_BCNDOK6			BIT( 23 )
+#define	IMR_BCNDOK5			BIT( 22 )
+#define	IMR_BCNDOK4			BIT( 21 )
+#define	IMR_BCNDOK3			BIT( 20 )
+#define	IMR_BCNDOK2			BIT( 19 )
+#define	IMR_BCNDOK1			BIT( 18 )
+#define	IMR_TIMEOUT2		BIT( 17 )
+#define	IMR_TIMEOUT1		BIT( 16 )
+#define	IMR_TXFOVW			BIT( 15 )
+#define	IMR_PSTIMEOUT		BIT( 14 )
+#define	IMR_BCNINT			BIT( 13 )
+#define	IMR_RXFOVW			BIT( 12 )
+#define	IMR_RDU				BIT( 11 )
+#define	IMR_RXCMDOK			BIT( 10 )
+#define	IMR_BDOK			BIT( 9 )
+#define	IMR_HIGHDOK			BIT( 8 )
+#define	IMR_COMDOK			BIT( 7 )
+#define	IMR_MGNTDOK			BIT( 6 )
+#define	IMR_HCCADOK			BIT( 5 )
+#define	IMR_BKDOK			BIT( 4 )
+#define	IMR_BEDOK			BIT( 3 )
+#define	IMR_VIDOK			BIT( 2 )
+#define	IMR_VODOK			BIT( 1 )
+#define	IMR_ROK				BIT( 0 )
 
-#define	TPPOLL_BKQ			BIT(0)
-#define	TPPOLL_BEQ			BIT(1)
-#define	TPPOLL_VIQ			BIT(2)
-#define	TPPOLL_VOQ			BIT(3)
-#define	TPPOLL_BQ			BIT(4)
-#define	TPPOLL_CQ			BIT(5)
-#define	TPPOLL_MQ			BIT(6)
-#define	TPPOLL_HQ			BIT(7)
-#define	TPPOLL_HCCAQ		BIT(8)
-#define	TPPOLL_STOPBK		BIT(9)
-#define	TPPOLL_STOPBE		BIT(10)
-#define	TPPOLL_STOPVI		BIT(11)
-#define	TPPOLL_STOPVO		BIT(12)
-#define	TPPOLL_STOPMGT		BIT(13)
-#define	TPPOLL_STOPHIGH		BIT(14)
-#define	TPPOLL_STOPHCCA		BIT(15)
+#define	TPPOLL_BKQ			BIT( 0 )
+#define	TPPOLL_BEQ			BIT( 1 )
+#define	TPPOLL_VIQ			BIT( 2 )
+#define	TPPOLL_VOQ			BIT( 3 )
+#define	TPPOLL_BQ			BIT( 4 )
+#define	TPPOLL_CQ			BIT( 5 )
+#define	TPPOLL_MQ			BIT( 6 )
+#define	TPPOLL_HQ			BIT( 7 )
+#define	TPPOLL_HCCAQ		BIT( 8 )
+#define	TPPOLL_STOPBK		BIT( 9 )
+#define	TPPOLL_STOPBE		BIT( 10 )
+#define	TPPOLL_STOPVI		BIT( 11 )
+#define	TPPOLL_STOPVO		BIT( 12 )
+#define	TPPOLL_STOPMGT		BIT( 13 )
+#define	TPPOLL_STOPHIGH		BIT( 14 )
+#define	TPPOLL_STOPHCCA		BIT( 15 )
 #define	TPPOLL_SHIFT		8
 
-#define	CCX_CMD_CLM_ENABLE			BIT(0)
-#define	CCX_CMD_NHM_ENABLE			BIT(1)
-#define	CCX_CMD_FUNCTION_ENABLE		BIT(8)
-#define	CCX_CMD_IGNORE_CCA			BIT(9)
-#define	CCX_CMD_IGNORE_TXON			BIT(10)
-#define	CCX_CLM_RESULT_READY		BIT(16)
-#define	CCX_NHM_RESULT_READY		BIT(16)
+#define	CCX_CMD_CLM_ENABLE			BIT( 0 )
+#define	CCX_CMD_NHM_ENABLE			BIT( 1 )
+#define	CCX_CMD_FUNCTION_ENABLE		BIT( 8 )
+#define	CCX_CMD_IGNORE_CCA			BIT( 9 )
+#define	CCX_CMD_IGNORE_TXON			BIT( 10 )
+#define	CCX_CLM_RESULT_READY		BIT( 16 )
+#define	CCX_NHM_RESULT_READY		BIT( 16 )
 #define	CCX_CMD_RESET				0x0
 
 
@@ -821,8 +821,8 @@
 #define	FW_IQK_FAIL					0x0000ffff
 #define	FW_OP_FAILURE				0xffffffff
 #define	FW_TX_FEEDBACK_NONE			0xfb000000
-#define	FW_TX_FEEDBACK_DTM_ENABLE	(FW_TX_FEEDBACK_NONE | 0x1)
-#define	FW_TX_FEEDBACK_CCX_ENABLE	(FW_TX_FEEDBACK_NONE | 0x2)
+#define	FW_TX_FEEDBACK_DTM_ENABLE	( FW_TX_FEEDBACK_NONE | 0x1 )
+#define	FW_TX_FEEDBACK_CCX_ENABLE	( FW_TX_FEEDBACK_NONE | 0x2 )
 #define	FW_BB_RESET_ENABLE			0xff00000d
 #define	FW_BB_RESET_DISABLE			0xff00000e
 #define	FW_CCA_CHK_ENABLE			0xff000011
@@ -834,14 +834,14 @@
 #define	FW_CHAN_SET					0xf3000001
 
 #define RFPC						0x5F
-#define RCR_9356SEL					BIT(6)
+#define RCR_9356SEL					BIT( 6 )
 #define TCR_LRL_OFFSET				0
 #define TCR_SRL_OFFSET				8
 #define TCR_MXDMA_OFFSET			21
-#define TCR_SAT						BIT(24)
+#define TCR_SAT						BIT( 24 )
 #define RCR_MXDMA_OFFSET			8
 #define RCR_FIFO_OFFSET				13
-#define RCR_OnlyErlPkt				BIT(31)
+#define RCR_OnlyErlPkt				BIT( 31 )
 #define CWR							0xDC
 #define RETRYCTR					0xDE
 
@@ -869,9 +869,9 @@
 #define	NHM_RPI_COUNTER6		0x8DE
 #define	NHM_RPI_COUNTER7		0x8DF
 
-#define	HAL_8192S_HW_GPIO_OFF_BIT	BIT(3)
+#define	HAL_8192S_HW_GPIO_OFF_BIT	BIT( 3 )
 #define	HAL_8192S_HW_GPIO_OFF_MASK	0xF7
-#define	HAL_8192S_HW_GPIO_WPS_BIT	BIT(4)
+#define	HAL_8192S_HW_GPIO_WPS_BIT	BIT( 4 )
 
 #define	RPMAC_RESET				0x100
 #define	RPMAC_TXSTART			0x104

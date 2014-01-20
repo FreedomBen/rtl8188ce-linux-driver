@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright(c) 2009-2010  Realtek Corporation.
+ * Copyright( c ) 2009-2010  Realtek Corporation.
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of version 2 of the GNU General Public License as
@@ -30,8 +30,8 @@
 #ifndef	__RTL8723E_DM_H__
 #define __RTL8723E_DM_H__
 
-#define HAL_DM_DIG_DISABLE			BIT(0)
-#define HAL_DM_HIPWR_DISABLE		BIT(1)
+#define HAL_DM_DIG_DISABLE			BIT( 0 )
+#define HAL_DM_HIPWR_DISABLE		BIT( 1 )
 
 #define OFDM_TABLE_LENGTH 			37
 #define CCK_TABLE_LENGTH 			33
@@ -186,22 +186,22 @@ enum dm_dig_connect_e {
 	DIG_CONNECT_MAX
 };
 
-#define BT_RSSI_STATE_NORMAL_POWER      BIT_OFFSET_LEN_MASK_32(0, 1)
-#define BT_RSSI_STATE_AMDPU_OFF         BIT_OFFSET_LEN_MASK_32(1, 1)
-#define BT_RSSI_STATE_SPECIAL_LOW       BIT_OFFSET_LEN_MASK_32(2, 1)
-#define BT_RSSI_STATE_BG_EDCA_LOW       BIT_OFFSET_LEN_MASK_32(3, 1)
-#define BT_RSSI_STATE_TXPOWER_LOW       BIT_OFFSET_LEN_MASK_32(4, 1)
-#define GET_UNDECORATED_AVERAGE_RSSI(_priv)     \
-        (((struct rtl_priv *)(_priv))->mac80211.opmode == NL80211_IFTYPE_ADHOC)?  \
-        (((struct rtl_priv *)(_priv))->dm.entry_min_undecoratedsmoothed_pwdb):  \
-        (((struct rtl_priv *)(_priv))->dm.undecorated_smoothed_pwdb)
+#define BT_RSSI_STATE_NORMAL_POWER      BIT_OFFSET_LEN_MASK_32( 0, 1 )
+#define BT_RSSI_STATE_AMDPU_OFF         BIT_OFFSET_LEN_MASK_32( 1, 1 )
+#define BT_RSSI_STATE_SPECIAL_LOW       BIT_OFFSET_LEN_MASK_32( 2, 1 )
+#define BT_RSSI_STATE_BG_EDCA_LOW       BIT_OFFSET_LEN_MASK_32( 3, 1 )
+#define BT_RSSI_STATE_TXPOWER_LOW       BIT_OFFSET_LEN_MASK_32( 4, 1 )
+#define GET_UNDECORATED_AVERAGE_RSSI( _priv )     \
+        ( ( ( struct rtl_priv * )( _priv ) )->mac80211.opmode == NL80211_IFTYPE_ADHOC )?  \
+        ( ( ( struct rtl_priv * )( _priv ) )->dm.entry_min_undecoratedsmoothed_pwdb ):  \
+        ( ( ( struct rtl_priv * )( _priv ) )->dm.undecorated_smoothed_pwdb )
 extern struct dig_t dm_digtable;
-void rtl8723e_dm_init(struct ieee80211_hw *hw);
-void rtl8723e_dm_watchdog(struct ieee80211_hw *hw);
-void rtl8723e_dm_write_dig(struct ieee80211_hw *hw);
-void rtl8723e_dm_init_edca_turbo(struct ieee80211_hw *hw);
-void rtl8723e_dm_check_txpower_tracking(struct ieee80211_hw *hw);
-void rtl8723e_dm_init_rate_adaptive_mask(struct ieee80211_hw *hw);
-void rtl8723e_dm_rf_saving(struct ieee80211_hw *hw, u8 bforce_in_normal);
-void rtl8723e_dm_bt_coexist(struct ieee80211_hw *hw);
+void rtl8723e_dm_init( struct ieee80211_hw *hw );
+void rtl8723e_dm_watchdog( struct ieee80211_hw *hw );
+void rtl8723e_dm_write_dig( struct ieee80211_hw *hw );
+void rtl8723e_dm_init_edca_turbo( struct ieee80211_hw *hw );
+void rtl8723e_dm_check_txpower_tracking( struct ieee80211_hw *hw );
+void rtl8723e_dm_init_rate_adaptive_mask( struct ieee80211_hw *hw );
+void rtl8723e_dm_rf_saving( struct ieee80211_hw *hw, u8 bforce_in_normal );
+void rtl8723e_dm_bt_coexist( struct ieee80211_hw *hw );
 #endif

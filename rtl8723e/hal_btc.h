@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright(c) 2009-2010  Realtek Corporation.
+ * Copyright( c ) 2009-2010  Realtek Corporation.
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of version 2 of the GNU General Public License as
@@ -144,14 +144,14 @@ enum rtl8723e_c2h_evt {
 	MAX_C2HEVENT
 };
 
-void rtl8723e_dm_bt_fw_coex_all_off_8723a(struct ieee80211_hw *hw);
-void rtl8723e_dm_bt_sw_coex_all_off_8723a(struct ieee80211_hw *hw);
-void rtl8723e_dm_bt_hw_coex_all_off_8723a(struct ieee80211_hw *hw);
-void rtl8723e_dm_bt_coexist_8723(struct ieee80211_hw *hw);
-void rtl8723e_dm_bt_set_bt_dm(struct ieee80211_hw *hw, struct btdm_8723 *p_btdm);
-void rtl_8723e_c2h_command_handle(struct ieee80211_hw *hw);
-void rtl_8723e_bt_wifi_media_status_notify(struct ieee80211_hw *hw, bool mstatus);
-void rtl8723e_dm_bt_turn_off_bt_coexist_before_enter_lps(struct ieee80211_hw *hw);
+void rtl8723e_dm_bt_fw_coex_all_off_8723a( struct ieee80211_hw *hw );
+void rtl8723e_dm_bt_sw_coex_all_off_8723a( struct ieee80211_hw *hw );
+void rtl8723e_dm_bt_hw_coex_all_off_8723a( struct ieee80211_hw *hw );
+void rtl8723e_dm_bt_coexist_8723( struct ieee80211_hw *hw );
+void rtl8723e_dm_bt_set_bt_dm( struct ieee80211_hw *hw, struct btdm_8723 *p_btdm );
+void rtl_8723e_c2h_command_handle( struct ieee80211_hw *hw );
+void rtl_8723e_bt_wifi_media_status_notify( struct ieee80211_hw *hw, bool mstatus );
+void rtl8723e_dm_bt_turn_off_bt_coexist_before_enter_lps( struct ieee80211_hw *hw );
 
 
 
