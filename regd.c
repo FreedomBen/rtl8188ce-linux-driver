@@ -155,7 +155,7 @@ static void _rtl_reg_apply_beaconing_flags(struct wiphy *wiphy,
 {
 	enum ieee80211_band band;
 	struct ieee80211_supported_band *sband;
-	const struct ieee80211_reg_rule *reg_rule;
+	/* const struct ieee80211_reg_rule *reg_rule; // TODO This is used below without initialization */
 	struct ieee80211_channel *ch;
 	unsigned int i;
 
@@ -184,11 +184,15 @@ static void _rtl_reg_apply_beaconing_flags(struct wiphy *wiphy,
 				 *regulatory_hint().
 				 */
 
+                                /*! dereferencing reg_rule may cause a crash because we never initialized it !*/
+
+                                /* TODO: Put some debug information in to see if we get to this path of execution 
 				if (!(reg_rule->flags & NL80211_RRF_NO_IBSS))
 					ch->flags &= ~IEEE80211_CHAN_NO_IBSS;
 				if (!(reg_rule->flags & NL80211_RRF_PASSIVE_SCAN))
 					ch->flags &=
 					    ~IEEE80211_CHAN_PASSIVE_SCAN;
+                                            */
 			} else {
 				if (ch->beacon_found)
 					ch->flags &= ~(IEEE80211_CHAN_NO_IBSS |
@@ -205,7 +209,7 @@ static void _rtl_reg_apply_active_scan_flags(struct wiphy *wiphy,
 {
 	struct ieee80211_supported_band *sband;
 	struct ieee80211_channel *ch;
-	const struct ieee80211_reg_rule *reg_rule;
+	/* const struct ieee80211_reg_rule *reg_rule; // TODO reg_rule is dereferenced but not initialized! */
 
 	if (!wiphy->bands[IEEE80211_BAND_2GHZ])
 		return;
@@ -234,16 +238,20 @@ static void _rtl_reg_apply_active_scan_flags(struct wiphy *wiphy,
 
 	ch = &sband->channels[11];	/* CH 12 */
 	if (!freq_reg_info(wiphy, ch->center_freq)) {
+            /* reg_rule is dereferenced here but never initialized
 		if (!(reg_rule->flags & NL80211_RRF_PASSIVE_SCAN))
 			if (ch->flags & IEEE80211_CHAN_PASSIVE_SCAN)
 				ch->flags &= ~IEEE80211_CHAN_PASSIVE_SCAN;
+                                */
 	}
 
 	ch = &sband->channels[12];	/* CH 13 */
 	if (!freq_reg_info(wiphy, ch->center_freq)) {
+            /* reg_rule is dereferenced here but never initialized
 		if (!(reg_rule->flags & NL80211_RRF_PASSIVE_SCAN))
 			if (ch->flags & IEEE80211_CHAN_PASSIVE_SCAN)
 				ch->flags &= ~IEEE80211_CHAN_PASSIVE_SCAN;
+                */
 	}
 }
 
