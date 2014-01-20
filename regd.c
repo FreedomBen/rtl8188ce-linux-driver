@@ -362,7 +362,7 @@ static const struct ieee80211_regdomain *_rtl_regdomain_select(
 
 static int _rtl_regd_init_wiphy(struct rtl_regulatory *reg,
 				struct wiphy *wiphy,
-				int (*reg_notifier) (struct wiphy * wiphy,
+				void (*reg_notifier) (struct wiphy * wiphy,
 						     struct regulatory_request *
 						     request))
 {
