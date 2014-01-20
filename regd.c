@@ -393,7 +393,7 @@ static struct country_code_to_enum_rd *_rtl_regd_find_country(u16 countrycode)
 }
 
 int rtl_regd_init(struct ieee80211_hw *hw,
-		  int (*reg_notifier) (struct wiphy *wiphy,
+		  void (*reg_notifier) (struct wiphy *wiphy,
 				       struct regulatory_request *request))
 {
 	struct rtl_priv *rtlpriv = rtl_priv(hw);
