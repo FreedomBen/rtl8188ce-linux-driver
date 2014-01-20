@@ -1174,6 +1174,12 @@ static void rtl92d_dm_txpower_tracking_callback_thermalmeter(
 		{0, 2, 4, 5, 7, 10,	13, 16, 16, 18, 18, 18, 18},
 	};
 
+
+        /* We need to initialize ofdm_index_old[x] because it may be used unitialized. TODO initialize to something sane */
+        for( i=0; i<2; ++i )
+            ofdm_index_old[i] = 0;
+
+
 	rtlpriv->dm.btxpower_trackinginit = true;
 	RT_TRACE( COMP_POWER_TRACKING, DBG_LOUD, ( "\n" ) );
 	thermalvalue = ( u8 ) rtl_get_rfreg( hw, RF90_PATH_A, RF_T_METER, 0xf800 );

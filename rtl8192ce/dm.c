@@ -742,6 +742,12 @@ static void rtl92c_dm_txpower_tracking_callback_thermalmeter( struct ieee80211_h
 	u8 txpwr_level[2] = {0, 0};
 	u8 ofdm_min_index = 6, rf;
 
+
+        /* We need to initialize ofdm_index_old[x] because it may be used unitialized. TODO initialize to something sane */
+        for( i=0; i<2; ++i )
+            ofdm_index_old[i] = 0;
+
+
 	rtlpriv->dm.btxpower_trackinginit = true;
 	RT_TRACE( COMP_POWER_TRACKING, DBG_LOUD,
 		 ( "rtl92c_dm_txpower_tracking_callback_thermalmeter\n" ) );
