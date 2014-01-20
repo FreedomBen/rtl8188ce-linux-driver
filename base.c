@@ -39,23 +39,23 @@
 #include "pci.h"
 
 /*
- *NOTICE!!!: This file will be very big, we hsould
- *keep it clear under follwing roles:
- *
- *This file include follwing part, so, if you add new
- *functions into this file, please check which part it
- *should includes. or check if you should add new part
- *for this file:
- *
- *1) mac80211 init functions
- *2) tx information functions
- *3) functions called by core.c
- *4) wq & timer callback functions
- *5) frame process functions
- *6) IOT functions
- *7) sysfs functions
- *8) vif functions
- *9) ...
+ * NOTICE!!!: This file will be very big, we should
+ * keep it clear under following roles:
+ * 
+ * This file includes the following sections, so, if you add new
+ * functions into this file, please check which section it
+ * should be in, or check if you should add a new section
+ * to this file:
+ * 
+ * 1) mac80211 init functions
+ * 2) tx information functions
+ * 3) functions called by core.c
+ * 4) wq & timer callback functions
+ * 5) frame process functions
+ * 6) IOT functions
+ * 7) sysfs functions
+ * 8) vif functions
+ * 9) ...
  */
 
 /*********************************************************
