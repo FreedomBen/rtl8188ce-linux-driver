@@ -24,6 +24,13 @@
  * Hsinchu 300, Taiwan.
  * Larry Finger <Larry.Finger@lwfinger.net>
  *
+ *
+ * Bug Fixes and enhancements for Linux Kernels >= 3.2
+ * by Benjamin Porter <BenjaminPorter86@gmail.com>
+ *
+ * Project homepage: https://github.com/FreedomBen/rtl8188ce-linux-driver
+ *
+ *
  *****************************************************************************/
 
 #ifndef __RTL8723E_HAL_BTC_H__
