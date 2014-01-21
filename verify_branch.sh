@@ -7,7 +7,7 @@ doSwitch ()
     if $(git status | grep "$BRANCH" > /dev/null); then
         echo "Yes"
     else
-        read -p "No (Current branch $CUR_BRANCH).  Should I switch it to $BRANCH for you?  (y/n)" input
+        read -p "No (Current branch $CUR_BRANCH).  Should I switch it to $BRANCH for you?  (y/n): " input
         if [ "$input" = "y" ]; then
             git checkout -f $BRANCH
         else
