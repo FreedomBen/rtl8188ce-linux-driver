@@ -24,6 +24,13 @@
  ** Realtek Corporation, No. 2, Innovation Road II, Hsinchu Science Park,
  ** Hsinchu 300, Taiwan.
  ** Larry Finger <Larry.Finger@lwfinger.net>
+ *
+ *
+ * Bug Fixes and enhancements for Linux Kernels >= 3.2
+ * by Benjamin Porter <BenjaminPorter86@gmail.com>
+ *
+ * Project homepage: https://github.com/FreedomBen/rtl8188ce-linux-driver
+ *
  **
  ******************************************************************************/
 

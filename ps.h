@@ -25,6 +25,13 @@
  *
  * Larry Finger <Larry.Finger@lwfinger.net>
  *
+ *
+ * Bug Fixes and enhancements for Linux Kernels >= 3.2
+ * by Benjamin Porter <BenjaminPorter86@gmail.com>
+ *
+ * Project homepage: https://github.com/FreedomBen/rtl8188ce-linux-driver
+ *
+ *
  *****************************************************************************/
 
 #ifndef __REALTEK_RTL_PCI_PS_H__
