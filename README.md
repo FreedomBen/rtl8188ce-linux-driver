@@ -68,7 +68,7 @@ master is currently compiling on 13.10 but for the latest and greatest I recomme
 
     rtl8192ce, rtlwifi, and rtl8192c_common
 
-8\. Make persistent by adding this to the end of /etc/modules:
+8\. Make persistent by adding this to the end of /etc/modules (for Ubuntu), or /etc/rc.modules (for Fedora) (make sure /etc/rc.modules is exectuable):
 
     rtl8192ce.ko
 
