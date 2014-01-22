@@ -1,5 +1,15 @@
 #/bin/sh
 
+runningFedora () 
+{ 
+    uname -r | grep --color=auto "fc" > /dev/null
+}
+
+runningUbuntu () 
+{ 
+    uname -a | grep --color=auto "Ubuntu" > /dev/null
+}
+
 doSwitch () 
 {
     BRANCH="$1"
@@ -20,7 +30,10 @@ echo "Verifying a sane branch for your kernel version..."
 if $(uname -r | grep "3.12" > /dev/null); then
     doSwitch "fedora-20"
 elif $(uname -r | grep "3.11" > /dev/null); then
-    doSwitch "ubuntu-13.10"
+    if [ runningFedora ]; then doSwitch "fedora-20"
+    else
+        doSwitch "ubuntu-13.10"
+    fi
 elif $(uname -r | grep "3.8" > /dev/null); then
     doSwitch "ubuntu-13.04"
 elif $(uname -r | grep "3.2" > /dev/null); then
