@@ -17,7 +17,9 @@ doSwitch ()
 }
 
 echo "Verifying a sane branch for your kernel version..."
-if $(uname -r | grep "3.11" > /dev/null); then
+if $(uname -r | grep "3.12" > /dev/null); then
+    doSwitch "fedora-20"
+elif $(uname -r | grep "3.11" > /dev/null); then
     doSwitch "ubuntu-13.10"
 elif $(uname -r | grep "3.8" > /dev/null); then
     doSwitch "ubuntu-13.04"
