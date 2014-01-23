@@ -22,6 +22,10 @@ Well supported Ubuntu releases:
         Ubuntu 13.04
         Ubuntu 13.10
 
+Well supported Fedora releases:
+
+        Fedora 19
+        Fedora 20
 
 Other RealTek cards, kernel releases, and Linux flavors/releases are supported, but not tested by me (since I don't have them/use them).  From the original readme file:
 
@@ -44,7 +48,7 @@ Other RealTek cards, kernel releases, and Linux flavors/releases are supported, 
         android 2.2 (froyo-x86), etc.
         
 
-Please note though that I have only tested the driver on Ubuntu, though I know it does compile on Fedora 17.  If you are NOT using Ubuntu, pay close attention to your kernel version when selecting branches.  You also need to substitute your package manager whenever you see "apt-get install", so Fedora would be "yum install xxx".  Most package names are the same but there may be some difference.
+Please note that I have only tested the driver on Ubuntu and Fedora (the well supported releases).  If you are NOT using Ubuntu, pay close attention to your kernel version when selecting branches.  You also need to substitute your package manager whenever you see "apt-get install", so Fedora would be "yum install xxx".  Most package names are the same but there may be some difference.
 
 
 To check your kernel version:  
@@ -64,14 +68,33 @@ These commands should be typed in an open terminal.  I recommend you start in yo
 Install git if necessary:
 
     sudo apt-get install git
+    
+    or
+
+    yum install git
 
 Clone the repo (Basically it makes a copy of the current source code)
 
     git clone https://github.com/FreedomBen/rtl8188ce-linux-driver.git
 
+
 1\.  Install build dependencies (pay attention to the backticks!):
 
+    Ubuntu:
+
     apt-get install gcc build-essential linux-headers-generic linux-headers-`uname -r`
+
+
+2\. (Skip unless your first build attempt fails) -> Make sure you are on the correct branch for your kernel version.  The branches are named after Ubuntu releases to which they commonly apply, but the most important factor is not the version of Ubuntu, it is the kernel version.  There is a script called "verify_branch" that will help you find the right branch based on your kernel version.  When you run "make", the script "verify_branch" will be automatically called for you.  It will recommend to you the best branch for your kernel version.  If you tried the recommended branch and your build failed, you may need to try a different one.  If so, decline the offer to automatically switch branches for you.
+
+
+    Fedora:
+
+    yum install kernel-devel kernel-headers
+    yum groupinstall "Development Tools"
+    yum groupinstall "C Development Tools and Libraries"
+
+
 
 2\. (Skip unless your first build attempt fails) -> Make sure you are on the correct branch for your kernel version.  The branches are named after Ubuntu releases to which they commonly apply, but the most important factor is not the version of Ubuntu, it is the kernel version.  There is a script called "verify_branch" that will help you find the right branch based on your kernel version.  When you run "make", the script "verify_branch" will be automatically called for you.  It will recommend to you the best branch for your kernel version.  If you tried the recommended branch and your build failed, you may need to try a different one.  If so, decline the offer to automatically switch branches for you.
 
@@ -86,8 +109,9 @@ Ex: "git checkout ubuntu-13.04"
     Ubuntu 12.04 | Kernel 3.2.x:  |  ubuntu-12.04
     Ubuntu 13.04 | Kernel 3.8.x:  |  ubuntu-13.04
     Ubuntu 13.10 | Kernel 3.11.x: |  ubuntu-13.10
+    Fedora 19/20 | Kernel 3.12.x: |  fedora-20
 
-    * Note, if the Ubuntu release ver and your kernel ver conflict, go with the branch corresponding to your *kernel version*!
+    * Note, if the Ubuntu/Fedora release version and your kernel version conflict, go with the branch corresponding to your *kernel version* as that is what really matters!
 
 
 3\. Compile:
@@ -113,7 +137,7 @@ Ex: "git checkout ubuntu-13.04"
 
     rtl8192ce, rtlwifi, and rtl8192c_common
 
-8\. Make persistent by adding this to the end of /etc/modules (for Ubuntu), or /etc/rc.modules (for Fedora) (make sure /etc/rc.modules is exectuable):
+8\. Make persistent by adding this to the end of "/etc/modules" (for Ubuntu), or "/etc/rc.modules" (for Fedora) (if Fedora make sure /etc/rc.modules is exectuable):
 
     rtl8192ce.ko
 
