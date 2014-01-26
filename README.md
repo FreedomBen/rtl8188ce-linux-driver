@@ -58,8 +58,6 @@ To check your kernel version:
 
 Instructions to install:
 
-Note:  These instructions were verified on Ubuntu 13.04 running kernel 3.8.0-27-generic #40 and on Ubuntu 13.10 running kernel 3.11
-
 
 These commands should be typed in an open terminal.  I recommend you start in your home directory by typing "cd"
 
@@ -144,6 +142,7 @@ Ex: "git checkout ubuntu-13.04"
 You may want to verify your CRDA domain.  For example if you were in Bolivia it would be: "iw reg set BO"
 There is more information about CRDA available at: http://ttys1.wordpress.com/2012/04/12/fixing-regulatory-domain-crda-of-realtec-wireless-device-drivers/
 
+
 Troubleshooting:
 
 1\. If you get the following error:
@@ -154,6 +153,5 @@ After running:
 
     modprobe rtl8192ce 
     
-It means you have invalid configuration options in /etc/modprobe.d/rtl8192ce.conf.  You can either remove the file or remove the debug option as it is no long supported.   
-
+You may have invalid configuration options in /etc/modprobe.d/rtl8192ce.conf.  You can either remove the file or remove the debug option as it is no long supported.   
 
