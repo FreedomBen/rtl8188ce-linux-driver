@@ -15,6 +15,7 @@ Well supported kernel releases:
         3.2.x
         3.8.x
         3.11.x
+        3.12.x
 
 Well supported Ubuntu releases:
 
