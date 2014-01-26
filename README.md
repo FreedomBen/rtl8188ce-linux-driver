@@ -82,16 +82,11 @@ Clone the repo (Basically it makes a copy of the current source code)
 
     apt-get install gcc build-essential linux-headers-generic linux-headers-`uname -r`
 
-
-2\. (Skip unless your first build attempt fails) -> Make sure you are on the correct branch for your kernel version.  The branches are named after Ubuntu releases to which they commonly apply, but the most important factor is not the version of Ubuntu, it is the kernel version.  There is a script called "verify_branch" that will help you find the right branch based on your kernel version.  When you run "make", the script "verify_branch" will be automatically called for you.  It will recommend to you the best branch for your kernel version.  If you tried the recommended branch and your build failed, you may need to try a different one.  If so, decline the offer to automatically switch branches for you.
-
-
     Fedora:
 
     yum install kernel-devel kernel-headers
     yum groupinstall "Development Tools"
     yum groupinstall "C Development Tools and Libraries"
-
 
 
 2\. (Skip unless your first build attempt fails) -> Make sure you are on the correct branch for your kernel version.  The branches are named after Ubuntu releases to which they commonly apply, but the most important factor is not the version of Ubuntu, it is the kernel version.  There is a script called "verify_branch" that will help you find the right branch based on your kernel version.  When you run "make", the script "verify_branch" will be automatically called for you.  It will recommend to you the best branch for your kernel version.  If you tried the recommended branch and your build failed, you may need to try a different one.  If so, decline the offer to automatically switch branches for you.
