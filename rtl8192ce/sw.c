@@ -245,9 +245,9 @@ struct rtl_hal_ops rtl8192ce_hal_ops = {
 
 struct rtl_mod_params rtl92ce_mod_params = {
 	.sw_crypto = false,
-	.b_inactiveps = true,
+	.b_inactiveps = false,
 	.b_swctrl_lps = false,
-	.b_fwctrl_lps = true,
+	.b_fwctrl_lps = false,
 };
 
 struct rtl_hal_cfg rtl92ce_hal_cfg = {
@@ -356,6 +356,7 @@ MODULE_DEVICE_TABLE( pci, rtl92ce_pci_ids );
 MODULE_AUTHOR( "lizhaoming	<chaoming_li@realsil.com.cn>" );
 MODULE_AUTHOR( "Realtek WlanFAE	<wlanfae@realtek.com>" );
 MODULE_AUTHOR( "Larry Finger	<Larry.Finger@lwfinger.net>" );
+MODULE_AUTHOR( "Benjamin Porter	<BenjaminPorter86@gmail.com>" );
 MODULE_LICENSE( "GPL" );
 MODULE_DESCRIPTION( "Realtek 8192C/8188C 802.11n PCI wireless" );
 MODULE_FIRMWARE( "rtlwifi/rtl8192cfw.bin" );
@@ -365,8 +366,8 @@ module_param_named( ips, rtl92ce_mod_params.b_inactiveps, bool, 0444 );
 module_param_named( swlps, rtl92ce_mod_params.b_swctrl_lps, bool, 0444 );
 module_param_named( fwlps, rtl92ce_mod_params.b_fwctrl_lps, bool, 0444 );
 MODULE_PARM_DESC( swenc, "using hardware crypto (default 0 [hardware])\n" );
-MODULE_PARM_DESC( ips, "using no link power save (default 1 is open)\n" );
-MODULE_PARM_DESC( fwlps, "using linked fw control power save (default 1 is open)\n" );
+MODULE_PARM_DESC( ips, "using no link power save (default 0 is off)\n" );
+MODULE_PARM_DESC( fwlps, "using no linked fw control power save (default 0 is off)\n" );
 
 #if ( LINUX_VERSION_CODE >= KERNEL_VERSION( 2,6,29 ) )
 static const SIMPLE_DEV_PM_OPS( rtlwifi_pm_ops, rtl_pci_suspend, rtl_pci_resume );
