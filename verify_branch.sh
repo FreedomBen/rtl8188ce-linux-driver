@@ -27,10 +27,13 @@ doSwitch ()
 }
 
 echo "Verifying a sane branch for your kernel version..."
-if $(uname -r | grep "3.12" > /dev/null); then
+if $(uname -r | grep "3.13" > /dev/null); then
+    doSwitch "fedora-20"
+elif $(uname -r | grep "3.12" > /dev/null); then
     doSwitch "fedora-20"
 elif $(uname -r | grep "3.11" > /dev/null); then
-    if [ runningFedora ]; then doSwitch "fedora-20"
+    if [ runningFedora ]; then 
+        doSwitch "fedora-20"
     else
         doSwitch "ubuntu-13.10"
     fi
@@ -38,5 +41,9 @@ elif $(uname -r | grep "3.8" > /dev/null); then
     doSwitch "ubuntu-13.04"
 elif $(uname -r | grep "3.2" > /dev/null); then
     doSwitch "ubuntu-12.04"
+else
+    echo "You are running kernel $(uname -r), which is not well supported."
+    echo "See the README.md for recommended branch."
+    read -p "(<Enter> to continue with build or Ctrl+C to quit): " input
 fi
 
