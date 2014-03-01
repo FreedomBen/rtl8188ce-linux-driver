@@ -1,0 +1,36 @@
+commit f4fbb9c8773c6094150cde3905372b4141485098
+Author: Benjamin Porter <benjamin.porter@raytheon.com>
+Date:   Sat Sep 14 15:09:46 2013 -0600
+
+    Path regd to fix CRLA issues
+    
+    When set to Bolivia country area, could not adjust tx power of card
+    above 20dBm.  This allows a maximum now of 33dBm.  Make sure your
+    country area is set properly, or you could be breaking the law!
+
+diff --git a/regd.c b/regd.c
+index 487fda4..52139b2 100755
+--- a/regd.c
++++ b/regd.c
+@@ -51,18 +51,18 @@ static struct country_code_to_enum_rd allCountries[] = {
+  *scan on all world regulatory domains
+  */
+ #define RTL819x_2GHZ_CH01_11   \
+-       REG_RULE(2412-10, 2462+10, 40, 0, 20, 0)
++       REG_RULE(2412-10, 2462+10, 40, 0, 33, 0)
+ 
+ /*
+  *We enable active scan on these a case
+  *by case basis by regulatory domain
+  */
+ #define RTL819x_2GHZ_CH12_13   \
+-       REG_RULE(2467-10, 2472+10, 40, 0, 20,\
++       REG_RULE(2467-10, 2472+10, 40, 0, 33,\
+        NL80211_RRF_PASSIVE_SCAN)
+ 
+ #define RTL819x_2GHZ_CH14      \
+-       REG_RULE(2484-10, 2484+10, 40, 0, 20, \
++       REG_RULE(2484-10, 2484+10, 40, 0, 33, \
+        NL80211_RRF_PASSIVE_SCAN | \
+        NL80211_RRF_NO_OFDM)
+ 
