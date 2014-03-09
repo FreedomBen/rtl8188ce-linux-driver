@@ -68,6 +68,11 @@ install: all
 	@#$(shell [ ! -d "$(FIRMWAREDIR)/`uname -r`" ] && cp -fr firmware/rtlwifi/ $(FIRMWAREDIR)/.)
 	@cp -fr firmware/rtlwifi/ $(FIRMWAREDIR)/
 
+	if [ -e update_modprobe_conf.sh ] ; \
+	then \
+	    ./update_modprobe_conf.sh ; \
+	fi;
+
 uninstall:
 	$(shell [ -d "$(MODDESTDIR)" ] && rm -fr $(MODDESTDIR))
 	
