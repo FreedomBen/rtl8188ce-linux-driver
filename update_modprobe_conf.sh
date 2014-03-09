@@ -1,7 +1,7 @@
 #!/bin/sh
 
 FILE="/etc/modprobe.d/modprobe.conf"
-COMMENT="# disable power save options (added by FreedomBen\'s driver)"
+COMMENT="# disable power save options (added by FreedomBen's driver)"
 OPTION1="options rtl8192ce ips=0"
 OPTION2="options rtl8192ce fwlps=0"
 
