@@ -7,11 +7,14 @@ OPTION2="options rtl8192ce fwlps=0"
 
 if [ "$(id -u)" = "0" ]; then
     CONTAINS=0
-    while read line; do
-        if [ "$line" = "$OPTION1" -o "$line" = "$OPTION2" ]; then
-            CONTAINS=1
-        fi
-    done < $FILE
+
+    if [ -f "$FILE" ]; then
+        while read line; do
+            if [ "$line" = "$OPTION1" -o "$line" = "$OPTION2" ]; then
+                CONTAINS=1
+            fi
+        done < $FILE
+    fi
 
     if [ "$CONTAINS" = "0" ]; then
         echo -e "\n\nIt is recommended to disable power save features for improved performance.\nThis is done by writing some options to ${FILE}."  
