@@ -1,32 +1,12 @@
 #/bin/sh
 
-inGitRepo ()
-{
-    prevdir="$(pwd)"
-    while true; do
-        if [ -d ".git" ]; then
-            cd "$prevdir"
-            return 0
-        fi
+if [ ! -f functions.sh ]; then
+    echo "Error: Required file functions.sh not present" >&2
+    exit 1
+else
+    source functions.sh
+fi
 
-        if [ "$(pwd)" = "/" ]; then
-            cd "$prevdir"
-            return 1
-        fi
-
-        cd ..
-    done
-}
-
-runningFedora () 
-{ 
-    uname -r | grep --color=auto "fc" > /dev/null
-}
-
-runningUbuntu () 
-{ 
-    uname -a | grep --color=auto "Ubuntu" > /dev/null
-}
 
 doSwitch () 
 {
@@ -45,6 +25,7 @@ doSwitch ()
         fi
     fi
 }
+
 
 echo "Verifying a sane branch for your kernel version..."
 
@@ -81,15 +62,7 @@ else
         read -p "Would you like me to try and get a git checkout for you? (Y/N): " checkout
 
         if [ "$checkout" = "y" -o "$checkout" = "Y" ]; then
-            if runningFedora; then
-                sudo yum -y install kernel-devel kernel-headers
-                sudo yum -y groupinstall "Development Tools"
-                sudo yum -y groupinstall "C Development Tools and Libraries"
-                sudo yum -y install git
-            elif runningUbuntu; then
-                sudo apt-get -y install gcc build-essential linux-headers-generic linux-headers-$(uname -r)
-                sudo apt-get -y install git
-            fi
+            installBuildDependencies
 
             dirname="rtl8188ce-linux-driver"
             deleteok="NOT_ASKED"
