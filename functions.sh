@@ -66,3 +66,29 @@ makeModuleLoadPersistent ()
         echo "rtl8192ce.ko" >> "$file"
     fi
 }
+
+runningAnyDriver ()
+{
+    lsmod | grep "rtlwifi" > /dev/null
+}
+
+runningRtlwifiDriver ()
+{
+    modinfo rtlwifi | grep "Benjamin Porter" > /dev/null
+}
+
+runningRtl8192ceDriver ()
+{
+    modinfo rtl8192ce | grep "Benjamin Porter" > /dev/null
+}
+
+runningOurDriver ()
+{
+    runningRtlwifiDriver || runningRtl8192ceDriver 
+}
+
+runningStockDriver ()
+{
+    runningAnyDriver && ! runningOurDriver
+}
+
