@@ -1,10 +1,5 @@
 #!/bin/sh
 
-restore='\033[0m'
-red='\033[0;31m'
-green='\033[0;32m'
-yellow='\033[1;33m'
-
 if [ ! -f "functions.sh" ]; then
     echo "Required file \"functions.sh\" not found!"
     exit
