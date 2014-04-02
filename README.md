@@ -52,12 +52,20 @@ Other RealTek cards, kernel releases, and Linux flavors/releases are supported, 
 Please note that I have only tested the driver on Ubuntu and Fedora (the well supported releases).  If you are NOT using Ubuntu, pay close attention to your kernel version when selecting branches.  You also need to substitute your package manager whenever you see "apt-get install", so Fedora would be "yum install xxx".  Most package names are the same but there may be some difference.
 
 
+Automatic installation:
+
+    There is an install script called install.sh which attempts to automate the manual steps.  If the script fails to build and install the driver, you should follow the steps for manual installation.
+    
+    If you want to run the install script, simply run:
+
+        ./install.sh
+
+
+Instructions for manual install:
+
 To check your kernel version:  
 
     uname -r
-
-
-Instructions to install:
 
 
 These commands should be typed in an open terminal.  I recommend you start in your home directory by typing "cd"
@@ -76,19 +84,18 @@ Clone the repo (Basically it makes a copy of the current source code)
 
     git clone https://github.com/FreedomBen/rtl8188ce-linux-driver.git
 
+
 1\.  Install build dependencies (pay attention to the backticks!):
 
     Ubuntu:
 
     apt-get install gcc build-essential linux-headers-generic linux-headers-`uname -r`
 
-
     Fedora:
 
     yum install kernel-devel kernel-headers
     yum groupinstall "Development Tools"
     yum groupinstall "C Development Tools and Libraries"
-
 
 
 2\. (Skip unless your first build attempt fails) -> Make sure you are on the correct branch for your kernel version.  The branches are named after Ubuntu releases to which they commonly apply, but the most important factor is not the version of Ubuntu, it is the kernel version.  There is a script called "verify_branch" that will help you find the right branch based on your kernel version.  When you run "make", the script "verify_branch" will be automatically called for you.  It will recommend to you the best branch for your kernel version.  If you tried the recommended branch and your build failed, you may need to try a different one.  If so, decline the offer to automatically switch branches for you.
@@ -142,6 +149,10 @@ There is more information about CRDA available at: http://ttys1.wordpress.com/20
 
 Troubleshooting:
 
+0\. To check whether you are running this driver or not, run the script:
+
+    ./am_i_using_this_driver.sh
+
 1\. If you get the following error:
     
     FATAL: Error inserting rtl8192ce                 (/lib/modules/3.8.0-34-generic/kernel/drivers/net/wireless/rtlwifi/rtl8192ce/rtl8192ce.ko): Invalid argument
@@ -151,5 +162,4 @@ After running:
     modprobe rtl8192ce 
     
 You may have invalid configuration options in /etc/modprobe.d/rtl8192ce.conf.  You can either remove the file or remove the debug option as it is no long supported.   
-
 
