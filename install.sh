@@ -1,10 +1,10 @@
 #!/bin/sh
 
-if [ ! -f functions.sh ]; then
+if [ ! -f "functions.sh" ]; then
     echo "Error: Required file functions.sh not present" >&2
     exit
 else
-    source functions.sh
+    source "$(readlink -f functions.sh)"
 fi
 
 echo "So you want to live on the wild side and try a different driver for your RealTek wireless card eh?  Awesome!  I'll help you do it."
