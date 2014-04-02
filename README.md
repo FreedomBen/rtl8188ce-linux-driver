@@ -55,11 +55,11 @@ Please note that I have only tested the driver on Ubuntu and Fedora (the well su
 Automatic Installation:
 -----------------------
 
-    There is an install script called install.sh which attempts to automate the manual steps.  If the script fails to build and install the driver, you should follow the steps for manual installation.
+There is an install script called install.sh which attempts to automate the manual steps.  If the script fails to build and install the driver, you should follow the steps for manual installation.
     
-    If you want to run the install script, simply run:
+If you want to run the install script, simply run:
 
-        ./install.sh
+    ./install.sh
 
 
 Manual Installation:
