@@ -19,10 +19,8 @@ read -p "Press <Enter> when ready to begin, or <Ctrl+C> to quit" throwaway
 echo -e "\nLet's install any dependencies you will need in order to build the driver."
 installBuildDependencies
 
-echo -e "\nNow let's compile the driver from source"
-make
-echo -e "\nNow let's copy the files to the right directories"
-sudo make install
+echo -e "\nNow let's compile the driver from source and copy the files to the right directories"
+make && sudo make install
 
 read -p "Is your wireless card either the RTL8188CE or RTL8192CE? (Y/N): " input
 
@@ -30,7 +28,7 @@ if [ "$input" = "y" -o "$input" = "Y" ]; then
     echo -e "\nNow let's make sure your kernel loads the new modules at boot time"
     makeModuleLoadPersistent
 
-    echo -e "\nTime to modprobe in your new driver.  If this doesn't work, a reboot should fix it and then you'll be running the new driver"
+    echo -e "\nTime to modprobe in your new driver..."  
 
     sudo modprobe -r rtl8192ce
     sudo modprobe -r rtlwifi
@@ -39,6 +37,7 @@ if [ "$input" = "y" -o "$input" = "Y" ]; then
 
     echo "You can check if you're running the new driver by running the script \"am_i_using_this_driver.sh\""
     echo "If you aren't running the driver, try a reboot and re-run the script."
+    echo -e "\nNOTE: If your wifi looks dead, it usually comes back after a reboot.  Don't panic yet."
 else
     echo "OK, reboot and you should be running the new driver.  To check, run the script \"am_i_using_this_driver.sh\""
 fi
