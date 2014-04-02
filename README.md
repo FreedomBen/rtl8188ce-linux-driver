@@ -52,12 +52,20 @@ Other RealTek cards, kernel releases, and Linux flavors/releases are supported, 
 Please note that I have only tested the driver on Ubuntu and Fedora (the well supported releases).  If you are NOT using Ubuntu, pay close attention to your kernel version when selecting branches.  You also need to substitute your package manager whenever you see "apt-get install", so Fedora would be "yum install xxx".  Most package names are the same but there may be some difference.
 
 
+Automatic installation:
+
+    There is an install script called install.sh which attempts to automate the manual steps.  If the script fails to build and install the driver, you should follow the steps for manual installation.
+    
+    If you want to run the install script, simply run:
+
+        ./install.sh
+
+
+Instructions for manual install:
+
 To check your kernel version:  
 
     uname -r
-
-
-Instructions to install:
 
 
 These commands should be typed in an open terminal.  I recommend you start in your home directory by typing "cd"
@@ -140,6 +148,10 @@ There is more information about CRDA available at: http://ttys1.wordpress.com/20
 
 
 Troubleshooting:
+
+0\. To check whether you are running this driver or not, run the script:
+
+    ./am_i_using_this_driver.sh
 
 1\. If you get the following error:
     
