@@ -6,7 +6,6 @@ if [ ! -f "functions.sh" ]; then
 else
     source "$(readlink -f functions.sh)"
 fi
-
 echo "So you want to live on the wild side and try a different driver for your RealTek wireless card eh?  Awesome!  I'll help you do it."
 echo "We are going to build and install the driver from source code, compiled specifically for your machine."
 echo ""
@@ -35,9 +34,12 @@ if [ "$input" = "y" -o "$input" = "Y" ]; then
     sudo modprobe rtlwifi
     sudo modprobe rtl8192ce
 
+    ./am_i_using_this_driver.sh
+
+    echo -e "\nIf you aren't running the driver, try a reboot and re-run the script."
+    echo -e "\nNOTE: If your wifi looks dead, it usually comes back after a reboot.  Don't panic yet.\n"
+    echo "OK, ready for a reboot. (only necessary if your wifi is not working)"
     echo "You can check if you're running the new driver by running the script \"am_i_using_this_driver.sh\""
-    echo "If you aren't running the driver, try a reboot and re-run the script."
-    echo -e "\nNOTE: If your wifi looks dead, it usually comes back after a reboot.  Don't panic yet."
 else
     echo "OK, reboot and you should be running the new driver.  To check, run the script \"am_i_using_this_driver.sh\""
 fi
