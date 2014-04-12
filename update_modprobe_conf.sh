@@ -20,7 +20,7 @@ if [ "$(id -u)" = "0" ]; then
         echo -e "\n\nIt is recommended to disable power save features for improved performance.\nThis is done by writing some options to ${FILE}."  
         read -p "Do this now? (y/n): " PROCEED
 
-        if [ "$PROCEED" == "y" -o "$PROCEED" == "Y" ]; then
+        if [ "$PROCEED" = "y" -o "$PROCEED" = "Y" ]; then
             echo "$COMMENT" >> $FILE
             echo "$OPTION1" >> $FILE
             echo "$OPTION2" >> $FILE
