@@ -5,7 +5,7 @@ if [ ! -f "functions.sh" ]; then
     exit
 fi
 
-source "$(readlink -f functions.sh)"
+. "$(readlink -f functions.sh)"
 
 if runningOurDriver; then
     if runningRtlwifiDriver; then
