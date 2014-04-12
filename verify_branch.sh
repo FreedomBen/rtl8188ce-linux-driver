@@ -22,6 +22,10 @@ doSwitch ()
             git checkout -f $BRANCH
         else
             echo "OK, but if the build fails come back here and try again."
+            read -p "Continue with the build? (Y/N): " input
+            if ! [ "$input" = "Y" -o "$input" = "y" ]; then
+                exit 1
+            fi
         fi
     fi
 }
@@ -47,7 +51,10 @@ if inGitRepo; then
     else
         echo "You are running kernel $(uname -r), which is not well supported."
         echo "See the README.md for recommended branch."
-        read -p "(<Enter> to continue with build or Ctrl+C to quit): " input
+        read -p "Continue with the build? (Y/N): " input
+        if ! [ "$input" = "Y" -o "$input" = "y" ]; then
+            exit 1
+        fi
     fi
 else
     base="$(basename $(pwd))"
@@ -90,14 +97,23 @@ else
                     echo "To install, cd over to $dirname and run \"sudo make install\""
                 else
                     echo -e "\nSomething went wrong and I couldn't clone the repo."
-                    read -p "Press <Enter> to continue with this build, or <Ctrl+C> to cancel" throwaway
+                    read -p "Continue with the build? (Y/N): " input
+                    if ! [ "$input" = "Y" -o "$input" = "y" ]; then
+                        exit 1
+                    fi
                 fi
             else
                 echo -e "\nDid not clone the git repo because the target already exists"
-                read -p "Press <Enter> to continue with this build, or <Ctrl+C> to cancel" throwaway
+                read -p "Continue with the build? (Y/N): " input
+                if ! [ "$input" = "Y" -o "$input" = "y" ]; then
+                    exit 1
+                fi
             fi
         else
-            read -p "Press <Enter> to continue with the build, or <Ctrl+C> to cancel" throwaway
+            read -p "Continue with the build? (Y/N): " input
+            if ! [ "$input" = "Y" -o "$input" = "y" ]; then
+                exit 1
+            fi
         fi
     else
         echo "Yes"
