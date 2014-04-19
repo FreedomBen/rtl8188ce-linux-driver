@@ -17,6 +17,11 @@ git checkout -f ubuntu-14.04        && \
 git merge origin/fedora-20          && \
 git push                       
 
-git checkout -f master              && \
+git checkout -f arch                && \
 git merge origin/ubuntu-14.04       && \
 git push                       
+
+git checkout -f master              && \
+git merge origin/arch               && \
+git push                       
+
