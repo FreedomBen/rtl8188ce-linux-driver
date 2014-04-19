@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright( c ) 2009-2010  Realtek Corporation.
+ * Copyright(c) 2009-2012  Realtek Corporation.
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of version 2 of the GNU General Public License as
@@ -25,13 +25,6 @@
  *
  * Larry Finger <Larry.Finger@lwfinger.net>
  *
- *
- * Bug Fixes and enhancements for Linux Kernels >= 3.2
- * by Benjamin Porter <BenjaminPorter86@gmail.com>
- *
- * Project homepage: https://github.com/FreedomBen/rtl8188ce-linux-driver
- *
- *
  *****************************************************************************/
 
 #ifndef __RTL_RC_H__
@@ -49,6 +42,6 @@ struct rtl_rate_priv {
 	u8 ht_cap;
 };
 
-int rtl_rate_control_register( void );
-void rtl_rate_control_unregister( void );
+int rtl_rate_control_register(void);
+void rtl_rate_control_unregister(void);
 #endif
