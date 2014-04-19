@@ -34,7 +34,9 @@ doSwitch ()
 echo "Verifying a sane branch for your kernel version..."
 
 if inGitRepo; then
-    if $(uname -r | grep "3.13" > /dev/null); then
+    if $(uname -r | grep "3.14" > /dev/null); then
+        doSwitch "arch"
+    elif $(uname -r | grep "3.13" > /dev/null); then
         if runningFedora; then
             doSwitch "fedora-20"
         else
