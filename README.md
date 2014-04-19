@@ -16,12 +16,14 @@ Well supported kernel releases:
         3.8.x
         3.11.x
         3.12.x
+        3.13.x
 
 Well supported Ubuntu releases:
 
         Ubuntu 12.04
         Ubuntu 13.04
         Ubuntu 13.10
+        Ubuntu 14.04
 
 Well supported Fedora releases:
 
