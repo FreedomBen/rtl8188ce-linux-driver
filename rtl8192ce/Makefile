@@ -18,7 +18,6 @@ PCI_92CE_HAL_OBJS:=	\
 	sw.o		\
 	trx.o		\
 	led.o		\
-	fw.o		\
 	phy.o		\
 	rf.o		\
 	dm.o		\
