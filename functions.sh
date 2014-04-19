@@ -47,6 +47,10 @@ runningUbuntu ()
 { 
     uname -a | grep --color=auto "Ubuntu" > /dev/null
 }
+runningArch ()
+{
+    uname -a | grep --color=auto "ARCH" > /dev/null
+}
 
 installBuildDependencies ()
 {
@@ -58,6 +62,10 @@ installBuildDependencies ()
     elif runningUbuntu; then
         sudo apt-get -y install gcc build-essential linux-headers-generic linux-headers-$(uname -r)
         sudo apt-get -y install git
+    elif runningArch; then
+        sudo pacman -S git
+        sudo pacman -S linux-headers
+        sudo pacman -S base-devel
     fi
 }
 
