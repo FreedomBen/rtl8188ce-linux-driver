@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright( c ) 2009-2010  Realtek Corporation.
+ * Copyright(c) 2009-2012  Realtek Corporation.
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of version 2 of the GNU General Public License as
@@ -23,19 +23,15 @@
  * Realtek Corporation, No. 2, Innovation Road II, Hsinchu Science Park,
  * Hsinchu 300, Taiwan.
  *
- *
- * Bug Fixes and enhancements for Linux Kernels >= 3.2
- * by Benjamin Porter <BenjaminPorter86@gmail.com>
- *
- * Project homepage: https://github.com/FreedomBen/rtl8188ce-linux-driver
- *
+ * Larry Finger <Larry.Finger@lwfinger.net>
  *
  *****************************************************************************/
 
 #ifndef __RTL92DE_SW_H__
 #define __RTL92DE_SW_H__
 
-extern spinlock_t globalmutex_for_poweron_and_poweroff;
+extern spinlock_t globalmutex_power;
 extern spinlock_t globalmutex_for_fwdownload;
 extern spinlock_t globalmutex_for_power_and_efuse;
+
 #endif

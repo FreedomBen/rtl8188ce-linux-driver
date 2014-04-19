@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright( c ) 2009-2010  Realtek Corporation.
+ * Copyright(c) 2009-2012  Realtek Corporation.
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of version 2 of the GNU General Public License as
@@ -23,53 +23,49 @@
  * Realtek Corporation, No. 2, Innovation Road II, Hsinchu Science Park,
  * Hsinchu 300, Taiwan.
  *
- *
- * Bug Fixes and enhancements for Linux Kernels >= 3.2
- * by Benjamin Porter <BenjaminPorter86@gmail.com>
- *
- * Project homepage: https://github.com/FreedomBen/rtl8188ce-linux-driver
- *
+ * Larry Finger <Larry.Finger@lwfinger.net>
  *
  *****************************************************************************/
 #ifndef __REALTEK_FIRMWARE92S_H__
 #define __REALTEK_FIRMWARE92S_H__
 
 #define RTL8190_MAX_FIRMWARE_CODE_SIZE		64000
-#define RTL8190_CPU_START_OFFSET			0x80
+#define RTL8190_MAX_RAW_FIRMWARE_CODE_SIZE	90000
+#define RTL8190_CPU_START_OFFSET		0x80
 /* Firmware Local buffer size. 64k */
-#define	MAX_FIRMWARE_CODE_SIZE				0xFF00
+#define	MAX_FIRMWARE_CODE_SIZE			0xFF00
 
-#define	RT_8192S_FIRMWARE_HDR_SIZE				80
+#define	RT_8192S_FIRMWARE_HDR_SIZE		80
 #define RT_8192S_FIRMWARE_HDR_EXCLUDE_PRI_SIZE	32
 
 /* support till 64 bit bus width OS */
-#define MAX_DEV_ADDR_SIZE				8
-#define MAX_FIRMWARE_INFORMATION_SIZE   32
-#define MAX_802_11_HEADER_LENGTH       	( 40 + \
-										MAX_FIRMWARE_INFORMATION_SIZE )
+#define MAX_DEV_ADDR_SIZE			8
+#define MAX_FIRMWARE_INFORMATION_SIZE		32
+#define MAX_802_11_HEADER_LENGTH		(40 + \
+						MAX_FIRMWARE_INFORMATION_SIZE)
 #define ENCRYPTION_MAX_OVERHEAD			128
-#define MAX_FRAGMENT_COUNT				8
-#define MAX_TRANSMIT_BUFFER_SIZE  		( 1600 + \
-										( MAX_802_11_HEADER_LENGTH + \
-										ENCRYPTION_MAX_OVERHEAD ) *\
-										MAX_FRAGMENT_COUNT )
+#define MAX_FRAGMENT_COUNT			8
+#define MAX_TRANSMIT_BUFFER_SIZE		(1600 + \
+						(MAX_802_11_HEADER_LENGTH + \
+						ENCRYPTION_MAX_OVERHEAD) *\
+						MAX_FRAGMENT_COUNT)
 
-#define H2C_TX_CMD_HDR_LEN				8
+#define H2C_TX_CMD_HDR_LEN			8
 
 /* The following DM control code are for Reg0x364, */
-#define	FW_DIG_ENABLE_CTL			BIT( 0 )
-#define	FW_HIGH_PWR_ENABLE_CTL		BIT( 1 )
-#define	FW_SS_CTL					BIT( 2 )
-#define	FW_RA_INIT_CTL				BIT( 3 )
-#define	FW_RA_BG_CTL				BIT( 4 )
-#define	FW_RA_N_CTL					BIT( 5 )
-#define	FW_PWR_TRK_CTL				BIT( 6 )
-#define	FW_IQK_CTL					BIT( 7 )
-#define	FW_FA_CTL					BIT( 8 )
-#define	FW_DRIVER_CTRL_DM_CTL		BIT( 9 )
-#define	FW_PAPE_CTL_BY_SW_HW		BIT( 10 )
+#define	FW_DIG_ENABLE_CTL			BIT(0)
+#define	FW_HIGH_PWR_ENABLE_CTL			BIT(1)
+#define	FW_SS_CTL				BIT(2)
+#define	FW_RA_INIT_CTL				BIT(3)
+#define	FW_RA_BG_CTL				BIT(4)
+#define	FW_RA_N_CTL				BIT(5)
+#define	FW_PWR_TRK_CTL				BIT(6)
+#define	FW_IQK_CTL				BIT(7)
+#define	FW_FA_CTL				BIT(8)
+#define	FW_DRIVER_CTRL_DM_CTL			BIT(9)
+#define	FW_PAPE_CTL_BY_SW_HW			BIT(10)
 #define	FW_DISABLE_ALL_DM			0
-#define	FW_PWR_TRK_PARAM_CLR		0x0000ffff
+#define	FW_PWR_TRK_PARAM_CLR			0x0000ffff
 #define	FW_RA_PARAM_CLR				0xffff0000
 
 enum desc_packet_type {
@@ -118,7 +114,7 @@ struct fw_priv {
 	/* 0x00: normal, 0x03: MACLBK, 0x01: PHYLBK */
 	u8 lbk_mode;
 	/* 1: for MP use, 0: for normal
-	 * driver ( to be discussed ) */
+	 * driver (to be discussed) */
 	u8 mp_mode;
 	u8 rsvd020;
 	u8 rsvd021;
@@ -222,27 +218,27 @@ struct rt_firmware {
 	u8 fw_emem[RTL8190_MAX_FIRMWARE_CODE_SIZE];
 	u32 fw_imem_len;
 	u32 fw_emem_len;
-	u8 sz_fw_tmpbuffer[164000];
+	u8 sz_fw_tmpbuffer[RTL8190_MAX_RAW_FIRMWARE_CODE_SIZE];
 	u32 sz_fw_tmpbufferlen;
 	u16 cmdpacket_fragthresold;
 };
 
 struct h2c_set_pwrmode_parm {
- 	u8 mode;
- 	u8 flag_low_traffic_en;
- 	u8 flag_lpnav_en;
- 	u8 flag_rf_low_snr_en;
+	u8 mode;
+	u8 flag_low_traffic_en;
+	u8 flag_lpnav_en;
+	u8 flag_rf_low_snr_en;
 	/* 1: dps, 0: 32k */
- 	u8 flag_dps_en;
- 	u8 bcn_rx_en;
- 	u8 bcn_pass_cnt;
-	/* beacon TO ( ms ). ¡§=0¡¨ no limit. */
- 	u8 bcn_to;
- 	u16	bcn_itv;
+	u8 flag_dps_en;
+	u8 bcn_rx_en;
+	u8 bcn_pass_cnt;
+	/* beacon TO (ms). Â¡Â§=0Â¡Â¨ no limit. */
+	u8 bcn_to;
+	u16	bcn_itv;
 	/* only for VOIP mode. */
- 	u8 app_itv;
- 	u8 awake_bcn_itvl;
- 	u8 smart_ps;
+	u8 app_itv;
+	u8 awake_bcn_itvl;
+	u8 smart_ps;
 	/* unit: 100 ms */
 	u8 bcn_pass_period;
 };
@@ -256,14 +252,14 @@ struct h2c_joinbss_rpt_parm {
 } ;
 
 struct h2c_wpa_ptk {
-	/* EAPOL-Key Key Confirmation Key ( KCK ) */
- 	u8 kck[16];
-	/* EAPOL-Key Key Encryption Key ( KEK ) */
- 	u8 kek[16];
-	/* Temporal Key 1 ( TK1 ) */
+	/* EAPOL-Key Key Confirmation Key (KCK) */
+	u8 kck[16];
+	/* EAPOL-Key Key Encryption Key (KEK) */
+	u8 kek[16];
+	/* Temporal Key 1 (TK1) */
 	u8 tk1[16];
 	union {
-		/* Temporal Key 2 ( TK2 ) */
+		/* Temporal Key 2 (TK2) */
 		u8 tk2[16];
 		struct {
 			u8 tx_mic_key[8];
@@ -279,7 +275,7 @@ struct h2c_wpa_two_way_parm {
 	struct h2c_wpa_ptk wpa_ptk_value;
 } ;
 
-enum h2c_cmd{
+enum h2c_cmd {
 	FW_H2C_SETPWRMODE = 0,
 	FW_H2C_JOINBSSRPT = 1,
 	FW_H2C_WOWLAN_UPDATE_GTK = 2,
@@ -287,87 +283,94 @@ enum h2c_cmd{
 	FW_H2C_WOWLAN_OFFLOAD = 4,
 };
 
-enum fw_h2c_cmd{
-	H2C_READ_MACREG_CMD ,				/*0*/
-	H2C_WRITE_MACREG_CMD ,
-	H2C_READBB_CMD ,
-	H2C_WRITEBB_CMD ,
-	H2C_READRF_CMD ,
-	H2C_WRITERF_CMD ,					/*5*/
-	H2C_READ_EEPROM_CMD ,
-	H2C_WRITE_EEPROM_CMD ,
-	H2C_READ_EFUSE_CMD ,
-	H2C_WRITE_EFUSE_CMD ,
-	H2C_READ_CAM_CMD ,					/*10*/
-	H2C_WRITE_CAM_CMD ,
+enum fw_h2c_cmd {
+	H2C_READ_MACREG_CMD,				/*0*/
+	H2C_WRITE_MACREG_CMD,
+	H2C_READBB_CMD,
+	H2C_WRITEBB_CMD,
+	H2C_READRF_CMD,
+	H2C_WRITERF_CMD,				/*5*/
+	H2C_READ_EEPROM_CMD,
+	H2C_WRITE_EEPROM_CMD,
+	H2C_READ_EFUSE_CMD,
+	H2C_WRITE_EFUSE_CMD,
+	H2C_READ_CAM_CMD,				/*10*/
+	H2C_WRITE_CAM_CMD,
 	H2C_SETBCNITV_CMD,
 	H2C_SETMBIDCFG_CMD,
-	H2C_JOINBSS_CMD ,
-	H2C_DISCONNECT_CMD,					/*15*/
-	H2C_CREATEBSS_CMD ,
+	H2C_JOINBSS_CMD,
+	H2C_DISCONNECT_CMD,				/*15*/
+	H2C_CREATEBSS_CMD,
 	H2C_SETOPMode_CMD,
 	H2C_SITESURVEY_CMD,
 	H2C_SETAUTH_CMD,
-	H2C_SETKEY_CMD ,					/*20*/
-	H2C_SETSTAKEY_CMD ,
+	H2C_SETKEY_CMD,					/*20*/
+	H2C_SETSTAKEY_CMD,
 	H2C_SETASSOCSTA_CMD,
-	H2C_DELASSOCSTA_CMD ,
-	H2C_SETSTAPWRSTATE_CMD ,
-	H2C_SETBASICRATE_CMD ,				/*25*/
-	H2C_GETBASICRATE_CMD ,
-	H2C_SETDATARATE_CMD ,
-	H2C_GETDATARATE_CMD ,
-	H2C_SETPHYINFO_CMD ,
-	H2C_GETPHYINFO_CMD ,				/*30*/
-	H2C_SETPHY_CMD ,
-	H2C_GETPHY_CMD ,
-	H2C_READRSSI_CMD ,
-	H2C_READGAIN_CMD ,
-	H2C_SETATIM_CMD ,					/*35*/
-	H2C_SETPWRMODE_CMD ,
+	H2C_DELASSOCSTA_CMD,
+	H2C_SETSTAPWRSTATE_CMD,
+	H2C_SETBASICRATE_CMD,				/*25*/
+	H2C_GETBASICRATE_CMD,
+	H2C_SETDATARATE_CMD,
+	H2C_GETDATARATE_CMD,
+	H2C_SETPHYINFO_CMD,
+	H2C_GETPHYINFO_CMD,				/*30*/
+	H2C_SETPHY_CMD,
+	H2C_GETPHY_CMD,
+	H2C_READRSSI_CMD,
+	H2C_READGAIN_CMD,
+	H2C_SETATIM_CMD,				/*35*/
+	H2C_SETPWRMODE_CMD,
 	H2C_JOINBSSRPT_CMD,
-	H2C_SETRATABLE_CMD ,
-	H2C_GETRATABLE_CMD ,
-	H2C_GETCCXREPORT_CMD,            	/*40*/
+	H2C_SETRATABLE_CMD,
+	H2C_GETRATABLE_CMD,
+	H2C_GETCCXREPORT_CMD,				/*40*/
 	H2C_GETDTMREPORT_CMD,
 	H2C_GETTXRATESTATICS_CMD,
 	H2C_SETUSBSUSPEND_CMD,
-	H2C_SETH2CLBK_CMD ,
-	H2C_TMP1 ,							/*45*/
-	H2C_WOWLAN_UPDATE_GTK_CMD ,
-	H2C_WOWLAN_FW_OFFLOAD ,
-	H2C_TMP2 ,
-	H2C_TMP3 ,
-	H2C_WOWLAN_UPDATE_IV_CMD , 			/*50*/
+	H2C_SETH2CLBK_CMD,
+	H2C_TMP1,					/*45*/
+	H2C_WOWLAN_UPDATE_GTK_CMD,
+	H2C_WOWLAN_FW_OFFLOAD,
+	H2C_TMP2,
+	H2C_TMP3,
+	H2C_WOWLAN_UPDATE_IV_CMD,			/*50*/
 	H2C_TMP4,
-	MAX_H2CCMD							/*52*/
+	MAX_H2CCMD					/*52*/
 };
 
 /* The following macros are used for FW
  * CMD map and parameter updated. */
-#define FW_CMD_IO_CLR( rtlpriv, _Bit )		\
-	udelay( 1000 );	\
-	rtlpriv->rtlhal.fwcmd_iomap &= ( ~_Bit );
+#define FW_CMD_IO_CLR(rtlpriv, _Bit)				\
+	do {							\
+		udelay(1000);					\
+		rtlpriv->rtlhal.fwcmd_iomap &= (~_Bit);		\
+	} while (0)
 
-#define FW_CMD_IO_UPDATE( rtlpriv, _val )		\
+#define FW_CMD_IO_UPDATE(rtlpriv, _val)				\
 	rtlpriv->rtlhal.fwcmd_iomap = _val;
 
-#define FW_CMD_IO_SET( rtlpriv, _val ) 	\
-	rtl_write_word( rtlpriv, LBUS_MON_ADDR, ( u16 )_val );	\
-	FW_CMD_IO_UPDATE( rtlpriv, _val );\
+#define FW_CMD_IO_SET(rtlpriv, _val)				\
+	do {							\
+		rtl_write_word(rtlpriv, LBUS_MON_ADDR, (u16)_val);	\
+		FW_CMD_IO_UPDATE(rtlpriv, _val);		\
+	} while (0)
 
-#define FW_CMD_PARA_SET( rtlpriv, _val ) 		\
-	rtl_write_dword( rtlpriv, LBUS_ADDR_MASK, _val );	\
-	rtlpriv->rtlhal.fwcmd_ioparam = _val;
+#define FW_CMD_PARA_SET(rtlpriv, _val)				\
+	do {							\
+		rtl_write_dword(rtlpriv, LBUS_ADDR_MASK, _val);	\
+		rtlpriv->rtlhal.fwcmd_ioparam = _val;		\
+	} while (0)
 
-#define FW_CMD_IO_QUERY( rtlpriv )	\
-	( u16 )( rtlpriv->rtlhal.fwcmd_iomap )
-#define FW_CMD_IO_PARA_QUERY( rtlpriv )	\
-	( ( u32 )( rtlpriv->rtlhal.fwcmd_ioparam ) )
+#define FW_CMD_IO_QUERY(rtlpriv)				\
+	(u16)(rtlpriv->rtlhal.fwcmd_iomap)
+#define FW_CMD_IO_PARA_QUERY(rtlpriv)				\
+	((u32)(rtlpriv->rtlhal.fwcmd_ioparam))
 
-int rtl92s_download_fw( struct ieee80211_hw *hw );
-void rtl92s_set_fw_pwrmode_cmd( struct ieee80211_hw *hw, u8 mode );
-void rtl92s_set_fw_joinbss_report_cmd( struct ieee80211_hw *hw,
-		u8	mstatus, u8 ps_qosinfo );
+int rtl92s_download_fw(struct ieee80211_hw *hw);
+void rtl92s_set_fw_pwrmode_cmd(struct ieee80211_hw *hw, u8 mode);
+void rtl92s_set_fw_joinbss_report_cmd(struct ieee80211_hw *hw,
+				      u8 mstatus, u8 ps_qosinfo);
+
 #endif
 
