@@ -94,28 +94,33 @@ makeModuleLoadPersistent ()
     fi
 }
 
-runningAnyDriver ()
+runningAnyRtl8192ce ()
+{
+    lsmod | grep "rtl8192ce" > /dev/null
+}
+
+runningAnyRtlwifi ()
 {
     lsmod | grep "rtlwifi" > /dev/null
 }
 
-runningRtlwifiDriver ()
+runningOurRtlwifi ()
 {
     modinfo rtlwifi | grep "Benjamin Porter" > /dev/null
 }
 
-runningRtl8192ceDriver ()
+runningOurRtl8192ce ()
 {
     modinfo rtl8192ce | grep "Benjamin Porter" > /dev/null
 }
 
-runningOurDriver ()
+runningStockRtlwifi ()
 {
-    runningRtlwifiDriver || runningRtl8192ceDriver 
+    runningAnyRtlwifi && ! runningOurRtlwifi
 }
 
-runningStockDriver ()
+runningStockRtl8192ce  ()
 {
-    runningAnyDriver && ! runningOurDriver
+    runningAnyRtl8192ce && ! runningOurRtl8192ce
 }
 
