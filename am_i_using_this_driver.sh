@@ -7,29 +7,23 @@ fi
 
 . "$(readlink -f functions.sh)"
 
-if runningOurDriver; then
-    if runningRtlwifiDriver; then
+if runningAnyRtlwifi; then
+    if runningOurRtlwifi; then
         echo -e "${green}[*] You are running our rtlwifi${restore}"
     else
-        echo -e "${yellow}[*] Not running our rtlwifi${restore}"
-    fi
-    if runningRtl8192ceDriver; then
-        echo -e "${green}[*] You are running our rtl8192ce${restore}"
-    else
-        echo -e "${yellow}[*] Not running our rtl8192ce${restore}"
-    fi
-elif ! runningStockDriver; then
-    if runningRtlwifiDriver; then
-        echo -e "${green}[*] You are running our rtlwifi${restore}"
-    else
-        echo -e "${red}[*] Not running our rtlwifi${restore}"
-    fi
-    if runningRtl8192ceDriver; then
-        echo -e "${green}[*] You are running our rtl8192ce${restore}"
-    else
-        echo -e "${red}[*] Not running our rtl8192ce${restore}"
+        echo -e "${yellow}[*] Not running our rtlwifi (running stock driver)${restore}"
     fi
 else
-    echo "${red}[*] Not running any rtlwifi or rtl8192ce driver${restore}"
+    echo -e "${red}[*] Not running any rtlwifi${restore}"
+fi
+
+if runningAnyRtl8192ce; then
+    if runningOurRtl8192ce; then
+        echo -e "${green}[*] You are running our rtl8192ce${restore}"
+    else
+        echo -e "${yellow}[*] Not running our rtl8192ce (running stock driver)${restore}"
+    fi
+else
+    echo -e "${red}[*] Not running any rtl8192ce${restore}"
 fi
 
