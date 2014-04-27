@@ -9,9 +9,9 @@ fi
 
 if runningAnyRtlwifi; then
     if runningOurRtlwifi; then
-        echo -e "${green}[*] You are running our rtlwifi${restore}"
+        echo -e "${green}[*] You are running the new rtlwifi${restore}"
     else
-        echo -e "${yellow}[*] Not running our rtlwifi (running stock driver)${restore}"
+        echo -e "${yellow}[*] Not running the new rtlwifi (running stock driver)${restore}"
     fi
 else
     echo -e "${red}[*] Not running any rtlwifi${restore}"
@@ -19,9 +19,9 @@ fi
 
 if runningAnyRtl8192ce; then
     if runningOurRtl8192ce; then
-        echo -e "${green}[*] You are running our rtl8192ce${restore}"
+        echo -e "${green}[*] You are running the new rtl8192ce${restore}"
     else
-        echo -e "${yellow}[*] Not running our rtl8192ce (running stock driver)${restore}"
+        echo -e "${yellow}[*] Not running the new rtl8192ce (running stock driver)${restore}"
     fi
 else
     echo -e "${red}[*] Not running any rtl8192ce${restore}"

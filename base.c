@@ -1802,6 +1802,7 @@ bool rtl_set_vif_info( struct ieee80211_hw *hw, struct ieee80211_vif *vif )
 }
 #endif
 
+MODULE_AUTHOR( "Benjamin Porter	<BenjaminPorter86@gmail.com>" );
 MODULE_AUTHOR( "lizhaoming	<chaoming_li@realsil.com.cn>" );
 MODULE_AUTHOR( "Realtek WlanFAE	<wlanfae@realtek.com>" );
 MODULE_AUTHOR( "Larry Finger	<Larry.FInger@lwfinger.net>" );
