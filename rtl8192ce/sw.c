@@ -353,6 +353,7 @@ static struct pci_device_id rtl92ce_pci_ids[] __devinitdata = {
 
 MODULE_DEVICE_TABLE(pci, rtl92ce_pci_ids);
 
+MODULE_AUTHOR("Benjamin Porter	<BenjaminPorter86@gmail.com>");
 MODULE_AUTHOR("lizhaoming	<chaoming_li@realsil.com.cn>");
 MODULE_AUTHOR("Realtek WlanFAE	<wlanfae@realtek.com>");
 MODULE_AUTHOR("Larry Finger	<Larry.Finger@lwfinger.net>");
