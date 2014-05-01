@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright(c) 2009-2012  Realtek Corporation.
+ * Copyright( c ) 2009-2012  Realtek Corporation.
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of version 2 of the GNU General Public License as
@@ -35,8 +35,8 @@
 #include "../rtl8192ce/reg.h"
 #include "fw_common.h"
 
-#define HAL_DM_DIG_DISABLE			BIT(0)
-#define HAL_DM_HIPWR_DISABLE			BIT(1)
+#define HAL_DM_DIG_DISABLE			BIT( 0 )
+#define HAL_DM_HIPWR_DISABLE			BIT( 1 )
 
 #define OFDM_TABLE_LENGTH			37
 #define CCK_TABLE_LENGTH			33
@@ -92,11 +92,11 @@
 #define TX_POWER_NEAR_FIELD_THRESH_LVL1		67
 
 #define DYNAMIC_FUNC_DISABLE			0x0
-#define DYNAMIC_FUNC_DIG			BIT(0)
-#define DYNAMIC_FUNC_HP				BIT(1)
-#define DYNAMIC_FUNC_SS				BIT(2) /*Tx Power Tracking*/
-#define DYNAMIC_FUNC_BT				BIT(3)
-#define DYNAMIC_FUNC_ANT_DIV			BIT(4)
+#define DYNAMIC_FUNC_DIG			BIT( 0 )
+#define DYNAMIC_FUNC_HP				BIT( 1 )
+#define DYNAMIC_FUNC_SS				BIT( 2 ) /*Tx Power Tracking*/
+#define DYNAMIC_FUNC_BT				BIT( 3 )
+#define DYNAMIC_FUNC_ANT_DIV			BIT( 4 )
 
 #define	RSSI_CCK				0
 #define	RSSI_OFDM				1
@@ -166,20 +166,20 @@ enum dm_dig_connect_e {
 	DIG_CONNECT_MAX
 };
 
-void rtl92c_dm_init(struct ieee80211_hw *hw);
-void rtl92c_dm_watchdog(struct ieee80211_hw *hw);
-void rtl92c_dm_write_dig(struct ieee80211_hw *hw);
-void rtl92c_dm_init_edca_turbo(struct ieee80211_hw *hw);
-void rtl92c_dm_check_txpower_tracking(struct ieee80211_hw *hw);
-void rtl92c_dm_init_rate_adaptive_mask(struct ieee80211_hw *hw);
-void rtl92c_dm_rf_saving(struct ieee80211_hw *hw, u8 bforce_in_normal);
-void rtl92c_phy_ap_calibrate(struct ieee80211_hw *hw, char delta);
-void rtl92c_phy_lc_calibrate(struct ieee80211_hw *hw);
-void rtl92c_phy_iq_calibrate(struct ieee80211_hw *hw, bool recovery);
-void rtl92c_dm_dynamic_txpower(struct ieee80211_hw *hw);
-void rtl92c_dm_bt_coexist(struct ieee80211_hw *hw);
-void dm_savepowerindex(struct ieee80211_hw *hw);
-void dm_writepowerindex(struct ieee80211_hw *hw, u8 value);
-void dm_restorepowerindex(struct ieee80211_hw *hw);
+void rtl92c_dm_init( struct ieee80211_hw *hw );
+void rtl92c_dm_watchdog( struct ieee80211_hw *hw );
+void rtl92c_dm_write_dig( struct ieee80211_hw *hw );
+void rtl92c_dm_init_edca_turbo( struct ieee80211_hw *hw );
+void rtl92c_dm_check_txpower_tracking( struct ieee80211_hw *hw );
+void rtl92c_dm_init_rate_adaptive_mask( struct ieee80211_hw *hw );
+void rtl92c_dm_rf_saving( struct ieee80211_hw *hw, u8 bforce_in_normal );
+void rtl92c_phy_ap_calibrate( struct ieee80211_hw *hw, char delta );
+void rtl92c_phy_lc_calibrate( struct ieee80211_hw *hw );
+void rtl92c_phy_iq_calibrate( struct ieee80211_hw *hw, bool recovery );
+void rtl92c_dm_dynamic_txpower( struct ieee80211_hw *hw );
+void rtl92c_dm_bt_coexist( struct ieee80211_hw *hw );
+void dm_savepowerindex( struct ieee80211_hw *hw );
+void dm_writepowerindex( struct ieee80211_hw *hw, u8 value );
+void dm_restorepowerindex( struct ieee80211_hw *hw );
 
 #endif

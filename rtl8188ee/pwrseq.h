@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright(c) 2009-2013  Realtek Corporation.
+ * Copyright( c ) 2009-2013  Realtek Corporation.
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of version 2 of the GNU General Public License as
@@ -70,29 +70,29 @@
 	/* { offset, cut_msk, fab_msk|interface_msk, base|cmd, msk, value },*/\
 	{0x0006, PWR_CUT_ALL_MSK, PWR_FAB_ALL_MSK, PWR_INTF_ALL_MSK,	\
 	/* wait till 0x04[17] = 1    power ready*/			\
-	PWR_BASEADDR_MAC, PWR_CMD_POLLING, BIT(1), BIT(1)},		\
+	PWR_BASEADDR_MAC, PWR_CMD_POLLING, BIT( 1 ), BIT( 1 )},		\
 	{0x0002, PWR_CUT_ALL_MSK, PWR_FAB_ALL_MSK, PWR_INTF_ALL_MSK,	\
 	/* 0x02[1:0] = 0	reset BB*/				\
-	PWR_BASEADDR_MAC, PWR_CMD_WRITE, BIT(0)|BIT(1), 0},		\
+	PWR_BASEADDR_MAC, PWR_CMD_WRITE, BIT( 0 )|BIT( 1 ), 0},		\
 	{0x0026, PWR_CUT_ALL_MSK, PWR_FAB_ALL_MSK, PWR_INTF_ALL_MSK,	\
 	/*0x24[23] = 2b'01 schmit trigger */				\
-	PWR_BASEADDR_MAC, PWR_CMD_WRITE, BIT(7), BIT(7)},		\
+	PWR_BASEADDR_MAC, PWR_CMD_WRITE, BIT( 7 ), BIT( 7 )},		\
 	{0x0005, PWR_CUT_ALL_MSK, PWR_FAB_ALL_MSK, PWR_INTF_ALL_MSK,	\
-	/* 0x04[15] = 0 disable HWPDN (control by DRV)*/		\
-	PWR_BASEADDR_MAC, PWR_CMD_WRITE, BIT(7), 0},			\
+	/* 0x04[15] = 0 disable HWPDN ( control by DRV )*/		\
+	PWR_BASEADDR_MAC, PWR_CMD_WRITE, BIT( 7 ), 0},			\
 	{0x0005, PWR_CUT_ALL_MSK, PWR_FAB_ALL_MSK, PWR_INTF_ALL_MSK,	\
 	/*0x04[12:11] = 2b'00 disable WL suspend*/			\
-	PWR_BASEADDR_MAC, PWR_CMD_WRITE, BIT(4)|BIT(3), 0},		\
+	PWR_BASEADDR_MAC, PWR_CMD_WRITE, BIT( 4 )|BIT( 3 ), 0},		\
 	{0x0005, PWR_CUT_ALL_MSK, PWR_FAB_ALL_MSK, PWR_INTF_ALL_MSK,	\
 	/*0x04[8] = 1 polling until return 0*/				\
-	PWR_BASEADDR_MAC, PWR_CMD_WRITE, BIT(0), BIT(0)},		\
+	PWR_BASEADDR_MAC, PWR_CMD_WRITE, BIT( 0 ), BIT( 0 )},		\
 	{0x0005, PWR_CUT_ALL_MSK, PWR_FAB_ALL_MSK, PWR_INTF_ALL_MSK,	\
 	/*wait till 0x04[8] = 0*/					\
-	PWR_BASEADDR_MAC, PWR_CMD_POLLING, BIT(0), 0},			\
+	PWR_BASEADDR_MAC, PWR_CMD_POLLING, BIT( 0 ), 0},			\
 	{0x0023, PWR_CUT_ALL_MSK, PWR_FAB_ALL_MSK, PWR_INTF_ALL_MSK,	\
-	PWR_BASEADDR_MAC, PWR_CMD_WRITE, BIT(4), 0}, /*LDO normal mode*/\
+	PWR_BASEADDR_MAC, PWR_CMD_WRITE, BIT( 4 ), 0}, /*LDO normal mode*/\
 	{0x0074, PWR_CUT_ALL_MSK, PWR_FAB_ALL_MSK, PWR_INTF_SDIO_MSK,	\
-	PWR_BASEADDR_MAC, PWR_CMD_WRITE, BIT(4), BIT(4)}, /*SDIO Driving*/\
+	PWR_BASEADDR_MAC, PWR_CMD_WRITE, BIT( 4 ), BIT( 4 )}, /*SDIO Driving*/\
 
 #define RTL8188E_TRANS_ACT_TO_CARDEMU					\
 	/* format */							\
@@ -100,13 +100,13 @@
 	{0x001F, PWR_CUT_ALL_MSK, PWR_FAB_ALL_MSK, PWR_INTF_ALL_MSK,	\
 	PWR_BASEADDR_MAC, PWR_CMD_WRITE, 0xFF, 0},/*0x1F[7:0] = 0 turn off RF*/\
 	{0x0023, PWR_CUT_ALL_MSK, PWR_FAB_ALL_MSK, PWR_INTF_ALL_MSK,	\
-	PWR_BASEADDR_MAC, PWR_CMD_WRITE, BIT(4), BIT(4)}, /*LDO Sleep mode*/\
+	PWR_BASEADDR_MAC, PWR_CMD_WRITE, BIT( 4 ), BIT( 4 )}, /*LDO Sleep mode*/\
 	{0x0005, PWR_CUT_ALL_MSK, PWR_FAB_ALL_MSK, PWR_INTF_ALL_MSK,	\
 	/*0x04[9] = 1 turn off MAC by HW state machine*/		\
-	PWR_BASEADDR_MAC, PWR_CMD_WRITE, BIT(1), BIT(1)},		\
+	PWR_BASEADDR_MAC, PWR_CMD_WRITE, BIT( 1 ), BIT( 1 )},		\
 	{0x0005, PWR_CUT_ALL_MSK, PWR_FAB_ALL_MSK, PWR_INTF_ALL_MSK,	\
 	/*wait till 0x04[9] = 0 polling until return 0 to disable*/	\
-	PWR_BASEADDR_MAC, PWR_CMD_POLLING, BIT(1), 0},			\
+	PWR_BASEADDR_MAC, PWR_CMD_POLLING, BIT( 1 ), 0},			\
 
 
 #define RTL8188E_TRANS_CARDEMU_TO_SUS					\
@@ -115,52 +115,52 @@
 	{0x0005, PWR_CUT_ALL_MSK, PWR_FAB_ALL_MSK,			\
 	PWR_INTF_USB_MSK|PWR_INTF_SDIO_MSK,				\
 	/*0x04[12:11] = 2b'01enable WL suspend*/			\
-	PWR_BASEADDR_MAC, PWR_CMD_WRITE, BIT(3)|BIT(4), BIT(3)},	\
+	PWR_BASEADDR_MAC, PWR_CMD_WRITE, BIT( 3 )|BIT( 4 ), BIT( 3 )},	\
 	{0x0005, PWR_CUT_ALL_MSK, PWR_FAB_ALL_MSK, PWR_INTF_PCI_MSK,	\
 	/*0x04[12:11] = 2b'11enable WL suspend for PCIe*/		\
-	PWR_BASEADDR_MAC, PWR_CMD_WRITE, BIT(3)|BIT(4), BIT(3)|BIT(4)},\
+	PWR_BASEADDR_MAC, PWR_CMD_WRITE, BIT( 3 )|BIT( 4 ), BIT( 3 )|BIT( 4 )},\
 	{0x0007, PWR_CUT_ALL_MSK, PWR_FAB_ALL_MSK,			\
 	PWR_INTF_USB_MSK|PWR_INTF_SDIO_MSK,				\
 	/*  0x04[31:30] = 2b'10 enable enable bandgap mbias in suspend */\
-	PWR_BASEADDR_MAC, PWR_CMD_WRITE, 0xFF, BIT(7)},			\
+	PWR_BASEADDR_MAC, PWR_CMD_WRITE, 0xFF, BIT( 7 )},			\
 	{0x0041, PWR_CUT_ALL_MSK, PWR_FAB_ALL_MSK,			\
 	PWR_INTF_USB_MSK|PWR_INTF_SDIO_MSK,				\
 	/*Clear SIC_EN register 0x40[12] = 1'b0 */			\
-	PWR_BASEADDR_MAC, PWR_CMD_WRITE, BIT(4), 0},			\
+	PWR_BASEADDR_MAC, PWR_CMD_WRITE, BIT( 4 ), 0},			\
 	{0xfe10, PWR_CUT_ALL_MSK, PWR_FAB_ALL_MSK,			\
 	PWR_INTF_USB_MSK|PWR_INTF_SDIO_MSK,				\
 	/*Set USB suspend enable local register  0xfe10[4]= 1 */	\
-	PWR_BASEADDR_MAC, PWR_CMD_WRITE, BIT(4), BIT(4)},		\
+	PWR_BASEADDR_MAC, PWR_CMD_WRITE, BIT( 4 ), BIT( 4 )},		\
 	{0x0086, PWR_CUT_ALL_MSK, PWR_FAB_ALL_MSK, PWR_INTF_SDIO_MSK,	\
 	/*Set SDIO suspend local register*/				\
-	PWR_BASEADDR_SDIO, PWR_CMD_WRITE, BIT(0), BIT(0)},		\
+	PWR_BASEADDR_SDIO, PWR_CMD_WRITE, BIT( 0 ), BIT( 0 )},		\
 	{0x0086, PWR_CUT_ALL_MSK, PWR_FAB_ALL_MSK, PWR_INTF_SDIO_MSK,	\
 	/*wait power state to suspend*/					\
-	PWR_BASEADDR_SDIO, PWR_CMD_POLLING, BIT(1), 0},
+	PWR_BASEADDR_SDIO, PWR_CMD_POLLING, BIT( 1 ), 0},
 
 #define RTL8188E_TRANS_SUS_TO_CARDEMU					\
 	/* format */							\
 	/* { offset, cut_msk, fab_msk|interface_msk, base|cmd, msk, value }, */\
 	{0x0086, PWR_CUT_ALL_MSK, PWR_FAB_ALL_MSK, PWR_INTF_SDIO_MSK,	\
 	/*Set SDIO suspend local register*/				\
-	PWR_BASEADDR_SDIO, PWR_CMD_WRITE, BIT(0), 0},			\
+	PWR_BASEADDR_SDIO, PWR_CMD_WRITE, BIT( 0 ), 0},			\
 	{0x0086, PWR_CUT_ALL_MSK, PWR_FAB_ALL_MSK, PWR_INTF_SDIO_MSK,	\
 	/*wait power state to suspend*/					\
-	PWR_BASEADDR_SDIO, PWR_CMD_POLLING, BIT(1), BIT(1)},		\
+	PWR_BASEADDR_SDIO, PWR_CMD_POLLING, BIT( 1 ), BIT( 1 )},		\
 	{0x0005, PWR_CUT_ALL_MSK, PWR_FAB_ALL_MSK, PWR_INTF_ALL_MSK,	\
 	/*0x04[12:11] = 2b'01enable WL suspend*/			\
-	PWR_BASEADDR_MAC, PWR_CMD_WRITE, BIT(3)|BIT(4), 0},
+	PWR_BASEADDR_MAC, PWR_CMD_WRITE, BIT( 3 )|BIT( 4 ), 0},
 
 #define RTL8188E_TRANS_CARDEMU_TO_CARDDIS				\
 	/* format */							\
 	/* { offset, cut_msk, fab_msk|interface_msk, base|cmd, msk, value }, */\
 	{0x0026, PWR_CUT_ALL_MSK, PWR_FAB_ALL_MSK, PWR_INTF_ALL_MSK,	\
 	/*0x24[23] = 2b'01 schmit trigger */				\
-	PWR_BASEADDR_MAC, PWR_CMD_WRITE, BIT(7), BIT(7)},		\
+	PWR_BASEADDR_MAC, PWR_CMD_WRITE, BIT( 7 ), BIT( 7 )},		\
 	{0x0005, PWR_CUT_ALL_MSK, PWR_FAB_ALL_MSK,			\
 	PWR_INTF_USB_MSK|PWR_INTF_SDIO_MSK,				\
 	/*0x04[12:11] = 2b'01 enable WL suspend*/			\
-	PWR_BASEADDR_MAC, PWR_CMD_WRITE, BIT(3)|BIT(4), BIT(3)},	\
+	PWR_BASEADDR_MAC, PWR_CMD_WRITE, BIT( 3 )|BIT( 4 ), BIT( 3 )},	\
 	{0x0007, PWR_CUT_ALL_MSK, PWR_FAB_ALL_MSK,			\
 	PWR_INTF_USB_MSK|PWR_INTF_SDIO_MSK,				\
 	/*  0x04[31:30] = 2b'10 enable enable bandgap mbias in suspend */\
@@ -168,28 +168,28 @@
 	{0x0041, PWR_CUT_ALL_MSK, PWR_FAB_ALL_MSK,			\
 	PWR_INTF_USB_MSK|PWR_INTF_SDIO_MSK,				\
 	/*Clear SIC_EN register 0x40[12] = 1'b0 */			\
-	PWR_BASEADDR_MAC, PWR_CMD_WRITE, BIT(4), 0},			\
+	PWR_BASEADDR_MAC, PWR_CMD_WRITE, BIT( 4 ), 0},			\
 	{0xfe10, PWR_CUT_ALL_MSK, PWR_FAB_ALL_MSK, PWR_INTF_USB_MSK,	\
 	/*Set USB suspend enable local register  0xfe10[4]= 1 */	\
-	PWR_BASEADDR_MAC, PWR_CMD_WRITE, BIT(4), BIT(4)},		\
+	PWR_BASEADDR_MAC, PWR_CMD_WRITE, BIT( 4 ), BIT( 4 )},		\
 	{0x0086, PWR_CUT_ALL_MSK, PWR_FAB_ALL_MSK, PWR_INTF_SDIO_MSK,	\
 	/*Set SDIO suspend local register*/				\
-	PWR_BASEADDR_SDIO, PWR_CMD_WRITE, BIT(0), BIT(0)},		\
+	PWR_BASEADDR_SDIO, PWR_CMD_WRITE, BIT( 0 ), BIT( 0 )},		\
 	{0x0086, PWR_CUT_ALL_MSK, PWR_FAB_ALL_MSK, PWR_INTF_SDIO_MSK,	\
-	PWR_CMD_POLLING, BIT(1), 0}, /*wait power state to suspend*/
+	PWR_CMD_POLLING, BIT( 1 ), 0}, /*wait power state to suspend*/
 
 #define RTL8188E_TRANS_CARDDIS_TO_CARDEMU				\
 	/* format */							\
 	/* { offset, cut_msk, fab_msk|interface_msk, base|cmd, msk, value }, */\
 	{0x0086, PWR_CUT_ALL_MSK, PWR_FAB_ALL_MSK, PWR_INTF_SDIO_MSK,	\
 	PWR_BASEADDR_SDIO,\
-	PWR_CMD_WRITE, BIT(0), 0}, /*Set SDIO suspend local register*/	\
+	PWR_CMD_WRITE, BIT( 0 ), 0}, /*Set SDIO suspend local register*/	\
 	{0x0086, PWR_CUT_ALL_MSK, PWR_FAB_ALL_MSK, PWR_INTF_SDIO_MSK,	\
 	PWR_BASEADDR_SDIO,\
-	PWR_CMD_POLLING, BIT(1), BIT(1)}, /*wait power state to suspend*/\
+	PWR_CMD_POLLING, BIT( 1 ), BIT( 1 )}, /*wait power state to suspend*/\
 	{0x0005, PWR_CUT_ALL_MSK, PWR_FAB_ALL_MSK, PWR_INTF_ALL_MSK,	\
 	PWR_BASEADDR_MAC,						\
-	PWR_CMD_WRITE, BIT(3)|BIT(4), 0},				\
+	PWR_CMD_WRITE, BIT( 3 )|BIT( 4 ), 0},				\
 	/*0x04[12:11] = 2b'01enable WL suspend*/
 
 
@@ -197,16 +197,16 @@
 	/* format */							\
 	/* { offset, cut_msk, fab_msk|interface_msk, base|cmd, msk, value }, */\
 	{0x0006, PWR_CUT_ALL_MSK, PWR_FAB_ALL_MSK, PWR_INTF_ALL_MSK,	\
-	PWR_BASEADDR_MAC, PWR_CMD_WRITE, BIT(0), 0},/* 0x04[16] = 0*/	\
+	PWR_BASEADDR_MAC, PWR_CMD_WRITE, BIT( 0 ), 0},/* 0x04[16] = 0*/	\
 	{0x0005, PWR_CUT_ALL_MSK, PWR_FAB_ALL_MSK, PWR_INTF_ALL_MSK,	\
-	PWR_BASEADDR_MAC, PWR_CMD_WRITE, BIT(7), BIT(7)},/* 0x04[15] = 1*/
+	PWR_BASEADDR_MAC, PWR_CMD_WRITE, BIT( 7 ), BIT( 7 )},/* 0x04[15] = 1*/
 
 
 #define RTL8188E_TRANS_PDN_TO_CARDEMU					\
 	/* format */							\
 	/* { offset, cut_msk, fab_msk|interface_msk, base|cmd, msk, value }, */\
 	{0x0005, PWR_CUT_ALL_MSK, PWR_FAB_ALL_MSK, PWR_INTF_ALL_MSK,	\
-	PWR_BASEADDR_MAC, PWR_CMD_WRITE, BIT(7), 0},/* 0x04[15] = 0*/
+	PWR_BASEADDR_MAC, PWR_CMD_WRITE, BIT( 7 ), 0},/* 0x04[15] = 0*/
 
 
 #define RTL8188E_TRANS_ACT_TO_LPS					\
@@ -228,17 +228,17 @@
 	PWR_BASEADDR_MAC, PWR_CMD_POLLING, 0xFF, 0},			\
 	{0x0002, PWR_CUT_ALL_MSK, PWR_FAB_ALL_MSK, PWR_INTF_ALL_MSK,	\
 	/*CCK and OFDM are disabled, and clock are gated*/		\
-	PWR_BASEADDR_MAC, PWR_CMD_WRITE, BIT(0), 0},			\
+	PWR_BASEADDR_MAC, PWR_CMD_WRITE, BIT( 0 ), 0},			\
 	{0x0002, PWR_CUT_ALL_MSK, PWR_FAB_ALL_MSK, PWR_INTF_ALL_MSK,	\
 	PWR_BASEADDR_MAC, PWR_CMD_DELAY, 0, PWRSEQ_DELAY_US},/*Delay 1us*/\
 	{0x0100, PWR_CUT_ALL_MSK, PWR_FAB_ALL_MSK, PWR_INTF_ALL_MSK,	\
 	PWR_BASEADDR_MAC, PWR_CMD_WRITE, 0xFF, 0x3F},/*Reset MAC TRX*/	\
 	{0x0101, PWR_CUT_ALL_MSK, PWR_FAB_ALL_MSK, PWR_INTF_ALL_MSK,	\
 	/*check if removed later*/					\
-	PWR_BASEADDR_MAC, PWR_CMD_WRITE, BIT(1), 0},			\
+	PWR_BASEADDR_MAC, PWR_CMD_WRITE, BIT( 1 ), 0},			\
 	{0x0553, PWR_CUT_ALL_MSK, PWR_FAB_ALL_MSK, PWR_INTF_ALL_MSK,	\
 	/*Respond TxOK to scheduler*/					\
-	PWR_BASEADDR_MAC, PWR_CMD_WRITE, BIT(5), BIT(5)},		\
+	PWR_BASEADDR_MAC, PWR_CMD_WRITE, BIT( 5 ), BIT( 5 )},		\
 
 
 #define RTL8188E_TRANS_LPS_TO_ACT					\
@@ -254,22 +254,22 @@
 	PWR_BASEADDR_MAC, PWR_CMD_DELAY, 0, PWRSEQ_DELAY_MS}, /*Delay*/	\
 	{0x0008, PWR_CUT_ALL_MSK, PWR_FAB_ALL_MSK, PWR_INTF_ALL_MSK,	\
 	/*.	0x08[4] = 0		 switch TSF to 40M*/		\
-	PWR_BASEADDR_MAC, PWR_CMD_WRITE, BIT(4), 0},			\
+	PWR_BASEADDR_MAC, PWR_CMD_WRITE, BIT( 4 ), 0},			\
 	{0x0109, PWR_CUT_ALL_MSK, PWR_FAB_ALL_MSK, PWR_INTF_ALL_MSK,	\
 	/*Polling 0x109[7]= 0  TSF in 40M*/				\
-	PWR_BASEADDR_MAC, PWR_CMD_POLLING, BIT(7), 0},			\
+	PWR_BASEADDR_MAC, PWR_CMD_POLLING, BIT( 7 ), 0},			\
 	{0x0029, PWR_CUT_ALL_MSK, PWR_FAB_ALL_MSK, PWR_INTF_ALL_MSK,	\
 	/*. 0x29[7:6] = 2b'00	 enable BB clock*/			\
-	PWR_BASEADDR_MAC, PWR_CMD_WRITE, BIT(6)|BIT(7), 0},		\
+	PWR_BASEADDR_MAC, PWR_CMD_WRITE, BIT( 6 )|BIT( 7 ), 0},		\
 	{0x0101, PWR_CUT_ALL_MSK, PWR_FAB_ALL_MSK, PWR_INTF_ALL_MSK,	\
 	/*.	0x101[1] = 1*/\
-	PWR_BASEADDR_MAC, PWR_CMD_WRITE, BIT(1), BIT(1)},		\
+	PWR_BASEADDR_MAC, PWR_CMD_WRITE, BIT( 1 ), BIT( 1 )},		\
 	{0x0100, PWR_CUT_ALL_MSK, PWR_FAB_ALL_MSK, PWR_INTF_ALL_MSK,	\
 	/*.	0x100[7:0] = 0xFF	 enable WMAC TRX*/\
 	PWR_BASEADDR_MAC, PWR_CMD_WRITE, 0xFF, 0xFF},			\
 	{0x0002, PWR_CUT_ALL_MSK, PWR_FAB_ALL_MSK, PWR_INTF_ALL_MSK,	\
 	/*. 0x02[1:0] = 2b'11  enable BB macro*/\
-	PWR_BASEADDR_MAC, PWR_CMD_WRITE, BIT(1)|BIT(0), BIT(1)|BIT(0)},	\
+	PWR_BASEADDR_MAC, PWR_CMD_WRITE, BIT( 1 )|BIT( 0 ), BIT( 1 )|BIT( 0 )},	\
 	{0x0522, PWR_CUT_ALL_MSK, PWR_FAB_ALL_MSK, PWR_INTF_ALL_MSK,\
 	PWR_BASEADDR_MAC, PWR_CMD_WRITE, 0xFF, 0}, /*.	0x522 = 0*/
 

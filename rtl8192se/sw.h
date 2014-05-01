@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright(c) 2009-2012  Realtek Corporation.
+ * Copyright( c ) 2009-2012  Realtek Corporation.
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of version 2 of the GNU General Public License as
@@ -29,8 +29,8 @@
 
 #define EFUSE_MAX_SECTION	16
 
-int rtl92se_init_sw(struct ieee80211_hw *hw);
-void rtl92se_deinit_sw(struct ieee80211_hw *hw);
-void rtl92se_init_var_map(struct ieee80211_hw *hw);
+int rtl92se_init_sw( struct ieee80211_hw *hw );
+void rtl92se_deinit_sw( struct ieee80211_hw *hw );
+void rtl92se_init_var_map( struct ieee80211_hw *hw );
 
 #endif

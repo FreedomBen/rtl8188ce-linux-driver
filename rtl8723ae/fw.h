@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright(c) 2009-2012  Realtek Corporation.
+ * Copyright( c ) 2009-2012  Realtek Corporation.
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of version 2 of the GNU General Public License as
@@ -43,8 +43,8 @@
 
 #define TOTAL_RESERVED_PKT_LEN			768
 
-#define IS_FW_HEADER_EXIST(_pfwhdr)		\
-	((_pfwhdr->signature&0xFF00) == 0x2300)
+#define IS_FW_HEADER_EXIST( _pfwhdr )		\
+	( ( _pfwhdr->signature&0xFF00 ) == 0x2300 )
 
 struct rtl8723ae_firmware_header {
 	u16 signature;
@@ -77,28 +77,28 @@ enum rtl8192c_h2c_cmd {
 	MAX_H2CCMD
 };
 
-#define SET_H2CCMD_PWRMODE_PARM_MODE(__ph2ccmd, __val)			\
-	SET_BITS_TO_LE_1BYTE(__ph2ccmd, 0, 8, __val)
-#define SET_H2CCMD_PWRMODE_PARM_SMART_PS(__ph2ccmd, __val)		\
-	SET_BITS_TO_LE_1BYTE((__ph2ccmd)+1, 0, 8, __val)
-#define SET_H2CCMD_PWRMODE_PARM_BCN_PASS_TIME(__ph2ccmd, __val)	\
-	SET_BITS_TO_LE_1BYTE((__ph2ccmd)+2, 0, 8, __val)
-#define SET_H2CCMD_JOINBSSRPT_PARM_OPMODE(__ph2ccmd, __val)		\
-	SET_BITS_TO_LE_1BYTE(__ph2ccmd, 0, 8, __val)
-#define SET_H2CCMD_RSVDPAGE_LOC_PROBE_RSP(__ph2ccmd, __val)		\
-	SET_BITS_TO_LE_1BYTE(__ph2ccmd, 0, 8, __val)
-#define SET_H2CCMD_RSVDPAGE_LOC_PSPOLL(__ph2ccmd, __val)		\
-	SET_BITS_TO_LE_1BYTE((__ph2ccmd)+1, 0, 8, __val)
-#define SET_H2CCMD_RSVDPAGE_LOC_NULL_DATA(__ph2ccmd, __val)		\
-	SET_BITS_TO_LE_1BYTE((__ph2ccmd)+2, 0, 8, __val)
+#define SET_H2CCMD_PWRMODE_PARM_MODE( __ph2ccmd, __val )			\
+	SET_BITS_TO_LE_1BYTE( __ph2ccmd, 0, 8, __val )
+#define SET_H2CCMD_PWRMODE_PARM_SMART_PS( __ph2ccmd, __val )		\
+	SET_BITS_TO_LE_1BYTE( ( __ph2ccmd )+1, 0, 8, __val )
+#define SET_H2CCMD_PWRMODE_PARM_BCN_PASS_TIME( __ph2ccmd, __val )	\
+	SET_BITS_TO_LE_1BYTE( ( __ph2ccmd )+2, 0, 8, __val )
+#define SET_H2CCMD_JOINBSSRPT_PARM_OPMODE( __ph2ccmd, __val )		\
+	SET_BITS_TO_LE_1BYTE( __ph2ccmd, 0, 8, __val )
+#define SET_H2CCMD_RSVDPAGE_LOC_PROBE_RSP( __ph2ccmd, __val )		\
+	SET_BITS_TO_LE_1BYTE( __ph2ccmd, 0, 8, __val )
+#define SET_H2CCMD_RSVDPAGE_LOC_PSPOLL( __ph2ccmd, __val )		\
+	SET_BITS_TO_LE_1BYTE( ( __ph2ccmd )+1, 0, 8, __val )
+#define SET_H2CCMD_RSVDPAGE_LOC_NULL_DATA( __ph2ccmd, __val )		\
+	SET_BITS_TO_LE_1BYTE( ( __ph2ccmd )+2, 0, 8, __val )
 
-int rtl8723ae_download_fw(struct ieee80211_hw *hw);
-void rtl8723ae_fill_h2c_cmd(struct ieee80211_hw *hw, u8 element_id,
-			    u32 cmd_len, u8 *p_cmdbuffer);
-void rtl8723ae_firmware_selfreset(struct ieee80211_hw *hw);
-void rtl8723ae_set_fw_pwrmode_cmd(struct ieee80211_hw *hw, u8 mode);
-void rtl8723ae_set_fw_rsvdpagepkt(struct ieee80211_hw *hw, bool b_dl_finished);
-void rtl8723ae_set_fw_joinbss_report_cmd(struct ieee80211_hw *hw, u8 mstatus);
-void rtl8723ae_set_p2p_ps_offload_cmd(struct ieee80211_hw *hw, u8 p2p_ps_state);
+int rtl8723ae_download_fw( struct ieee80211_hw *hw );
+void rtl8723ae_fill_h2c_cmd( struct ieee80211_hw *hw, u8 element_id,
+			    u32 cmd_len, u8 *p_cmdbuffer );
+void rtl8723ae_firmware_selfreset( struct ieee80211_hw *hw );
+void rtl8723ae_set_fw_pwrmode_cmd( struct ieee80211_hw *hw, u8 mode );
+void rtl8723ae_set_fw_rsvdpagepkt( struct ieee80211_hw *hw, bool b_dl_finished );
+void rtl8723ae_set_fw_joinbss_report_cmd( struct ieee80211_hw *hw, u8 mstatus );
+void rtl8723ae_set_p2p_ps_offload_cmd( struct ieee80211_hw *hw, u8 p2p_ps_state );
 
 #endif

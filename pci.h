@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright(c) 2009-2012  Realtek Corporation.
+ * Copyright( c ) 2009-2012  Realtek Corporation.
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of version 2 of the GNU General Public License as
@@ -55,12 +55,12 @@
 #define HIGH_QUEUE				7
 #define HCCA_QUEUE				8
 
-#define RTL_PCI_DEVICE(vend, dev, cfg)  \
-	.vendor = (vend), \
-	.device = (dev), \
+#define RTL_PCI_DEVICE( vend, dev, cfg )  \
+	.vendor = ( vend ), \
+	.device = ( dev ), \
 	.subvendor = PCI_ANY_ID, \
 	.subdevice = PCI_ANY_ID,\
-	.driver_data = (kernel_ulong_t)&(cfg)
+	.driver_data = ( kernel_ulong_t )&( cfg )
 
 #define PCI_MAX_BRIDGE_NUMBER			255
 #define PCI_MAX_DEVICES				32
@@ -231,50 +231,50 @@ struct rtl_pci_priv {
 	struct bt_coexist_info bt_coexist;
 };
 
-#define rtl_pcipriv(hw)		(((struct rtl_pci_priv *)(rtl_priv(hw))->priv))
-#define rtl_pcidev(pcipriv)	(&((pcipriv)->dev))
+#define rtl_pcipriv( hw )		( ( ( struct rtl_pci_priv * )( rtl_priv( hw ) )->priv ) )
+#define rtl_pcidev( pcipriv )	( &( ( pcipriv )->dev ) )
 
-int rtl_pci_reset_trx_ring(struct ieee80211_hw *hw);
+int rtl_pci_reset_trx_ring( struct ieee80211_hw *hw );
 
 extern struct rtl_intf_ops rtl_pci_ops;
 
-int rtl_pci_probe(struct pci_dev *pdev,
-			    const struct pci_device_id *id);
-void rtl_pci_disconnect(struct pci_dev *pdev);
+int rtl_pci_probe( struct pci_dev *pdev,
+			    const struct pci_device_id *id );
+void rtl_pci_disconnect( struct pci_dev *pdev );
 #ifdef CONFIG_PM_SLEEP
-int rtl_pci_suspend(struct device *dev);
-int rtl_pci_resume(struct device *dev);
+int rtl_pci_suspend( struct device *dev );
+int rtl_pci_resume( struct device *dev );
 #endif /* CONFIG_PM_SLEEP */
-static inline u8 pci_read8_sync(struct rtl_priv *rtlpriv, u32 addr)
+static inline u8 pci_read8_sync( struct rtl_priv *rtlpriv, u32 addr )
 {
-	return readb((u8 __iomem *) rtlpriv->io.pci_mem_start + addr);
+	return readb( ( u8 __iomem * ) rtlpriv->io.pci_mem_start + addr );
 }
 
-static inline u16 pci_read16_sync(struct rtl_priv *rtlpriv, u32 addr)
+static inline u16 pci_read16_sync( struct rtl_priv *rtlpriv, u32 addr )
 {
-	return readw((u8 __iomem *) rtlpriv->io.pci_mem_start + addr);
+	return readw( ( u8 __iomem * ) rtlpriv->io.pci_mem_start + addr );
 }
 
-static inline u32 pci_read32_sync(struct rtl_priv *rtlpriv, u32 addr)
+static inline u32 pci_read32_sync( struct rtl_priv *rtlpriv, u32 addr )
 {
-	return readl((u8 __iomem *) rtlpriv->io.pci_mem_start + addr);
+	return readl( ( u8 __iomem * ) rtlpriv->io.pci_mem_start + addr );
 }
 
-static inline void pci_write8_async(struct rtl_priv *rtlpriv, u32 addr, u8 val)
+static inline void pci_write8_async( struct rtl_priv *rtlpriv, u32 addr, u8 val )
 {
-	writeb(val, (u8 __iomem *) rtlpriv->io.pci_mem_start + addr);
+	writeb( val, ( u8 __iomem * ) rtlpriv->io.pci_mem_start + addr );
 }
 
-static inline void pci_write16_async(struct rtl_priv *rtlpriv,
-				     u32 addr, u16 val)
+static inline void pci_write16_async( struct rtl_priv *rtlpriv,
+				     u32 addr, u16 val )
 {
-	writew(val, (u8 __iomem *) rtlpriv->io.pci_mem_start + addr);
+	writew( val, ( u8 __iomem * ) rtlpriv->io.pci_mem_start + addr );
 }
 
-static inline void pci_write32_async(struct rtl_priv *rtlpriv,
-				     u32 addr, u32 val)
+static inline void pci_write32_async( struct rtl_priv *rtlpriv,
+				     u32 addr, u32 val )
 {
-	writel(val, (u8 __iomem *) rtlpriv->io.pci_mem_start + addr);
+	writel( val, ( u8 __iomem * ) rtlpriv->io.pci_mem_start + addr );
 }
 
 #endif
