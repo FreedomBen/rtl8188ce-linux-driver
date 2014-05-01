@@ -36,7 +36,7 @@ if [ "$input" = "y" -o "$input" = "Y" ]; then
 
     ./am_i_using_this_driver.sh
 
-    echo -e "\nIf you aren't running the driver, try a reboot and re-run the script."
+    echo -e "\nIf you aren't running the driver, try a reboot and re-run the script \"am_i_using_this_driver.sh\"."
     echo -e "\nNOTE: If your wifi looks dead, it usually comes back after a reboot.  Don't panic yet.\n"
     echo "OK, ready for a reboot. (only necessary if your wifi is not working)"
     echo "You can check if you're running the new driver by running the script \"am_i_using_this_driver.sh\""
