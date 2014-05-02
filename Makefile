@@ -55,7 +55,7 @@ install: all
 	$(shell mkdir $(MODDESTDIR)/rtl8192de)
 	$(shell mkdir $(MODDESTDIR)/rtl8188ee)
 	@install -p -m 644 rtlwifi.ko $(MODDESTDIR)	
-	@install -p -m 644 ./rtl8192c/rtl8192c_common.ko $(MODDESTDIR)/rtl8192se
+	@install -p -m 644 ./rtl8192c/rtl8192c_common.ko $(MODDESTDIR)/rtl8192c
 	@install -p -m 644 ./rtl8192se/rtl8192se.ko $(MODDESTDIR)/rtl8192se
 	@install -p -m 644 ./rtl8192ce/rtl8192ce.ko $(MODDESTDIR)/rtl8192ce
 	@install -p -m 644 ./rtl8192de/rtl8192de.ko $(MODDESTDIR)/rtl8192de

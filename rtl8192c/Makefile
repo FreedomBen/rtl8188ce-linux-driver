@@ -9,7 +9,7 @@ EXTRA_CFLAGS += -O2
 #EXTRA_CFLAGS += -DRTK_FW_HDR
 
 ####################################################
-obj-m := rtl8192c.o
+obj-m := rtl8192c_common.o
 
 
 PCI_92C_HAL_OBJS:=	\
@@ -19,7 +19,7 @@ PCI_92C_HAL_OBJS:=	\
 
 ####################################################
 
-rtl8192ce-objs += $(PCI_92C_HAL_OBJS)
+rtl8192c_common-objs += $(PCI_92C_HAL_OBJS)
 
 default:
 	        $(MAKE) -C $(KSRC) M=$(PWD) modules
