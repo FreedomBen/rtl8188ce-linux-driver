@@ -1,9 +1,36 @@
-rtl8192c-common-objs :=		\
-		main.o		\
-		dm_common.o	\
-		fw_common.o	\
-		phy_common.o
 
-obj-$(CONFIG_RTL8192C_COMMON) += rtl8192c-common.o
+CC = gcc
+KVER  := $(shell uname -r)
+KSRC := /lib/modules/$(KVER)/build
+MODDESTDIR := /lib/modules/$(KVER)/kernel/drivers/net/wireless/
+PWD := $(shell pwd)
 
-ccflags-y += -D__CHECK_ENDIAN__
+EXTRA_CFLAGS += -O2
+#EXTRA_CFLAGS += -DRTK_FW_HDR
+
+####################################################
+obj-m := rtl8192c.o
+
+
+PCI_92C_HAL_OBJS:=	\
+	dm_common.o	\
+	fw_common.o	\
+	phy_common.o
+
+####################################################
+
+rtl8192ce-objs += $(PCI_92C_HAL_OBJS)
+
+default:
+	        $(MAKE) -C $(KSRC) M=$(PWD) modules
+
+.PHONY:clean
+clean:
+	rm -fr *.mod.c *.mod *.o .*.cmd *.ko *~
+	rm -fr .tmp_versions
+	rm -fr Modules.symvers
+	rm -fr Module.symvers
+	rm -fr Module.markers
+	rm -fr modules.order
+	rm -fr tags
+
