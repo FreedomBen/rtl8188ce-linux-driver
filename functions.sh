@@ -55,6 +55,11 @@ runningArch ()
 
 installBuildDependencies ()
 {
+    if ! $(which sudo > /dev/null 2>&1); then
+        echo "This script requires sudo to be installed." >&2
+        return 2
+    fi
+
     if runningFedora; then
         sudo yum -y install kernel-devel kernel-headers
         sudo yum -y groupinstall "Development Tools"
