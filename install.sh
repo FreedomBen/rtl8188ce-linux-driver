@@ -6,6 +6,15 @@ if [ ! -f "functions.sh" ]; then
 else
     . "$(readlink -f functions.sh)"
 fi
+
+if ! $(pciDetectsRealtekCard || usbDetectsRealtekCard); then
+    read -p "I wasn't able to find a Realtek card on your machine.  Do you want to proceed anyway?" PROCEED
+
+    if ! [ "$PROCEED" = "Y" -o "$PROCEED" = "y" ]; then
+        exit 1
+    fi
+fi
+
 echo "So you want to live on the wild side and try a different driver for your RealTek wireless card eh?  Awesome!  I'll help you do it."
 echo "We are going to build and install the driver from source code, compiled specifically for your machine."
 echo ""
@@ -16,12 +25,29 @@ echo "You will need sudo privileges in order to complete this install."
 read -p "Press <Enter> when ready to begin, or <Ctrl+C> to quit" throwaway
 
 echo -e "\nLet's install any dependencies you will need in order to build the driver."
-installBuildDependencies
+if ! installBuildDependencies; then
+    read -p "Dependency install reported failure.  Proceed anyway? (Y/N): " PROCEED
+
+    if ! [ "$PROCEED" = "Y" -o "$PROCEED" = "y" ]; then
+        exit 1
+    fi
+fi
 
 echo -e "\nNow let's compile the driver from source and copy the files to the right directories"
 make && sudo make install
 
-read -p "Is your wireless card either the RTL8188CE or RTL8192CE? (Y/N): " input
+if pciDetectsRtl8188ce || pciDetectsRtl8192ce; then
+    input="y"
+    if pciDetectsRtl8188ce; then
+        CARD="RTL8188CE"
+    elif pciDetectsRtl8192ce; then
+        CARD="RTL8188CE"
+    fi
+
+    echo "I see you have an $CARD card"
+else
+    read -p "Is your wireless card either the RTL8188CE or RTL8192CE? (Y/N): " input
+fi
 
 if [ "$input" = "y" -o "$input" = "Y" ]; then
     echo -e "\nNow let's make sure your kernel loads the new modules at boot time"
@@ -44,3 +70,4 @@ else
     echo "OK, reboot and you should be running the new driver.  To check, run the script \"am_i_using_this_driver.sh\""
 fi
 
+exit 0
