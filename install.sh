@@ -68,6 +68,10 @@ if [ "$input" = "y" -o "$input" = "Y" ]; then
     sudo modprobe rtlwifi
     sudo modprobe rtl8192ce
 
+    if usingSystemd; then
+        sudo systemctl restart wpa_supplicant
+    fi
+
     ./am_i_using_this_driver.sh
 
     echo -e "\n${blue}[*] If you aren't running the driver, try a reboot and re-run the script \"am_i_using_this_driver.sh\".${restore}"

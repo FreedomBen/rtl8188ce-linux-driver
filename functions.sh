@@ -156,3 +156,8 @@ runningStockRtl8192ce  ()
     runningAnyRtl8192ce && ! runningOurRtl8192ce
 }
 
+usingSystemd () 
+{
+    which systemctl > /dev/null 2>&1
+}
+
