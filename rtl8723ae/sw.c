@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright(c) 2009-2012  Realtek Corporation.
+ * Copyright( c ) 2009-2012  Realtek Corporation.
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of version 2 of the GNU General Public License as
@@ -45,9 +45,9 @@
 #include "table.h"
 #include "hal_btc.h"
 
-static void rtl8723ae_init_aspm_vars(struct ieee80211_hw *hw)
+static void rtl8723ae_init_aspm_vars( struct ieee80211_hw *hw )
 {
-	struct rtl_pci *rtlpci = rtl_pcidev(rtl_pcipriv(hw));
+	struct rtl_pci *rtlpci = rtl_pcidev( rtl_pcipriv( hw ) );
 
 	/*close ASPM for AMD defaultly */
 	rtlpci->const_amdpci_aspm = 0;
@@ -86,26 +86,26 @@ static void rtl8723ae_init_aspm_vars(struct ieee80211_hw *hw)
 	rtlpci->const_support_pciaspm = 1;
 }
 
-int rtl8723ae_init_sw_vars(struct ieee80211_hw *hw)
+int rtl8723ae_init_sw_vars( struct ieee80211_hw *hw )
 {
-	struct rtl_priv *rtlpriv = rtl_priv(hw);
-	struct rtl_pci *rtlpci = rtl_pcidev(rtl_pcipriv(hw));
-	struct rtl_hal *rtlhal = rtl_hal(rtl_priv(hw));
+	struct rtl_priv *rtlpriv = rtl_priv( hw );
+	struct rtl_pci *rtlpci = rtl_pcidev( rtl_pcipriv( hw ) );
+	struct rtl_hal *rtlhal = rtl_hal( rtl_priv( hw ) );
 	int err;
 
-	rtl8723ae_bt_reg_init(hw);
+	rtl8723ae_bt_reg_init( hw );
 	rtlpriv->dm.dm_initialgain_enable = 1;
 	rtlpriv->dm.dm_flag = 0;
 	rtlpriv->dm.disable_framebursting = 0;
 	rtlpriv->dm.thermalvalue = 0;
-	rtlpci->transmit_config = CFENDFORM | BIT(12) | BIT(13);
+	rtlpci->transmit_config = CFENDFORM | BIT( 12 ) | BIT( 13 );
 
 	/* compatible 5G band 88ce just 2.4G band & smsp */
 	rtlpriv->rtlhal.current_bandtype = BAND_ON_2_4G;
 	rtlpriv->rtlhal.bandset = BAND_ON_2_4G;
 	rtlpriv->rtlhal.macphymode = SINGLEMAC_SINGLEPHY;
 
-	rtlpci->receive_config = (RCR_APPFCS |
+	rtlpci->receive_config = ( RCR_APPFCS |
 				  RCR_APP_MIC |
 				  RCR_APP_ICV |
 				  RCR_APP_PHYST_RXFF |
@@ -117,10 +117,10 @@ int rtl8723ae_init_sw_vars(struct ieee80211_hw *hw)
 				  RCR_AB |
 				  RCR_AM |
 				  RCR_APM |
-				  0);
+				  0 );
 
 	rtlpci->irq_mask[0] =
-	    (u32) (PHIMR_ROK |
+	    ( u32 ) ( PHIMR_ROK |
 		   PHIMR_RDU |
 		   PHIMR_VODOK |
 		   PHIMR_VIDOK |
@@ -133,9 +133,9 @@ int rtl8723ae_init_sw_vars(struct ieee80211_hw *hw)
 		   PHIMR_TSF_BIT32_TOGGLE |
 		   PHIMR_TXBCNOK |
 		   PHIMR_PSTIMEOUT |
-		   0);
+		   0 );
 
-	rtlpci->irq_mask[1] = (u32)(PHIMR_RXFOVW | 0);
+	rtlpci->irq_mask[1] = ( u32 )( PHIMR_RXFOVW | 0 );
 
 	/* for debug level */
 	rtlpriv->dbg.global_debuglevel = rtlpriv->cfg->mod_params->debug;
@@ -148,47 +148,47 @@ int rtl8723ae_init_sw_vars(struct ieee80211_hw *hw)
 	/* for ASPM, you can close aspm through
 	 * set const_support_pciaspm = 0
 	 */
-	rtl8723ae_init_aspm_vars(hw);
+	rtl8723ae_init_aspm_vars( hw );
 
-	if (rtlpriv->psc.reg_fwctrl_lps == 1)
+	if ( rtlpriv->psc.reg_fwctrl_lps == 1 )
 		rtlpriv->psc.fwctrl_psmode = FW_PS_MIN_MODE;
-	else if (rtlpriv->psc.reg_fwctrl_lps == 2)
+	else if ( rtlpriv->psc.reg_fwctrl_lps == 2 )
 		rtlpriv->psc.fwctrl_psmode = FW_PS_MAX_MODE;
-	else if (rtlpriv->psc.reg_fwctrl_lps == 3)
+	else if ( rtlpriv->psc.reg_fwctrl_lps == 3 )
 		rtlpriv->psc.fwctrl_psmode = FW_PS_DTIM_MODE;
 
 	/* for firmware buf */
-	rtlpriv->rtlhal.pfirmware = vmalloc(0x6000);
-	if (!rtlpriv->rtlhal.pfirmware) {
-		RT_TRACE(rtlpriv, COMP_ERR, DBG_EMERG,
-			 "Can't alloc buffer for fw.\n");
+	rtlpriv->rtlhal.pfirmware = vmalloc( 0x6000 );
+	if ( !rtlpriv->rtlhal.pfirmware ) {
+		RT_TRACE( rtlpriv, COMP_ERR, DBG_EMERG,
+			 "Can't alloc buffer for fw.\n" );
 		return 1;
 	}
 
-	if (IS_VENDOR_8723_A_CUT(rtlhal->version))
+	if ( IS_VENDOR_8723_A_CUT( rtlhal->version ) )
 		rtlpriv->cfg->fw_name = "rtlwifi/rtl8723fw.bin";
-	else if (IS_81xxC_VENDOR_UMC_B_CUT(rtlhal->version))
+	else if ( IS_81xxC_VENDOR_UMC_B_CUT( rtlhal->version ) )
 		rtlpriv->cfg->fw_name = "rtlwifi/rtl8723fw_B.bin";
 
 	rtlpriv->max_fw_size = 0x6000;
-	pr_info("Using firmware %s\n", rtlpriv->cfg->fw_name);
-	err = request_firmware_nowait(THIS_MODULE, 1, rtlpriv->cfg->fw_name,
+	pr_info( "Using firmware %s\n", rtlpriv->cfg->fw_name );
+	err = request_firmware_nowait( THIS_MODULE, 1, rtlpriv->cfg->fw_name,
 				      rtlpriv->io.dev, GFP_KERNEL, hw,
-				      rtl_fw_cb);
-	if (err) {
-		RT_TRACE(rtlpriv, COMP_ERR, DBG_EMERG,
-			 "Failed to request firmware!\n");
+				      rtl_fw_cb );
+	if ( err ) {
+		RT_TRACE( rtlpriv, COMP_ERR, DBG_EMERG,
+			 "Failed to request firmware!\n" );
 		return 1;
 	}
 	return 0;
 }
 
-void rtl8723ae_deinit_sw_vars(struct ieee80211_hw *hw)
+void rtl8723ae_deinit_sw_vars( struct ieee80211_hw *hw )
 {
-	struct rtl_priv *rtlpriv = rtl_priv(hw);
+	struct rtl_priv *rtlpriv = rtl_priv( hw );
 
-	if (rtlpriv->rtlhal.pfirmware) {
-		vfree(rtlpriv->rtlhal.pfirmware);
+	if ( rtlpriv->rtlhal.pfirmware ) {
+		vfree( rtlpriv->rtlhal.pfirmware );
 		rtlpriv->rtlhal.pfirmware = NULL;
 	}
 }
@@ -320,8 +320,8 @@ static struct rtl_hal_cfg rtl8723ae_hal_cfg = {
 	.maps[RTL_IMR_VIDOK] = PHIMR_VIDOK,
 	.maps[RTL_IMR_VODOK] = PHIMR_VODOK,
 	.maps[RTL_IMR_ROK] = PHIMR_ROK,
-	.maps[RTL_IBSS_INT_MASKS] = (PHIMR_BCNDMAINT0 |
-				     PHIMR_TXBCNOK | PHIMR_TXBCNERR),
+	.maps[RTL_IBSS_INT_MASKS] = ( PHIMR_BCNDMAINT0 |
+				     PHIMR_TXBCNOK | PHIMR_TXBCNERR ),
 	.maps[RTL_IMR_C2HCMD] = PHIMR_C2HCMD,
 
 
@@ -343,32 +343,32 @@ static struct rtl_hal_cfg rtl8723ae_hal_cfg = {
 };
 
 static struct pci_device_id rtl8723ae_pci_ids[] = {
-	{RTL_PCI_DEVICE(PCI_VENDOR_ID_REALTEK, 0x8723, rtl8723ae_hal_cfg)},
+	{RTL_PCI_DEVICE( PCI_VENDOR_ID_REALTEK, 0x8723, rtl8723ae_hal_cfg )},
 	{},
 };
 
-MODULE_DEVICE_TABLE(pci, rtl8723ae_pci_ids);
+MODULE_DEVICE_TABLE( pci, rtl8723ae_pci_ids );
 
-MODULE_AUTHOR("lizhaoming	<chaoming_li@realsil.com.cn>");
-MODULE_AUTHOR("Realtek WlanFAE	<wlanfae@realtek.com>");
-MODULE_AUTHOR("Larry Finger	<Larry.Finger@lwfinger.net>");
-MODULE_LICENSE("GPL");
-MODULE_DESCRIPTION("Realtek 8723E 802.11n PCI wireless");
-MODULE_FIRMWARE("rtlwifi/rtl8723fw.bin");
-MODULE_FIRMWARE("rtlwifi/rtl8723fw_B.bin");
+MODULE_AUTHOR( "lizhaoming	<chaoming_li@realsil.com.cn>" );
+MODULE_AUTHOR( "Realtek WlanFAE	<wlanfae@realtek.com>" );
+MODULE_AUTHOR( "Larry Finger	<Larry.Finger@lwfinger.net>" );
+MODULE_LICENSE( "GPL" );
+MODULE_DESCRIPTION( "Realtek 8723E 802.11n PCI wireless" );
+MODULE_FIRMWARE( "rtlwifi/rtl8723fw.bin" );
+MODULE_FIRMWARE( "rtlwifi/rtl8723fw_B.bin" );
 
-module_param_named(swenc, rtl8723ae_mod_params.sw_crypto, bool, 0444);
-module_param_named(debug, rtl8723ae_mod_params.debug, int, 0444);
-module_param_named(ips, rtl8723ae_mod_params.inactiveps, bool, 0444);
-module_param_named(swlps, rtl8723ae_mod_params.swctrl_lps, bool, 0444);
-module_param_named(fwlps, rtl8723ae_mod_params.fwctrl_lps, bool, 0444);
-MODULE_PARM_DESC(swenc, "Set to 1 for software crypto (default 0)\n");
-MODULE_PARM_DESC(ips, "Set to 0 to not use link power save (default 1)\n");
-MODULE_PARM_DESC(swlps, "Set to 1 to use SW control power save (default 0)\n");
-MODULE_PARM_DESC(fwlps, "Set to 1 to use FW control power save (default 1)\n");
-MODULE_PARM_DESC(debug, "Set debug level (0-5) (default 0)");
+module_param_named( swenc, rtl8723ae_mod_params.sw_crypto, bool, 0444 );
+module_param_named( debug, rtl8723ae_mod_params.debug, int, 0444 );
+module_param_named( ips, rtl8723ae_mod_params.inactiveps, bool, 0444 );
+module_param_named( swlps, rtl8723ae_mod_params.swctrl_lps, bool, 0444 );
+module_param_named( fwlps, rtl8723ae_mod_params.fwctrl_lps, bool, 0444 );
+MODULE_PARM_DESC( swenc, "Set to 1 for software crypto (default 0)\n" );
+MODULE_PARM_DESC( ips, "Set to 0 to not use link power save (default 1)\n" );
+MODULE_PARM_DESC( swlps, "Set to 1 to use SW control power save (default 0)\n" );
+MODULE_PARM_DESC( fwlps, "Set to 1 to use FW control power save (default 1)\n" );
+MODULE_PARM_DESC( debug, "Set debug level (0-5) (default 0)" );
 
-static SIMPLE_DEV_PM_OPS(rtlwifi_pm_ops, rtl_pci_suspend, rtl_pci_resume);
+static SIMPLE_DEV_PM_OPS( rtlwifi_pm_ops, rtl_pci_suspend, rtl_pci_resume );
 
 static struct pci_driver rtl8723ae_driver = {
 	.name = KBUILD_MODNAME,
@@ -378,4 +378,4 @@ static struct pci_driver rtl8723ae_driver = {
 	.driver.pm = &rtlwifi_pm_ops,
 };
 
-module_pci_driver(rtl8723ae_driver);
+module_pci_driver( rtl8723ae_driver );

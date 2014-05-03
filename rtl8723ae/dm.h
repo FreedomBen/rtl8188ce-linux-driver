@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright(c) 2009-2012  Realtek Corporation.
+ * Copyright( c ) 2009-2012  Realtek Corporation.
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of version 2 of the GNU General Public License as
@@ -31,7 +31,7 @@
 #ifndef	__RTL8723E_DM_H__
 #define __RTL8723E_DM_H__
 
-#define HAL_DM_HIPWR_DISABLE			BIT(1)
+#define HAL_DM_HIPWR_DISABLE			BIT( 1 )
 
 #define OFDM_TABLE_SIZE				37
 #define CCK_TABLE_SIZE				33
@@ -138,18 +138,18 @@ enum dm_dig_connect_e {
 	DIG_CONNECT_MAX
 };
 
-#define GET_UNDECORATED_AVERAGE_RSSI(_priv)     \
-	((((struct rtl_priv *)(_priv))->mac80211.opmode ==	\
-	NL80211_IFTYPE_ADHOC) ?  \
-	(((struct rtl_priv *)(_priv))->dm.entry_min_undec_sm_pwdb) \
-	: (((struct rtl_priv *)(_priv))->dm.undec_sm_pwdb))
+#define GET_UNDECORATED_AVERAGE_RSSI( _priv )     \
+	( ( ( ( struct rtl_priv * )( _priv ) )->mac80211.opmode ==	\
+	NL80211_IFTYPE_ADHOC ) ?  \
+	( ( ( struct rtl_priv * )( _priv ) )->dm.entry_min_undec_sm_pwdb ) \
+	: ( ( ( struct rtl_priv * )( _priv ) )->dm.undec_sm_pwdb ) )
 
-void rtl8723ae_dm_init(struct ieee80211_hw *hw);
-void rtl8723ae_dm_watchdog(struct ieee80211_hw *hw);
-void rtl8723ae_dm_write_dig(struct ieee80211_hw *hw);
-void rtl8723ae_dm_init_edca_turbo(struct ieee80211_hw *hw);
-void rtl8723ae_dm_init_rate_adaptive_mask(struct ieee80211_hw *hw);
-void rtl8723ae_dm_rf_saving(struct ieee80211_hw *hw, u8 bforce_in_normal);
-void rtl8723ae_dm_bt_coexist(struct ieee80211_hw *hw);
+void rtl8723ae_dm_init( struct ieee80211_hw *hw );
+void rtl8723ae_dm_watchdog( struct ieee80211_hw *hw );
+void rtl8723ae_dm_write_dig( struct ieee80211_hw *hw );
+void rtl8723ae_dm_init_edca_turbo( struct ieee80211_hw *hw );
+void rtl8723ae_dm_init_rate_adaptive_mask( struct ieee80211_hw *hw );
+void rtl8723ae_dm_rf_saving( struct ieee80211_hw *hw, u8 bforce_in_normal );
+void rtl8723ae_dm_bt_coexist( struct ieee80211_hw *hw );
 
 #endif

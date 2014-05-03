@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright(c) 2009-2012  Realtek Corporation.
+ * Copyright( c ) 2009-2012  Realtek Corporation.
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of version 2 of the GNU General Public License as
@@ -30,8 +30,8 @@
 #ifndef	__RTL92C_DM_H__
 #define __RTL92C_DM_H__
 
-#define HAL_DM_DIG_DISABLE			BIT(0)
-#define HAL_DM_HIPWR_DISABLE			BIT(1)
+#define HAL_DM_DIG_DISABLE			BIT( 0 )
+#define HAL_DM_HIPWR_DISABLE			BIT( 1 )
 
 #define OFDM_TABLE_LENGTH			37
 #define OFDM_TABLE_SIZE_92D			43
@@ -151,11 +151,11 @@ enum dm_dig_connect {
 	DIG_CONNECT_MAX
 };
 
-void rtl92d_dm_init(struct ieee80211_hw *hw);
-void rtl92d_dm_watchdog(struct ieee80211_hw *hw);
-void rtl92d_dm_init_edca_turbo(struct ieee80211_hw *hw);
-void rtl92d_dm_write_dig(struct ieee80211_hw *hw);
-void rtl92d_dm_check_txpower_tracking_thermal_meter(struct ieee80211_hw *hw);
-void rtl92d_dm_init_rate_adaptive_mask(struct ieee80211_hw *hw);
+void rtl92d_dm_init( struct ieee80211_hw *hw );
+void rtl92d_dm_watchdog( struct ieee80211_hw *hw );
+void rtl92d_dm_init_edca_turbo( struct ieee80211_hw *hw );
+void rtl92d_dm_write_dig( struct ieee80211_hw *hw );
+void rtl92d_dm_check_txpower_tracking_thermal_meter( struct ieee80211_hw *hw );
+void rtl92d_dm_init_rate_adaptive_mask( struct ieee80211_hw *hw );
 
 #endif

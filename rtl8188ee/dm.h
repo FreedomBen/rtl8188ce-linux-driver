@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright(c) 2009-2013  Realtek Corporation.
+ * Copyright( c ) 2009-2013  Realtek Corporation.
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of version 2 of the GNU General Public License as
@@ -174,8 +174,8 @@
 /*DIG Related*/
 #define	DM_BIT_IGI_11N					0x0000007F
 
-#define HAL_DM_DIG_DISABLE				BIT(0)
-#define HAL_DM_HIPWR_DISABLE				BIT(1)
+#define HAL_DM_DIG_DISABLE				BIT( 0 )
+#define HAL_DM_HIPWR_DISABLE				BIT( 1 )
 
 #define OFDM_TABLE_LENGTH				43
 #define CCK_TABLE_LENGTH				33
@@ -308,19 +308,19 @@ enum pwr_track_control_method {
 	TXAGC
 };
 
-void rtl88e_dm_set_tx_ant_by_tx_info(struct ieee80211_hw *hw,
-				     u8 *pdesc, u32 mac_id);
-void rtl88e_dm_ant_sel_statistics(struct ieee80211_hw *hw, u8 antsel_tr_mux,
-				  u32 mac_id, u32 rx_pwdb_all);
-void rtl88e_dm_fast_antenna_training_callback(unsigned long data);
-void rtl88e_dm_init(struct ieee80211_hw *hw);
-void rtl88e_dm_watchdog(struct ieee80211_hw *hw);
-void rtl88e_dm_write_dig(struct ieee80211_hw *hw);
-void rtl88e_dm_init_edca_turbo(struct ieee80211_hw *hw);
-void rtl88e_dm_check_txpower_tracking(struct ieee80211_hw *hw);
-void rtl88e_dm_init_rate_adaptive_mask(struct ieee80211_hw *hw);
-void rtl88e_dm_txpower_track_adjust(struct ieee80211_hw *hw,
+void rtl88e_dm_set_tx_ant_by_tx_info( struct ieee80211_hw *hw,
+				     u8 *pdesc, u32 mac_id );
+void rtl88e_dm_ant_sel_statistics( struct ieee80211_hw *hw, u8 antsel_tr_mux,
+				  u32 mac_id, u32 rx_pwdb_all );
+void rtl88e_dm_fast_antenna_training_callback( unsigned long data );
+void rtl88e_dm_init( struct ieee80211_hw *hw );
+void rtl88e_dm_watchdog( struct ieee80211_hw *hw );
+void rtl88e_dm_write_dig( struct ieee80211_hw *hw );
+void rtl88e_dm_init_edca_turbo( struct ieee80211_hw *hw );
+void rtl88e_dm_check_txpower_tracking( struct ieee80211_hw *hw );
+void rtl88e_dm_init_rate_adaptive_mask( struct ieee80211_hw *hw );
+void rtl88e_dm_txpower_track_adjust( struct ieee80211_hw *hw,
 				    u8 type, u8 *pdirection,
-				    u32 *poutwrite_val);
+				    u32 *poutwrite_val );
 
 #endif

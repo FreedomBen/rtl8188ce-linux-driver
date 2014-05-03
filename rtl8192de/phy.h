@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright(c) 2009-2012  Realtek Corporation.
+ * Copyright( c ) 2009-2012  Realtek Corporation.
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of version 2 of the GNU General Public License as
@@ -36,7 +36,7 @@
 
 #define MAX_DOZE_WAITING_TIMES_9x		64
 
-#define RT_CANNOT_IO(hw)			false
+#define RT_CANNOT_IO( hw )			false
 #define HIGHPOWER_RADIOA_ARRAYLEN		22
 
 #define MAX_TOLERANCE				5
@@ -106,68 +106,68 @@ enum rf_content {
 	radiod_txt = 3
 };
 
-static inline void rtl92d_acquire_cckandrw_pagea_ctl(struct ieee80211_hw *hw,
-						     unsigned long *flag)
+static inline void rtl92d_acquire_cckandrw_pagea_ctl( struct ieee80211_hw *hw,
+						     unsigned long *flag )
 {
-	struct rtl_priv *rtlpriv = rtl_priv(hw);
+	struct rtl_priv *rtlpriv = rtl_priv( hw );
 
-	if (rtlpriv->rtlhal.interfaceindex == 1)
-		spin_lock_irqsave(&rtlpriv->locks.cck_and_rw_pagea_lock, *flag);
+	if ( rtlpriv->rtlhal.interfaceindex == 1 )
+		spin_lock_irqsave( &rtlpriv->locks.cck_and_rw_pagea_lock, *flag );
 }
 
-static inline void rtl92d_release_cckandrw_pagea_ctl(struct ieee80211_hw *hw,
-						     unsigned long *flag)
+static inline void rtl92d_release_cckandrw_pagea_ctl( struct ieee80211_hw *hw,
+						     unsigned long *flag )
 {
-	struct rtl_priv *rtlpriv = rtl_priv(hw);
+	struct rtl_priv *rtlpriv = rtl_priv( hw );
 
-	if (rtlpriv->rtlhal.interfaceindex == 1)
-		spin_unlock_irqrestore(&rtlpriv->locks.cck_and_rw_pagea_lock,
-			*flag);
+	if ( rtlpriv->rtlhal.interfaceindex == 1 )
+		spin_unlock_irqrestore( &rtlpriv->locks.cck_and_rw_pagea_lock,
+			*flag );
 }
 
-u32 rtl92d_phy_query_bb_reg(struct ieee80211_hw *hw,
-			    u32 regaddr, u32 bitmask);
-void rtl92d_phy_set_bb_reg(struct ieee80211_hw *hw,
-			   u32 regaddr, u32 bitmask, u32 data);
-u32 rtl92d_phy_query_rf_reg(struct ieee80211_hw *hw,
+u32 rtl92d_phy_query_bb_reg( struct ieee80211_hw *hw,
+			    u32 regaddr, u32 bitmask );
+void rtl92d_phy_set_bb_reg( struct ieee80211_hw *hw,
+			   u32 regaddr, u32 bitmask, u32 data );
+u32 rtl92d_phy_query_rf_reg( struct ieee80211_hw *hw,
 			    enum radio_path rfpath, u32 regaddr,
-			    u32 bitmask);
-void rtl92d_phy_set_rf_reg(struct ieee80211_hw *hw,
+			    u32 bitmask );
+void rtl92d_phy_set_rf_reg( struct ieee80211_hw *hw,
 			   enum radio_path rfpath, u32 regaddr,
-			   u32 bitmask, u32 data);
-bool rtl92d_phy_mac_config(struct ieee80211_hw *hw);
-bool rtl92d_phy_bb_config(struct ieee80211_hw *hw);
-bool rtl92d_phy_rf_config(struct ieee80211_hw *hw);
-bool rtl92c_phy_config_rf_with_feaderfile(struct ieee80211_hw *hw,
-					  enum radio_path rfpath);
-void rtl92d_phy_get_hw_reg_originalvalue(struct ieee80211_hw *hw);
-void rtl92d_phy_set_txpower_level(struct ieee80211_hw *hw, u8 channel);
-void rtl92d_phy_set_bw_mode(struct ieee80211_hw *hw,
-			    enum nl80211_channel_type ch_type);
-u8 rtl92d_phy_sw_chnl(struct ieee80211_hw *hw);
-bool rtl92d_phy_config_rf_with_headerfile(struct ieee80211_hw *hw,
+			   u32 bitmask, u32 data );
+bool rtl92d_phy_mac_config( struct ieee80211_hw *hw );
+bool rtl92d_phy_bb_config( struct ieee80211_hw *hw );
+bool rtl92d_phy_rf_config( struct ieee80211_hw *hw );
+bool rtl92c_phy_config_rf_with_feaderfile( struct ieee80211_hw *hw,
+					  enum radio_path rfpath );
+void rtl92d_phy_get_hw_reg_originalvalue( struct ieee80211_hw *hw );
+void rtl92d_phy_set_txpower_level( struct ieee80211_hw *hw, u8 channel );
+void rtl92d_phy_set_bw_mode( struct ieee80211_hw *hw,
+			    enum nl80211_channel_type ch_type );
+u8 rtl92d_phy_sw_chnl( struct ieee80211_hw *hw );
+bool rtl92d_phy_config_rf_with_headerfile( struct ieee80211_hw *hw,
 					  enum rf_content content,
-					  enum radio_path rfpath);
-bool rtl92d_phy_set_io_cmd(struct ieee80211_hw *hw, enum io_type iotype);
-bool rtl92d_phy_set_rf_power_state(struct ieee80211_hw *hw,
-				   enum rf_pwrstate rfpwr_state);
+					  enum radio_path rfpath );
+bool rtl92d_phy_set_io_cmd( struct ieee80211_hw *hw, enum io_type iotype );
+bool rtl92d_phy_set_rf_power_state( struct ieee80211_hw *hw,
+				   enum rf_pwrstate rfpwr_state );
 
-void rtl92d_phy_config_macphymode(struct ieee80211_hw *hw);
-void rtl92d_phy_config_macphymode_info(struct ieee80211_hw *hw);
-u8 rtl92d_get_chnlgroup_fromarray(u8 chnl);
-void rtl92d_phy_set_poweron(struct ieee80211_hw *hw);
-void rtl92d_phy_config_maccoexist_rfpage(struct ieee80211_hw *hw);
-bool rtl92d_phy_check_poweroff(struct ieee80211_hw *hw);
-void rtl92d_phy_lc_calibrate(struct ieee80211_hw *hw);
-void rtl92d_update_bbrf_configuration(struct ieee80211_hw *hw);
-void rtl92d_phy_ap_calibrate(struct ieee80211_hw *hw, char delta);
-void rtl92d_phy_iq_calibrate(struct ieee80211_hw *hw);
-void rtl92d_phy_reset_iqk_result(struct ieee80211_hw *hw);
-void rtl92d_release_cckandrw_pagea_ctl(struct ieee80211_hw *hw,
-				       unsigned long *flag);
-void rtl92d_acquire_cckandrw_pagea_ctl(struct ieee80211_hw *hw,
-				       unsigned long *flag);
-u8 rtl92d_get_rightchnlplace_for_iqk(u8 chnl);
-void rtl92d_phy_reload_iqk_setting(struct ieee80211_hw *hw, u8 channel);
+void rtl92d_phy_config_macphymode( struct ieee80211_hw *hw );
+void rtl92d_phy_config_macphymode_info( struct ieee80211_hw *hw );
+u8 rtl92d_get_chnlgroup_fromarray( u8 chnl );
+void rtl92d_phy_set_poweron( struct ieee80211_hw *hw );
+void rtl92d_phy_config_maccoexist_rfpage( struct ieee80211_hw *hw );
+bool rtl92d_phy_check_poweroff( struct ieee80211_hw *hw );
+void rtl92d_phy_lc_calibrate( struct ieee80211_hw *hw );
+void rtl92d_update_bbrf_configuration( struct ieee80211_hw *hw );
+void rtl92d_phy_ap_calibrate( struct ieee80211_hw *hw, char delta );
+void rtl92d_phy_iq_calibrate( struct ieee80211_hw *hw );
+void rtl92d_phy_reset_iqk_result( struct ieee80211_hw *hw );
+void rtl92d_release_cckandrw_pagea_ctl( struct ieee80211_hw *hw,
+				       unsigned long *flag );
+void rtl92d_acquire_cckandrw_pagea_ctl( struct ieee80211_hw *hw,
+				       unsigned long *flag );
+u8 rtl92d_get_rightchnlplace_for_iqk( u8 chnl );
+void rtl92d_phy_reload_iqk_setting( struct ieee80211_hw *hw, u8 channel );
 
 #endif
