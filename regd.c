@@ -75,19 +75,19 @@ static struct country_code_to_enum_rd allCountries[] = {
 
 /* 5G chan 36 - chan 64*/
 #define RTL819x_5GHZ_5150_5350	\
-	REG_RULE( 5150-10, 5350+10, 40, 0, 30, \
+	REG_RULE( 5150-10, 5350+10, 40, 0, 33, \
 	NL80211_RRF_PASSIVE_SCAN | \
 	NL80211_RRF_NO_IBSS )
 
 /* 5G chan 100 - chan 165*/
 #define RTL819x_5GHZ_5470_5850	\
-	REG_RULE( 5470-10, 5850+10, 40, 0, 30, \
+	REG_RULE( 5470-10, 5850+10, 40, 0, 33, \
 	NL80211_RRF_PASSIVE_SCAN | \
 	NL80211_RRF_NO_IBSS )
 
 /* 5G chan 149 - chan 165*/
 #define RTL819x_5GHZ_5725_5850	\
-	REG_RULE( 5725-10, 5850+10, 40, 0, 30, \
+	REG_RULE( 5725-10, 5850+10, 40, 0, 33, \
 	NL80211_RRF_PASSIVE_SCAN | \
 	NL80211_RRF_NO_IBSS )
 
