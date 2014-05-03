@@ -136,6 +136,11 @@ runningAnyRtlwifi ()
     lsmod | grep "rtlwifi" > /dev/null
 }
 
+runningAnyRtl8192c_common ()
+{
+    lsmod | grep "rtl8192c_common" > /dev/null
+}
+
 runningOurRtlwifi ()
 {
     modinfo rtlwifi | grep "Benjamin Porter" > /dev/null
@@ -146,9 +151,19 @@ runningOurRtl8192ce ()
     modinfo rtl8192ce | grep "Benjamin Porter" > /dev/null
 }
 
+runningOurRtl8192c_common ()
+{
+    modinfo rtl8192c_common | grep "Benjamin Porter" > /dev/null
+}
+
 runningStockRtlwifi ()
 {
     runningAnyRtlwifi && ! runningOurRtlwifi
+}
+
+runningStockRtl8192c_common ()
+{
+    runningAnyRtl8192c_common && ! runningOurRtl8192c_common
 }
 
 runningStockRtl8192ce  ()
