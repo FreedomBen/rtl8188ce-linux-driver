@@ -1880,6 +1880,7 @@ struct attribute_group rtl_attribute_group = {
 };
 EXPORT_SYMBOL_GPL( rtl_attribute_group );
 
+MODULE_AUTHOR( "Benjamin Porter	<BenjaminPorter86@gmail.com>" );
 MODULE_AUTHOR( "lizhaoming	<chaoming_li@realsil.com.cn>" );
 MODULE_AUTHOR( "Realtek WlanFAE	<wlanfae@realtek.com>" );
 MODULE_AUTHOR( "Larry Finger	<Larry.FInger@lwfinger.net>" );

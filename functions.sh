@@ -43,21 +43,41 @@ runningFedora ()
     uname -r | grep --color=auto "fc" > /dev/null
 }
 
+# also returns true for Linux Mint
 runningUbuntu () 
 { 
     uname -a | grep --color=auto "Ubuntu" > /dev/null
 }
+runningArch ()
+{
+    uname -a | grep --color=auto "ARCH" > /dev/null
+}
 
 installBuildDependencies ()
 {
+    if ! $(which sudo > /dev/null 2>&1); then
+        echo "This script requires sudo to be installed." >&2
+        return 2
+    fi
+
     if runningFedora; then
         sudo yum -y install kernel-devel kernel-headers
         sudo yum -y groupinstall "Development Tools"
         sudo yum -y groupinstall "C Development Tools and Libraries"
         sudo yum -y install git
+        return $?
     elif runningUbuntu; then
         sudo apt-get -y install gcc build-essential linux-headers-generic linux-headers-$(uname -r)
         sudo apt-get -y install git
+        return $?
+    elif runningArch; then
+        sudo pacman -S git
+        sudo pacman -S linux-headers
+        sudo pacman -S base-devel
+        return $?
+    else
+        echo "Unknown distro. Please ensure all build dependencies are installed before proceeding (or the compile will fail).  Roughly you need gcc build essentials, linux headers, and git." >&2
+        return 1
     fi
 }
 
@@ -86,28 +106,53 @@ makeModuleLoadPersistent ()
     fi
 }
 
-runningAnyDriver ()
+usbDetectsRealtekCard ()
+{
+    lsusb | egrep -i "realtek.*wifi" > /dev/null
+}
+
+pciDetectsRealtekCard ()
+{
+    lspci | egrep -i "realtek.*wifi" > /dev/null
+}
+
+pciDetectsRtl8192ce ()
+{
+    lspci | grep -i "RTL8192CE" > /dev/null
+}
+
+pciDetectsRtl8188ce ()
+{
+    lspci | grep -i "RTL8188CE" > /dev/null
+}
+
+runningAnyRtl8192ce ()
+{
+    lsmod | grep "rtl8192ce" > /dev/null
+}
+
+runningAnyRtlwifi ()
 {
     lsmod | grep "rtlwifi" > /dev/null
 }
 
-runningRtlwifiDriver ()
+runningOurRtlwifi ()
 {
     modinfo rtlwifi | grep "Benjamin Porter" > /dev/null
 }
 
-runningRtl8192ceDriver ()
+runningOurRtl8192ce ()
 {
     modinfo rtl8192ce | grep "Benjamin Porter" > /dev/null
 }
 
-runningOurDriver ()
+runningStockRtlwifi ()
 {
-    runningRtlwifiDriver || runningRtl8192ceDriver 
+    runningAnyRtlwifi && ! runningOurRtlwifi
 }
 
-runningStockDriver ()
+runningStockRtl8192ce  ()
 {
-    runningAnyDriver && ! runningOurDriver
+    runningAnyRtl8192ce && ! runningOurRtl8192ce
 }
 
