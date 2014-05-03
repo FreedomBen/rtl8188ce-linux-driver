@@ -17,6 +17,16 @@ else
     echo -e "${red}[*] Not running any rtlwifi${restore}"
 fi
 
+if runningAnyRtl8192c_common; then
+    if runningOurRtl8192c_common; then
+        echo -e "${green}[*] You are running the new rtl8192c_common${restore}"
+    else
+        echo -e "${yellow}[*] Not running the new rtl8192c_common (running stock driver)${restore}"
+    fi
+else
+    echo -e "${red}[*] Not running any rtl8192c_common${restore}"
+fi
+
 if runningAnyRtl8192ce; then
     if runningOurRtl8192ce; then
         echo -e "${green}[*] You are running the new rtl8192ce${restore}"
