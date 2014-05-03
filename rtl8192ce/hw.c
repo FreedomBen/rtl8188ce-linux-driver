@@ -37,7 +37,7 @@
 #include "reg.h"
 #include "def.h"
 #include "phy.h"
-#include "fw_common.h"
+#include "../rtl8192c/fw_common.h"
 #include "dm.h"
 #include "led.h"
 #include "hw.h"
