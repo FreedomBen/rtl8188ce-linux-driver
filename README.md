@@ -165,6 +165,8 @@ Ex: "git checkout ubuntu-13.04"
 
     rtl8192ce, rtlwifi, rtl8192c_common, mac80211, cfg80211
 
+NOTE: Unlike the stock driver, `rtl8192c_common` is only required with kernel >= 3.14
+
 
 8\. Make persistent by adding this to the end of "/etc/modules" (for Ubuntu), or "/etc/rc.modules" (for Fedora) (if Fedora make sure /etc/rc.modules is exectuable. If you don't have an RTL8188CE or RTL8192CE, then substitute the correct kernel module in place of `rtl8192ce.ko`:
 
