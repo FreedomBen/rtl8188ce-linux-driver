@@ -245,7 +245,7 @@ struct rtl_hal_ops rtl8192ce_hal_ops = {
 
 struct rtl_mod_params rtl92ce_mod_params = {
 	.sw_crypto = false,
-	.b_inactiveps = false,
+	.b_inactiveps = true,
 	.b_swctrl_lps = false,
 	.b_fwctrl_lps = false,
 };
@@ -365,9 +365,9 @@ module_param_named( swenc, rtl92ce_mod_params.sw_crypto, bool, 0444 );
 module_param_named( ips, rtl92ce_mod_params.b_inactiveps, bool, 0444 );
 module_param_named( swlps, rtl92ce_mod_params.b_swctrl_lps, bool, 0444 );
 module_param_named( fwlps, rtl92ce_mod_params.b_fwctrl_lps, bool, 0444 );
-MODULE_PARM_DESC( swenc, "using hardware crypto (default 0 [hardware])\n" );
-MODULE_PARM_DESC( ips, "using no link power save (default 0 is off)\n" );
-MODULE_PARM_DESC( fwlps, "using no linked fw control power save (default 0 is off)\n" );
+MODULE_PARM_DESC( swenc, "Using hardware crypto (default 0 [hardware])\n" );
+MODULE_PARM_DESC( ips, "Using no link power save (default 1 is inactive)\n" );
+MODULE_PARM_DESC( fwlps, "Using no linked fw control power save (default 0 is off)\n" );
 
 #if ( LINUX_VERSION_CODE >= KERNEL_VERSION( 2,6,29 ) )
 static const SIMPLE_DEV_PM_OPS( rtlwifi_pm_ops, rtl_pci_suspend, rtl_pci_resume );
