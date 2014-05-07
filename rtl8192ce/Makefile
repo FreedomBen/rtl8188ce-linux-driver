@@ -21,9 +21,6 @@ PCI_92CE_HAL_OBJS:=	\
 	phy.o		\
 	rf.o		\
 	dm.o		\
-	dm_common.o     \
-	fw_common.o     \
-	phy_common.o
 
 ####################################################
 
