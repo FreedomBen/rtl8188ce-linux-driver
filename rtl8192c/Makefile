@@ -13,6 +13,7 @@ obj-m := rtl8192c_common.o
 
 
 PCI_92C_HAL_OBJS:=	\
+    	main.o		\
 	dm_common.o	\
 	fw_common.o	\
 	phy_common.o
