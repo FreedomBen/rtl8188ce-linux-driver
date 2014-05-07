@@ -21,6 +21,7 @@ if [ "$(id -u)" = "0" ]; then
         read -p "Do this now? (y/n): " PROCEED
 
         if [ "$PROCEED" = "y" -o "$PROCEED" = "Y" ]; then
+            echo -e "\n\n" >> $FILE 
             echo "$COMMENT" >> $FILE
             echo "$OPTION1" >> $FILE
             echo "$OPTION2" >> $FILE
