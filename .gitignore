@@ -28,3 +28,7 @@ modules.order
 
 # vim swap files
 *.swp
+
+# YouCompleteMe config file
+*.ycm_extra_conf.pyc
+
