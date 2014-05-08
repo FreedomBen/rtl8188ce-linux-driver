@@ -358,6 +358,7 @@ MODULE_DEVICE_TABLE( pci, rtl92ce_pci_ids );
 MODULE_AUTHOR( "lizhaoming	<chaoming_li@realsil.com.cn>" );
 MODULE_AUTHOR( "Realtek WlanFAE	<wlanfae@realtek.com>" );
 MODULE_AUTHOR( "Larry Finger	<Larry.Finger@lwfinger.net>" );
+MODULE_AUTHOR( "Benjamin Porter	<BenjaminPorter86@gmail.com>" );
 MODULE_LICENSE( "GPL" );
 MODULE_DESCRIPTION( "Realtek 8192C/8188C 802.11n PCI wireless" );
 MODULE_FIRMWARE( "rtlwifi/rtl8192cfw.bin" );
