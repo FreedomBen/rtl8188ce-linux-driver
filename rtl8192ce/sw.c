@@ -366,7 +366,6 @@ MODULE_FIRMWARE( "rtlwifi/rtl8192cfwU.bin" );
 MODULE_FIRMWARE( "rtlwifi/rtl8192cfwU_B.bin" );
 
 module_param_named( swenc, rtl92ce_mod_params.sw_crypto, bool, 0444 );
-<<<<<<< HEAD
 module_param_named( debug, rtl92ce_mod_params.debug, int, 0444 );
 module_param_named( ips, rtl92ce_mod_params.inactiveps, bool, 0444 );
 module_param_named( swlps, rtl92ce_mod_params.swctrl_lps, bool, 0444 );
@@ -378,23 +377,6 @@ MODULE_PARM_DESC( fwlps, "Set to 1 to use FW control power save (default 1)\n" )
 MODULE_PARM_DESC( debug, "Set debug level (0-5) (default 0)" );
 
 static SIMPLE_DEV_PM_OPS( rtlwifi_pm_ops, rtl_pci_suspend, rtl_pci_resume );
-=======
-module_param_named( ips, rtl92ce_mod_params.b_inactiveps, bool, 0444 );
-module_param_named( swlps, rtl92ce_mod_params.b_swctrl_lps, bool, 0444 );
-module_param_named( fwlps, rtl92ce_mod_params.b_fwctrl_lps, bool, 0444 );
-MODULE_PARM_DESC( swenc, "Using hardware crypto (default 0 [hardware])\n" );
-MODULE_PARM_DESC( ips, "Using no link power save (default 1 is inactive)\n" );
-MODULE_PARM_DESC( fwlps, "Using no linked fw control power save (default 0 is off)\n" );
-
-#if ( LINUX_VERSION_CODE >= KERNEL_VERSION( 2,6,29 ) )
-static const SIMPLE_DEV_PM_OPS( rtlwifi_pm_ops, rtl_pci_suspend, rtl_pci_resume );
-#endif
-
-#if ( LINUX_VERSION_CODE < KERNEL_VERSION( 2,6,29 ) )
-compat_pci_suspend( rtl_pci_suspend )
-compat_pci_resume( rtl_pci_resume )
-#endif
->>>>>>> origin/fedora-20
 
 static struct pci_driver rtl92ce_driver = {
 	.name = KBUILD_MODNAME,
