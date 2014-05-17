@@ -35,13 +35,13 @@ echo "Verifying a sane branch for your kernel version..."
 
 if inGitRepo; then
     if $(uname -r | grep "3.14" > /dev/null); then
-        doSwitch "arch"
-    elif $(uname -r | grep "3.13" > /dev/null); then
         if runningFedora; then
             doSwitch "fedora-20"
         else
-            doSwitch "ubuntu-14.04"
+            doSwitch "arch"
         fi
+    elif $(uname -r | grep "3.13" > /dev/null); then
+        doSwitch "ubuntu-14.04"
     elif $(uname -r | grep "3.12" > /dev/null); then
         doSwitch "fedora-20"
     elif $(uname -r | grep "3.11" > /dev/null); then
@@ -64,8 +64,8 @@ if inGitRepo; then
     fi
 else
     base="$(basename $(pwd))"
-    if ( $(uname -r | grep "3.14" > /dev/null) && ! $(echo "$base" | grep "arch"          > /dev/null) ) ||                                                        \
-       ( $(uname -r | grep "3.13" > /dev/null) && ! $(echo "$base" | grep "fedora-20"     > /dev/null) ) && ! $(echo "$base" | grep "ubuntu-14.04" > /dev/null) || \
+    if ( $(uname -r | grep "3.14" > /dev/null) && ! $(echo "$base" | grep "fedora-20"     > /dev/null) ) && ! $(echo "$base" | grep "arch" > /dev/null) ||         \
+       ( $(uname -r | grep "3.13" > /dev/null) && ! $(echo "$base" | grep "ubuntu-14.04"  > /dev/null) ) ||                                                        \
        ( $(uname -r | grep "3.12" > /dev/null) && ! $(echo "$base" | grep "fedora-20"     > /dev/null) ) ||                                                        \
        ( $(uname -r | grep "3.11" > /dev/null) && ! $(echo "$base" | grep "fedora-20"     > /dev/null) ) && ! $(echo "$base" | grep "ubuntu-13.10" > /dev/null) || \
        ( $(uname -r | grep "3.8"  > /dev/null) && ! $(echo "$base" | grep "ubuntu-13.04"  > /dev/null) ) ||                                                        \
