@@ -134,8 +134,8 @@ Ex: "git checkout ubuntu-13.04"
     Ubuntu 12.04 | Kernel 3.2.x  | ubuntu-12.04
     Ubuntu 13.04 | Kernel 3.8.x  | ubuntu-13.04
     Ubuntu 13.10 | Kernel 3.11.x | ubuntu-13.10
-    Fedora 19/20 | Kernel 3.13.x | fedora-20
     Ubuntu 14.04 | Kernel 3.13.x | ubuntu-14.04 
+    Fedora 19/20 | Kernel 3.14.x | fedora-20
     Arch         | Kernel 3.14.x | arch
 
     * Note, if the Ubuntu/Fedora release version and your kernel version conflict, go with the branch corresponding to your *kernel version* as that is what really matters!
@@ -145,7 +145,7 @@ Ex: "git checkout ubuntu-13.04"
 
     make
 
-4\. Remove existing kernel modules.  You may want to write these down before removing just in case you need to add them back manually after the build (rare but possible).  Record the output of "lsmod | grep ^rtl":
+4\. Unload the existing rtl kernel modules.
 
     lsmod | grep ^rtl                     // to list the modules
     sudo modprobe -r $(lsmod | grep ^rtl) // To unload them
@@ -161,7 +161,7 @@ Ex: "git checkout ubuntu-13.04"
 *(rtl8192ce is the driver for the RTL8188CE card also)*
 
 
-7\. The rtl8192ce should load all modules it depends on (`rtlwifi`, `rtl8192c_common`, `mac80211`, `cfg80211`, etc.), but if it doesn't work you may need to modprobe back in the other modules too (I did).  Common modules:
+7\. The rtl8192ce should load all modules it depends on (`rtlwifi`, `rtl8192c_common`, `mac80211`, `cfg80211`, etc.), but if it doesn't work you may need to modprobe back in the other modules too.  Common modules:
 
     rtl8192ce, rtlwifi, rtl8192c_common, mac80211, cfg80211
 
@@ -198,4 +198,26 @@ After running:
     modprobe rtl8192ce 
     
 You may have invalid configuration options in /etc/modprobe.d/rtl8192ce.conf.  You can either remove the file or remove the debug option as it is no long supported.   
+
+3\. If you're getting power drops*:
+
+    You may have better luck fixing your data rate.  The best rate will vary depending on your Tx power, Rx power, and distance from the router.  You may want to set the rate to be fixed around your internet connection speed unless you're doing other stuff on your LAN.  Basgoosen found his sweetspot to be 24M.  You can set the fixed rate as follows (substitute your wireless interface for \<wlan\>, so for example wlan0):
+
+    sudo iwconfig <wlan> rate fixed
+    sudo iwconfig <wlan> rate 24M
+    sudo iwconfig <wlan> bit fixed
+    sudo iwconfig <wlan> bit 24M
+
+To make this persistent, create a file in `/etc/network/if-up.d` containing the following (substitute your wireless interface for \<wlan\>!):
+
+    #!/bin/sh
+
+    if [ "$IFACE" = "<wlan>" ]; then
+        sudo iwconfig <wlan> rate fixed
+        sudo iwconfig <wlan> rate 24M
+        sudo iwconfig <wlan> bit fixed
+        sudo iwconfig <wlan> bit 24M
+    fi
+
+*Thanks to basgoosen for this suggestion
 
