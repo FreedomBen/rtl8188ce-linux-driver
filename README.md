@@ -201,7 +201,7 @@ You may have invalid configuration options in /etc/modprobe.d/rtl8192ce.conf.  Y
 
 3\. If you're getting power drops*:
 
-    You may have better luck fixing your data rate.  The best rate will vary depending on your Tx power, Rx power, and distance from the router.  You may want to set the rate to be fixed around your internet connection speed unless you're doing other stuff on your LAN.  Basgoosen found his sweetspot to be 24M.  You can set the fixed rate as follows (substitute your wireless interface for \<wlan\>, so for example wlan0):
+You may have better luck fixing your data rate.  The best rate will vary depending on your Tx power, Rx power, and distance from the router.  You may want to set the rate to be fixed around your internet connection speed unless you're doing other stuff on your LAN.  Basgoosen found his sweetspot to be 24M.  You can set the fixed rate as follows (substitute your wireless interface for \<wlan\>, so for example wlan0):
 
     sudo iwconfig <wlan> rate fixed
     sudo iwconfig <wlan> rate 24M
