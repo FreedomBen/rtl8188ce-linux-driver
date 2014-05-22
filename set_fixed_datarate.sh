@@ -28,7 +28,7 @@ fi
 
 if [ "$(wi_count)" = "0" ]; then
     echo "Sorry, I couldn't find any wireless interfaces" >&2
-elif [ "$(wi_count)" != "0" ]; then
+elif [ "$(wi_count)" != "1" ]; then
     echo "You have $(wi_count) wireless interfaces."
     read -p "Use which I/F? (leave blank to use all): " INF
     if [ -n "$INF" ]; then
