@@ -199,7 +199,32 @@ After running:
     
 You may have invalid configuration options in /etc/modprobe.d/rtl8192ce.conf.  You can either remove the file or remove the debug option as it is no long supported.   
 
-3\. If you're getting power drops*:
+3\. If you're connection seems unstable:
+
+This driver has been modified to allow up to 33 dBm Tx power (instead of the stock driver limit of 20).  This allows you to crank up the Tx power, which *vastly* improves performance for me. 
+
+To do this, your CRDA regulatory domain must allow it.  You need to be aware of the laws that govern your local area so you are not in violation.  If you do this, you assume all legal liability for your actions.  Also, don't crank your Tx power up to 33 dBm when you're sitting right next to your router.  Almost all wireless routers have AGC built-in that will save them from hot transmitters, but it is better to try not to fry the receiver.  Keep in mind that you're hacking your wi-fi card to bypass the normal safety net(s) that prevent us from doing cool stuff.
+
+A very lenient CRDA domain is Bolivia (BO) that will let you up to 33 dBm.  To set Bolivia, run the following:
+
+    sudo iw reg set BO
+
+To turn up the Tx power, run this (substitute your wireless interface name for <if-name> and desired power level for <value>):
+
+    sudo iwconfig <if-name> txpower <value>
+
+    E.g.:
+
+    sudo iwconfig wlan0 txpower 33
+
+To check the current Tx power, run:
+
+    iwconfig <if-name> | grep "Tx-Power"
+
+The current tx power will be listed as `Tx-Power=xx dBm`
+
+
+4\. If you're getting power drops*:
 
 You may have better luck fixing your data rate.  The best rate will vary depending on your Tx power, Rx power, and distance from the router.  You may want to set the rate to be fixed around your internet connection speed unless you're doing other stuff on your LAN.  Basgoosen found his sweetspot to be 24M.  You can set the fixed rate as follows (substitute your wireless interface for \<wlan\>, so for example wlan0):
 
