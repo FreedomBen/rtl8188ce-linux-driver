@@ -221,7 +221,7 @@ To check the current Tx power, run:
 
     iwconfig <if-name> | grep "Tx-Power"
 
-The current tx power will be listed as `Tx-Power=xx dBm`
+The current Tx power will be listed as `Tx-Power=xx dBm`
 
 
 4\. If you're getting power drops*:
@@ -245,4 +245,16 @@ To make this persistent, create a file in `/etc/network/if-up.d` containing the 
     fi
 
 *Thanks to basgoosen for this suggestion
+
+5\. My kernel package was updated by my distro and now I'm stuck back on the stock driver!
+
+Yeah unfornately this does currently happen anytime your kernel package is updated by your distro.  The solution is to rebuild and reinstall this driver.  On the plus side that gives you a chance to pull down the latest changes so that you're up to date with the latest.
+
+Please don't save a copy of the drivers compiled under a different version of the kernel to copy back in after the kernel update.  While a clever solution, this could cause undefined and potentially disastrous results if the ABI changes (which it does frequently).  The drivers need to be rebuilt using the new kernel headers to ensure they are compiled correctly.  It may work fine for a few upgrades, but eventually it will probably leave your system unbootable.
+
+In the long term I plan to get this working with DKMS so this driver will be automatically recompiled every time the kernel changes.
+
+You can run this command to automatically clone this repo and kick off the installer (git must be installed already):
+
+    git clone https://github.com/FreedomBen/rtl8188ce-linux-driver.git && cd rtl8188ce-linux-driver && ./install.sh
 
