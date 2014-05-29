@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright( c ) 2008 - 2010 Realtek Corporation. All rights reserved.
+ * Copyright( c ) 2008 - 2012 Realtek Corporation. All rights reserved.
  *
  * This program is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
@@ -15,7 +15,10 @@
  *
  * Contact Information:
  * wlanfae <wlanfae@realtek.com>
-******************************************************************************/
+ *
+ * Larry Finger <Larry.Finger@lwfinger.net>
+ *
+ ******************************************************************************/
 #ifndef __INC_HAL8192SE_FW_IMG_H
 #define __INC_HAL8192SE_FW_IMG_H
 

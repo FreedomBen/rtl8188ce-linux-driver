@@ -1,0 +1,5527 @@
+commit fb1f1a73d489f6e3f3e04d3e3710aee80f7ff9a5
+Author: Mark Cave-Ayland <mark.cave-ayland@ilande.co.uk>
+Date:   Sat Nov 2 14:28:35 2013 -0500
+
+    rtlwifi: Fix endian error in extracting packet type
+    
+    commit 0c5d63f0ab6728f05ddefa25aff55e31297f95e6 upstream.
+    
+    All of the rtlwifi drivers have an error in the routine that tests if
+    the data is "special". If it is, the subsequant transmission will be
+    at the lowest rate to enhance reliability. The 16-bit quantity is
+    big-endian, but was being extracted in native CPU mode. One of the
+    effects of this bug is to inhibit association under some conditions
+    as the TX rate is too high.
+    
+    Based on suggestions by Joe Perches, the entire routine is rewritten.
+    
+    One of the local headers contained duplicates of some of the ETH_P_XXX
+    definitions. These are deleted.
+    
+    Signed-off-by: Larry Finger <Larry.Finger@lwfinger.net>
+    Cc: Mark Cave-Ayland <mark.cave-ayland@ilande.co.uk>
+    Signed-off-by: John W. Linville <linville@tuxdriver.com>
+    Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+
+diff --git a/drivers/net/wireless/rtlwifi/base.c b/drivers/net/wireless/rtlwifi/base.c
+index 8bb4a9a..9fa90a2 100644
+--- a/drivers/net/wireless/rtlwifi/base.c
++++ b/drivers/net/wireless/rtlwifi/base.c
+@@ -37,6 +37,7 @@
+ 
+ #include <linux/ip.h>
+ #include <linux/module.h>
++#include <linux/udp.h>
+ 
+ /*
+  *NOTICE!!!: This file will be very big, we should
+@@ -1074,64 +1075,52 @@ u8 rtl_is_special_data(struct ieee80211_hw *hw, struct sk_buff *skb, u8 is_tx)
+ 	if (!ieee80211_is_data(fc))
+ 		return false;
+ 
++	ip = (const struct iphdr *)(skb->data + mac_hdr_len +
++				    SNAP_SIZE + PROTOC_TYPE_SIZE);
++	ether_type = be16_to_cpup((__be16 *)
++				  (skb->data + mac_hdr_len + SNAP_SIZE));
+ 
+-	ip = (struct iphdr *)((u8 *) skb->data + mac_hdr_len +
+-			      SNAP_SIZE + PROTOC_TYPE_SIZE);
+-	ether_type = *(u16 *) ((u8 *) skb->data + mac_hdr_len + SNAP_SIZE);
+-	/*	ether_type = ntohs(ether_type); */
+-
+-	if (ETH_P_IP == ether_type) {
+-		if (IPPROTO_UDP == ip->protocol) {
+-			struct udphdr *udp = (struct udphdr *)((u8 *) ip +
+-							       (ip->ihl << 2));
+-			if (((((u8 *) udp)[1] == 68) &&
+-			     (((u8 *) udp)[3] == 67)) ||
+-			    ((((u8 *) udp)[1] == 67) &&
+-			     (((u8 *) udp)[3] == 68))) {
+-				/*
+-				 * 68 : UDP BOOTP client
+-				 * 67 : UDP BOOTP server
+-				 */
+-				RT_TRACE(rtlpriv, (COMP_SEND | COMP_RECV),
+-					 DBG_DMESG, "dhcp %s !!\n",
+-					 is_tx ? "Tx" : "Rx");
+-
+-				if (is_tx) {
+-					rtlpriv->enter_ps = false;
+-					schedule_work(&rtlpriv->
+-						      works.lps_change_work);
+-					ppsc->last_delaylps_stamp_jiffies =
+-					    jiffies;
+-				}
++	switch (ether_type) {
++	case ETH_P_IP: {
++		struct udphdr *udp;
++		u16 src;
++		u16 dst;
+ 
+-				return true;
+-			}
+-		}
+-	} else if (ETH_P_ARP == ether_type) {
+-		if (is_tx) {
+-			rtlpriv->enter_ps = false;
+-			schedule_work(&rtlpriv->works.lps_change_work);
+-			ppsc->last_delaylps_stamp_jiffies = jiffies;
+-		}
++		if (ip->protocol != IPPROTO_UDP)
++			return false;
++		udp = (struct udphdr *)((u8 *)ip + (ip->ihl << 2));
++		src = be16_to_cpu(udp->source);
++		dst = be16_to_cpu(udp->dest);
+ 
+-		return true;
+-	} else if (ETH_P_PAE == ether_type) {
++		/* If this case involves port 68 (UDP BOOTP client) connecting
++		 * with port 67 (UDP BOOTP server), then return true so that
++		 * the lowest speed is used.
++		 */
++		if (!((src == 68 && dst == 67) || (src == 67 && dst == 68)))
++			return false;
++
++		RT_TRACE(rtlpriv, (COMP_SEND | COMP_RECV), DBG_DMESG,
++			 "dhcp %s !!\n", is_tx ? "Tx" : "Rx");
++		break;
++	}
++	case ETH_P_ARP:
++		break;
++	case ETH_P_PAE:
+ 		RT_TRACE(rtlpriv, (COMP_SEND | COMP_RECV), DBG_DMESG,
+ 			 "802.1X %s EAPOL pkt!!\n", is_tx ? "Tx" : "Rx");
+-
+-		if (is_tx) {
+-			rtlpriv->enter_ps = false;
+-			schedule_work(&rtlpriv->works.lps_change_work);
+-			ppsc->last_delaylps_stamp_jiffies = jiffies;
+-		}
+-
+-		return true;
+-	} else if (ETH_P_IPV6 == ether_type) {
+-		/* IPv6 */
+-		return true;
++		break;
++	case ETH_P_IPV6:
++		/* TODO: Is this right? */
++		return false;
++	default:
++		return false;
+ 	}
+-
+-	return false;
++	if (is_tx) {
++		rtlpriv->enter_ps = false;
++		schedule_work(&rtlpriv->works.lps_change_work);
++		ppsc->last_delaylps_stamp_jiffies = jiffies;
++	}
++	return true;
+ }
+ EXPORT_SYMBOL_GPL(rtl_is_special_data);
+ 
+
+commit 7367d0b573d149550d2ae25c402984b98f8f422e
+Author: Joe Perches <joe@perches.com>
+Date:   Sun Sep 1 11:51:23 2013 -0700
+
+    drivers/net: Convert uses of compare_ether_addr to ether_addr_equal
+    
+    Use the new bool function ether_addr_equal to add
+    some clarity and reduce the likelihood for misuse
+    of compare_ether_addr for sorting.
+    
+    Done via cocci script: (and a little typing)
+    
+    $ cat compare_ether_addr.cocci
+    @@
+    expression a,b;
+    @@
+    -	!compare_ether_addr(a, b)
+    +	ether_addr_equal(a, b)
+    
+    @@
+    expression a,b;
+    @@
+    -	compare_ether_addr(a, b)
+    +	!ether_addr_equal(a, b)
+    
+    @@
+    expression a,b;
+    @@
+    -	!ether_addr_equal(a, b) == 0
+    +	ether_addr_equal(a, b)
+    
+    @@
+    expression a,b;
+    @@
+    -	!ether_addr_equal(a, b) != 0
+    +	!ether_addr_equal(a, b)
+    
+    @@
+    expression a,b;
+    @@
+    -	ether_addr_equal(a, b) == 0
+    +	!ether_addr_equal(a, b)
+    
+    @@
+    expression a,b;
+    @@
+    -	ether_addr_equal(a, b) != 0
+    +	ether_addr_equal(a, b)
+    
+    @@
+    expression a,b;
+    @@
+    -	!!ether_addr_equal(a, b)
+    +	ether_addr_equal(a, b)
+    
+    Signed-off-by: Joe Perches <joe@perches.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+diff --git a/drivers/net/wireless/rtlwifi/base.c b/drivers/net/wireless/rtlwifi/base.c
+index 7651f5a..8bb4a9a 100644
+--- a/drivers/net/wireless/rtlwifi/base.c
++++ b/drivers/net/wireless/rtlwifi/base.c
+@@ -1304,7 +1304,7 @@ void rtl_beacon_statistic(struct ieee80211_hw *hw, struct sk_buff *skb)
+ 		return;
+ 
+ 	/* and only beacons from the associated BSSID, please */
+-	if (compare_ether_addr(hdr->addr3, rtlpriv->mac80211.bssid))
++	if (!ether_addr_equal(hdr->addr3, rtlpriv->mac80211.bssid))
+ 		return;
+ 
+ 	rtlpriv->link_info.bcn_rx_inperiod++;
+
+commit 6f334c2b3966f10cbd089bb124ec0e114d8d8c77
+Author: Larry Finger <Larry.Finger@lwfinger.net>
+Date:   Fri Jul 12 15:32:15 2013 -0500
+
+    rtlwifi: Fix build errors for unusual cases
+    
+    The present build configuration for the rtlwifi family of drivers will
+    fail under two known conditions:
+    
+    (1) If rtlwifi is selected without selecting any of the dependent drivers,
+        there are errors in the build.
+    (2) If the PCI drivers are built into the kernel and the USB drivers are modules,
+        or vice versa, there are missing globals.
+    
+    The first condition is fixed by never building rtlwifi unless at least one
+    of the device drivers is selected. The second failure is fixed by splitting
+    the PCI and USB codes out of rtlwifi, and creating their own mini drivers.
+    If the drivers that use them are modules, they will also be modules.
+    
+    Although a number of files are touched by this patch, only Makefile and Kconfig
+    have undergone significant changes. The only modifications to the other files
+    were to export entry points needed by the new rtl_pci and rtl_usb units, or to
+    rename two variables that had names that were likely to cause namespace collisions.
+    
+    Reported-by: Fengguang Wu <fengguang.wu@intel.com>  [Condition 1]
+    Reported-by: Ben Hutchings <bhutchings@solarflare.com> [Condition 2]
+    Signed-off-by: Larry Finger <Larry.Finger@lwfinger.net>
+    Cc: Ben Hutchings <bhutchings@solarflare.com>
+    Cc: Fengguang Wu <fengguang.wu@intel.com>
+    Signed-off-by: John W. Linville <linville@tuxdriver.com>
+
+diff --git a/drivers/net/wireless/rtlwifi/base.c b/drivers/net/wireless/rtlwifi/base.c
+index 9d558ac..7651f5a 100644
+--- a/drivers/net/wireless/rtlwifi/base.c
++++ b/drivers/net/wireless/rtlwifi/base.c
+@@ -172,6 +172,7 @@ u8 rtl_tid_to_ac(u8 tid)
+ {
+ 	return tid_to_ac[tid];
+ }
++EXPORT_SYMBOL_GPL(rtl_tid_to_ac);
+ 
+ static void _rtl_init_hw_ht_capab(struct ieee80211_hw *hw,
+ 				  struct ieee80211_sta_ht_cap *ht_cap)
+@@ -406,6 +407,7 @@ void rtl_deinit_deferred_work(struct ieee80211_hw *hw)
+ 	cancel_delayed_work(&rtlpriv->works.ps_rfon_wq);
+ 	cancel_delayed_work(&rtlpriv->works.fwevt_wq);
+ }
++EXPORT_SYMBOL_GPL(rtl_deinit_deferred_work);
+ 
+ void rtl_init_rfkill(struct ieee80211_hw *hw)
+ {
+@@ -439,6 +441,7 @@ void rtl_deinit_rfkill(struct ieee80211_hw *hw)
+ {
+ 	wiphy_rfkill_stop_polling(hw->wiphy);
+ }
++EXPORT_SYMBOL_GPL(rtl_deinit_rfkill);
+ 
+ int rtl_init_core(struct ieee80211_hw *hw)
+ {
+@@ -489,10 +492,12 @@ int rtl_init_core(struct ieee80211_hw *hw)
+ 
+ 	return 0;
+ }
++EXPORT_SYMBOL_GPL(rtl_init_core);
+ 
+ void rtl_deinit_core(struct ieee80211_hw *hw)
+ {
+ }
++EXPORT_SYMBOL_GPL(rtl_deinit_core);
+ 
+ void rtl_init_rx_config(struct ieee80211_hw *hw)
+ {
+@@ -501,6 +506,7 @@ void rtl_init_rx_config(struct ieee80211_hw *hw)
+ 
+ 	rtlpriv->cfg->ops->get_hw_reg(hw, HW_VAR_RCR, (u8 *) (&mac->rx_conf));
+ }
++EXPORT_SYMBOL_GPL(rtl_init_rx_config);
+ 
+ /*********************************************************
+  *
+@@ -879,6 +885,7 @@ bool rtl_tx_mgmt_proc(struct ieee80211_hw *hw, struct sk_buff *skb)
+ 
+ 	return true;
+ }
++EXPORT_SYMBOL_GPL(rtl_tx_mgmt_proc);
+ 
+ void rtl_get_tcb_desc(struct ieee80211_hw *hw,
+ 		      struct ieee80211_tx_info *info,
+@@ -1052,6 +1059,7 @@ bool rtl_action_proc(struct ieee80211_hw *hw, struct sk_buff *skb, u8 is_tx)
+ 
+ 	return true;
+ }
++EXPORT_SYMBOL_GPL(rtl_action_proc);
+ 
+ /*should call before software enc*/
+ u8 rtl_is_special_data(struct ieee80211_hw *hw, struct sk_buff *skb, u8 is_tx)
+@@ -1125,6 +1133,7 @@ u8 rtl_is_special_data(struct ieee80211_hw *hw, struct sk_buff *skb, u8 is_tx)
+ 
+ 	return false;
+ }
++EXPORT_SYMBOL_GPL(rtl_is_special_data);
+ 
+ /*********************************************************
+  *
+@@ -1300,6 +1309,7 @@ void rtl_beacon_statistic(struct ieee80211_hw *hw, struct sk_buff *skb)
+ 
+ 	rtlpriv->link_info.bcn_rx_inperiod++;
+ }
++EXPORT_SYMBOL_GPL(rtl_beacon_statistic);
+ 
+ void rtl_watchdog_wq_callback(void *data)
+ {
+@@ -1793,6 +1803,7 @@ void rtl_recognize_peer(struct ieee80211_hw *hw, u8 *data, unsigned int len)
+ 
+ 	mac->vendor = vendor;
+ }
++EXPORT_SYMBOL_GPL(rtl_recognize_peer);
+ 
+ /*********************************************************
+  *
+@@ -1849,6 +1860,7 @@ struct attribute_group rtl_attribute_group = {
+ 	.name = "rtlsysfs",
+ 	.attrs = rtl_sysfs_entries,
+ };
++EXPORT_SYMBOL_GPL(rtl_attribute_group);
+ 
+ MODULE_AUTHOR("lizhaoming	<chaoming_li@realsil.com.cn>");
+ MODULE_AUTHOR("Realtek WlanFAE	<wlanfae@realtek.com>");
+@@ -1856,7 +1868,8 @@ MODULE_AUTHOR("Larry Finger	<Larry.FInger@lwfinger.net>");
+ MODULE_LICENSE("GPL");
+ MODULE_DESCRIPTION("Realtek 802.11n PCI wireless core");
+ 
+-struct rtl_global_var global_var = {};
++struct rtl_global_var rtl_global_var = {};
++EXPORT_SYMBOL_GPL(rtl_global_var);
+ 
+ static int __init rtl_core_module_init(void)
+ {
+@@ -1864,8 +1877,8 @@ static int __init rtl_core_module_init(void)
+ 		pr_err("Unable to register rtl_rc, use default RC !!\n");
+ 
+ 	/* init some global vars */
+-	INIT_LIST_HEAD(&global_var.glb_priv_list);
+-	spin_lock_init(&global_var.glb_list_lock);
++	INIT_LIST_HEAD(&rtl_global_var.glb_priv_list);
++	spin_lock_init(&rtl_global_var.glb_list_lock);
+ 
+ 	return 0;
+ }
+
+commit 496322bc91e35007ed754184dcd447a02b6dd685
+Merge: 2e17c5a 56e0ef5
+Author: Linus Torvalds <torvalds@linux-foundation.org>
+Date:   Tue Jul 9 18:24:39 2013 -0700
+
+    Merge git://git.kernel.org/pub/scm/linux/kernel/git/davem/net-next
+    
+    Pull networking updates from David Miller:
+     "This is a re-do of the net-next pull request for the current merge
+      window.  The only difference from the one I made the other day is that
+      this has Eliezer's interface renames and the timeout handling changes
+      made based upon your feedback, as well as a few bug fixes that have
+      trickeled in.
+    
+      Highlights:
+    
+       1) Low latency device polling, eliminating the cost of interrupt
+          handling and context switches.  Allows direct polling of a network
+          device from socket operations, such as recvmsg() and poll().
+    
+          Currently ixgbe, mlx4, and bnx2x support this feature.
+    
+          Full high level description, performance numbers, and design in
+          commit 0a4db187a999 ("Merge branch 'll_poll'")
+    
+          From Eliezer Tamir.
+    
+       2) With the routing cache removed, ip_check_mc_rcu() gets exercised
+          more than ever before in the case where we have lots of multicast
+          addresses.  Use a hash table instead of a simple linked list, from
+          Eric Dumazet.
+    
+       3) Add driver for Atheros CQA98xx 802.11ac wireless devices, from
+          Bartosz Markowski, Janusz Dziedzic, Kalle Valo, Marek Kwaczynski,
+          Marek Puzyniak, Michal Kazior, and Sujith Manoharan.
+    
+       4) Support reporting the TUN device persist flag to userspace, from
+          Pavel Emelyanov.
+    
+       5) Allow controlling network device VF link state using netlink, from
+          Rony Efraim.
+    
+       6) Support GRE tunneling in openvswitch, from Pravin B Shelar.
+    
+       7) Adjust SOCK_MIN_RCVBUF and SOCK_MIN_SNDBUF for modern times, from
+          Daniel Borkmann and Eric Dumazet.
+    
+       8) Allow controlling of TCP quickack behavior on a per-route basis,
+          from Cong Wang.
+    
+       9) Several bug fixes and improvements to vxlan from Stephen
+          Hemminger, Pravin B Shelar, and Mike Rapoport.  In particular,
+          support receiving on multiple UDP ports.
+    
+      10) Major cleanups, particular in the area of debugging and cookie
+          lifetime handline, to the SCTP protocol code.  From Daniel
+          Borkmann.
+    
+      11) Allow packets to cross network namespaces when traversing tunnel
+          devices.  From Nicolas Dichtel.
+    
+      12) Allow monitoring netlink traffic via AF_PACKET sockets, in a
+          manner akin to how we monitor real network traffic via ptype_all.
+          From Daniel Borkmann.
+    
+      13) Several bug fixes and improvements for the new alx device driver,
+          from Johannes Berg.
+    
+      14) Fix scalability issues in the netem packet scheduler's time queue,
+          by using an rbtree.  From Eric Dumazet.
+    
+      15) Several bug fixes in TCP loss recovery handling, from Yuchung
+          Cheng.
+    
+      16) Add support for GSO segmentation of MPLS packets, from Simon
+          Horman.
+    
+      17) Make network notifiers have a real data type for the opaque
+          pointer that's passed into them.  Use this to properly handle
+          network device flag changes in arp_netdev_event().  From Jiri
+          Pirko and Timo Teräs.
+    
+      18) Convert several drivers over to module_pci_driver(), from Peter
+          Huewe.
+    
+      19) tcp_fixup_rcvbuf() can loop 500 times over loopback, just use a
+          O(1) calculation instead.  From Eric Dumazet.
+    
+      20) Support setting of explicit tunnel peer addresses in ipv6, just
+          like ipv4.  From Nicolas Dichtel.
+    
+      21) Protect x86 BPF JIT against spraying attacks, from Eric Dumazet.
+    
+      22) Prevent a single high rate flow from overruning an individual cpu
+          during RX packet processing via selective flow shedding.  From
+          Willem de Bruijn.
+    
+      23) Don't use spinlocks in TCP md5 signing fast paths, from Eric
+          Dumazet.
+    
+      24) Don't just drop GSO packets which are above the TBF scheduler's
+          burst limit, chop them up so they are in-bounds instead.  Also
+          from Eric Dumazet.
+    
+      25) VLAN offloads are missed when configured on top of a bridge, fix
+          from Vlad Yasevich.
+    
+      26) Support IPV6 in ping sockets.  From Lorenzo Colitti.
+    
+      27) Receive flow steering targets should be updated at poll() time
+          too, from David Majnemer.
+    
+      28) Fix several corner case regressions in PMTU/redirect handling due
+          to the routing cache removal, from Timo Teräs.
+    
+      29) We have to be mindful of ipv4 mapped ipv6 sockets in
+          upd_v6_push_pending_frames().  From Hannes Frederic Sowa.
+    
+      30) Fix L2TP sequence number handling bugs, from James Chapman."
+    
+    * git://git.kernel.org/pub/scm/linux/kernel/git/davem/net-next: (1214 commits)
+      drivers/net: caif: fix wrong rtnl_is_locked() usage
+      drivers/net: enic: release rtnl_lock on error-path
+      vhost-net: fix use-after-free in vhost_net_flush
+      net: mv643xx_eth: do not use port number as platform device id
+      net: sctp: confirm route during forward progress
+      virtio_net: fix race in RX VQ processing
+      virtio: support unlocked queue poll
+      net/cadence/macb: fix bug/typo in extracting gem_irq_read_clear bit
+      Documentation: Fix references to defunct linux-net@vger.kernel.org
+      net/fs: change busy poll time accounting
+      net: rename low latency sockets functions to busy poll
+      bridge: fix some kernel warning in multicast timer
+      sfc: Fix memory leak when discarding scattered packets
+      sit: fix tunnel update via netlink
+      dt:net:stmmac: Add dt specific phy reset callback support.
+      dt:net:stmmac: Add support to dwmac version 3.610 and 3.710
+      dt:net:stmmac: Allocate platform data only if its NULL.
+      net:stmmac: fix memleak in the open method
+      ipv6: rt6_check_neigh should successfully verify neigh if no NUD information are available
+      net: ipv6: fix wrong ping_v6_sendmsg return value
+      ...
+
+commit d8537548c924db3c44afde7646b6e220c7beb79d
+Author: Kees Cook <keescook@chromium.org>
+Date:   Wed Jul 3 15:04:57 2013 -0700
+
+    drivers: avoid format strings in names passed to alloc_workqueue()
+    
+    For the workqueue creation interfaces that do not expect format strings,
+    make sure they cannot accidently be parsed that way.  Additionally, clean
+    up calls made with a single parameter that would be handled as a format
+    string.  Many callers are passing potentially dynamic string content, so
+    use "%s" in those cases to avoid any potential accidents.
+    
+    Signed-off-by: Kees Cook <keescook@chromium.org>
+    Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
+    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+
+diff --git a/drivers/net/wireless/rtlwifi/base.c b/drivers/net/wireless/rtlwifi/base.c
+index af59dd5..a5f2231 100644
+--- a/drivers/net/wireless/rtlwifi/base.c
++++ b/drivers/net/wireless/rtlwifi/base.c
+@@ -380,7 +380,7 @@ static void _rtl_init_deferred_work(struct ieee80211_hw *hw)
+ 
+ 	/* <2> work queue */
+ 	rtlpriv->works.hw = hw;
+-	rtlpriv->works.rtl_wq = alloc_workqueue(rtlpriv->cfg->name, 0, 0);
++	rtlpriv->works.rtl_wq = alloc_workqueue("%s", 0, 0, rtlpriv->cfg->name);
+ 	INIT_DELAYED_WORK(&rtlpriv->works.watchdog_wq,
+ 			  (void *)rtl_watchdog_wq_callback);
+ 	INIT_DELAYED_WORK(&rtlpriv->works.ips_nic_off_wq,
+
+commit 27d7f47756f40fb1bc3159e09217f740f5c5b5b1
+Author: Jingoo Han <jg1.han@samsung.com>
+Date:   Fri May 31 21:24:06 2013 +0000
+
+    net: wireless: replace strict_strtoul() with kstrtoul()
+    
+    The usage of strict_strtoul() is not preferred, because
+    strict_strtoul() is obsolete. Thus, kstrtoul() should be
+    used.
+    
+    Signed-off-by: Jingoo Han <jg1.han@samsung.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+diff --git a/drivers/net/wireless/rtlwifi/base.c b/drivers/net/wireless/rtlwifi/base.c
+index af59dd5..8053f77 100644
+--- a/drivers/net/wireless/rtlwifi/base.c
++++ b/drivers/net/wireless/rtlwifi/base.c
+@@ -1817,7 +1817,7 @@ static ssize_t rtl_store_debug_level(struct device *d,
+ 	unsigned long val;
+ 	int ret;
+ 
+-	ret = strict_strtoul(buf, 0, &val);
++	ret = kstrtoul(buf, 0, &val);
+ 	if (ret) {
+ 		printk(KERN_DEBUG "%s is not in hex or decimal form.\n", buf);
+ 	} else {
+
+commit 655d8e2328a6ef6b6b514609a4c1e33508d3a1da
+Merge: 6fe5468 ddc4db2
+Author: John W. Linville <linville@tuxdriver.com>
+Date:   Wed Apr 10 14:09:54 2013 -0400
+
+    Merge branch 'for-john' of git://git.kernel.org/pub/scm/linux/kernel/git/jberg/mac80211-next
+    
+    Conflicts:
+    	drivers/net/wireless/ath/carl9170/debug.c
+    	drivers/net/wireless/ath/carl9170/main.c
+    	net/mac80211/ieee80211_i.h
+
+commit e6deaf810cc4b6437d55179660776e131ac059df
+Author: Larry Finger <Larry.Finger@lwfinger.net>
+Date:   Sun Mar 24 22:06:55 2013 -0500
+
+    rtlwifi: rtl8192c: rtl8192ce: rtl8192cu: rtl8192de: rtl8723ae: Add changes required by adding rtl81988ee
+    
+    This patch combines the remaining changes in the rtlwifi family to handle
+    the addition of rtl8188ee. A number of these changes eliminate some CamelCase
+    variable names, and other shorten common variable names so that long lines
+    in the new driver could be shortened.
+    
+    Signed-off-by: Larry Finger <Larry.Finger@lwfinger.net>
+    Cc: jcheung@suse.com
+    Cc: machen@suse.com
+    Cc: mmarek@suse.cz
+    Cc: zhiyuan_yang@realsil.com.cn
+    Signed-off-by: John W. Linville <linville@tuxdriver.com>
+
+diff --git a/drivers/net/wireless/rtlwifi/base.c b/drivers/net/wireless/rtlwifi/base.c
+index f8a2d9f..cac1fa9 100644
+--- a/drivers/net/wireless/rtlwifi/base.c
++++ b/drivers/net/wireless/rtlwifi/base.c
+@@ -473,6 +473,7 @@ int rtl_init_core(struct ieee80211_hw *hw)
+ 	spin_lock_init(&rtlpriv->locks.rf_lock);
+ 	spin_lock_init(&rtlpriv->locks.waitq_lock);
+ 	spin_lock_init(&rtlpriv->locks.entry_list_lock);
++	spin_lock_init(&rtlpriv->locks.fw_ps_lock);
+ 	spin_lock_init(&rtlpriv->locks.cck_and_rw_pagea_lock);
+ 	spin_lock_init(&rtlpriv->locks.check_sendpkt_lock);
+ 	spin_lock_init(&rtlpriv->locks.fw_ps_lock);
+
+commit a269913c52ad37952a4d9953bb6d748f7299c304
+Author: Larry Finger <Larry.Finger@lwfinger.net>
+Date:   Sun Mar 24 22:06:41 2013 -0500
+
+    rtlwifi: Rework rtl_lps_leave() and rtl_lps_enter() to use work queue
+    
+    In commit a5ffbe0, some of the calls to rtl_lps_leave() were switched
+    to be called from a work queue to avoid a scheduling while atomic bug.
+    This patch converts the remaining calls to use the work queue. In
+    addition, the call to rtl_lps_enter() is also switched to the work
+    queue. None of these newly converted calls had triggered the bug (yet),
+    but this change make all of them fit a single pattern.
+    
+    Signed-off-by: Larry Finger <Larry.Finger@lwfinger.net>
+    Cc: jcheung@suse.com
+    Cc: machen@suse.com
+    Cc: mmarek@suse.cz
+    Cc: zhiyuan_yang@realsil.com.cn
+    Cc: page_he@realsil.com.cn
+    Signed-off-by: John W. Linville <linville@tuxdriver.com>
+
+diff --git a/drivers/net/wireless/rtlwifi/base.c b/drivers/net/wireless/rtlwifi/base.c
+index 270b27a..f8a2d9f 100644
+--- a/drivers/net/wireless/rtlwifi/base.c
++++ b/drivers/net/wireless/rtlwifi/base.c
+@@ -1088,8 +1088,9 @@ u8 rtl_is_special_data(struct ieee80211_hw *hw, struct sk_buff *skb, u8 is_tx)
+ 					 is_tx ? "Tx" : "Rx");
+ 
+ 				if (is_tx) {
++					rtlpriv->enter_ps = false;
+ 					schedule_work(&rtlpriv->
+-						      works.lps_leave_work);
++						      works.lps_change_work);
+ 					ppsc->last_delaylps_stamp_jiffies =
+ 					    jiffies;
+ 				}
+@@ -1099,7 +1100,8 @@ u8 rtl_is_special_data(struct ieee80211_hw *hw, struct sk_buff *skb, u8 is_tx)
+ 		}
+ 	} else if (ETH_P_ARP == ether_type) {
+ 		if (is_tx) {
+-			schedule_work(&rtlpriv->works.lps_leave_work);
++			rtlpriv->enter_ps = false;
++			schedule_work(&rtlpriv->works.lps_change_work);
+ 			ppsc->last_delaylps_stamp_jiffies = jiffies;
+ 		}
+ 
+@@ -1109,7 +1111,8 @@ u8 rtl_is_special_data(struct ieee80211_hw *hw, struct sk_buff *skb, u8 is_tx)
+ 			 "802.1X %s EAPOL pkt!!\n", is_tx ? "Tx" : "Rx");
+ 
+ 		if (is_tx) {
+-			schedule_work(&rtlpriv->works.lps_leave_work);
++			rtlpriv->enter_ps = false;
++			schedule_work(&rtlpriv->works.lps_change_work);
+ 			ppsc->last_delaylps_stamp_jiffies = jiffies;
+ 		}
+ 
+@@ -1318,7 +1321,6 @@ void rtl_watchdog_wq_callback(void *data)
+ 	u32 aver_tx_cnt_inperiod = 0;
+ 	u32 aver_tidtx_inperiod[MAX_TID_COUNT] = {0};
+ 	u32 tidtx_inp4eriod[MAX_TID_COUNT] = {0};
+-	bool enter_ps = false;
+ 
+ 	if (is_hal_stop(rtlhal))
+ 		return;
+@@ -1400,15 +1402,12 @@ void rtl_watchdog_wq_callback(void *data)
+ 		if (((rtlpriv->link_info.num_rx_inperiod +
+ 		      rtlpriv->link_info.num_tx_inperiod) > 8) ||
+ 		    (rtlpriv->link_info.num_rx_inperiod > 2))
+-			enter_ps = false;
++			rtlpriv->enter_ps = true;
+ 		else
+-			enter_ps = true;
++			rtlpriv->enter_ps = false;
+ 
+ 		/* LeisurePS only work in infra mode. */
+-		if (enter_ps)
+-			rtl_lps_enter(hw);
+-		else
+-			schedule_work(&rtlpriv->works.lps_leave_work);
++		schedule_work(&rtlpriv->works.lps_change_work);
+ 	}
+ 
+ 	rtlpriv->link_info.num_rx_inperiod = 0;
+
+commit 26634c4b1868323f49f8cd24c3493b57819867fd
+Author: Larry Finger <Larry.Finger@lwfinger.net>
+Date:   Sun Mar 24 22:06:33 2013 -0500
+
+    rtlwifi Modify existing bits to match vendor version 2013.02.07
+    
+    These changes add the new variables for P2P and modify the various struct
+    definitions for other new features.
+    
+    This patch updates files base.{c,h} for the changes in the newest vendor
+    driver.
+    
+    This patch updates files ps.{c,h} for the changes in the newest vendor
+    driver.
+    
+    This patch updates files debug.{c,h}, efuse.c, pci.{c,h}, and wifi.h for
+    the changes in the newest vendor driver.
+    
+    This patch updates files core.c, ps.c, rc.c, and wifi.h for
+    the changes in the newest vendor driver.
+    
+    Signed-off-by: Larry Finger <Larry.Finger@lwfinger.net>
+    Cc: jcheung@suse.com
+    Cc: machen@suse.com
+    Cc: mmarek@suse.cz
+    Cc: zhiyuan_yang@realsil.com.cn
+    Cc: page_he@realsil.com.cn
+    Signed-off-by: John W. Linville <linville@tuxdriver.com>
+
+diff --git a/drivers/net/wireless/rtlwifi/base.c b/drivers/net/wireless/rtlwifi/base.c
+index 99c5cea..270b27a 100644
+--- a/drivers/net/wireless/rtlwifi/base.c
++++ b/drivers/net/wireless/rtlwifi/base.c
+@@ -54,7 +54,8 @@
+  *5) frame process functions
+  *6) IOT functions
+  *7) sysfs functions
+- *8) ...
++ *8) vif functions
++ *9) ...
+  */
+ 
+ /*********************************************************
+@@ -198,34 +199,46 @@ static void _rtl_init_hw_ht_capab(struct ieee80211_hw *hw,
+ 
+ 	ht_cap->mcs.tx_params = IEEE80211_HT_MCS_TX_DEFINED;
+ 
+-	/*
+-	 *hw->wiphy->bands[IEEE80211_BAND_2GHZ]
++	/*hw->wiphy->bands[IEEE80211_BAND_2GHZ]
+ 	 *base on ant_num
+ 	 *rx_mask: RX mask
+-	 *if rx_ant =1 rx_mask[0]=0xff;==>MCS0-MCS7
+-	 *if rx_ant =2 rx_mask[1]=0xff;==>MCS8-MCS15
+-	 *if rx_ant >=3 rx_mask[2]=0xff;
+-	 *if BW_40 rx_mask[4]=0x01;
++	 *if rx_ant = 1 rx_mask[0]= 0xff;==>MCS0-MCS7
++	 *if rx_ant = 2 rx_mask[1]= 0xff;==>MCS8-MCS15
++	 *if rx_ant >= 3 rx_mask[2]= 0xff;
++	 *if BW_40 rx_mask[4]= 0x01;
+ 	 *highest supported RX rate
+ 	 */
+-	if (get_rf_type(rtlphy) == RF_1T2R || get_rf_type(rtlphy) == RF_2T2R) {
++	if (rtlpriv->dm.supp_phymode_switch) {
+ 
+-		RT_TRACE(rtlpriv, COMP_INIT, DBG_DMESG, "1T2R or 2T2R\n");
++		RT_TRACE(rtlpriv, COMP_INIT, DBG_EMERG,
++			 "Support phy mode switch\n");
+ 
+ 		ht_cap->mcs.rx_mask[0] = 0xFF;
+ 		ht_cap->mcs.rx_mask[1] = 0xFF;
+ 		ht_cap->mcs.rx_mask[4] = 0x01;
+ 
+ 		ht_cap->mcs.rx_highest = cpu_to_le16(MAX_BIT_RATE_40MHZ_MCS15);
+-	} else if (get_rf_type(rtlphy) == RF_1T1R) {
+-
+-		RT_TRACE(rtlpriv, COMP_INIT, DBG_DMESG, "1T1R\n");
+-
+-		ht_cap->mcs.rx_mask[0] = 0xFF;
+-		ht_cap->mcs.rx_mask[1] = 0x00;
+-		ht_cap->mcs.rx_mask[4] = 0x01;
+-
+-		ht_cap->mcs.rx_highest = cpu_to_le16(MAX_BIT_RATE_40MHZ_MCS7);
++	} else {
++		if (get_rf_type(rtlphy) == RF_1T2R ||
++		    get_rf_type(rtlphy) == RF_2T2R) {
++			RT_TRACE(rtlpriv, COMP_INIT, DBG_DMESG,
++				 "1T2R or 2T2R\n");
++			ht_cap->mcs.rx_mask[0] = 0xFF;
++			ht_cap->mcs.rx_mask[1] = 0xFF;
++			ht_cap->mcs.rx_mask[4] = 0x01;
++
++			ht_cap->mcs.rx_highest =
++				 cpu_to_le16(MAX_BIT_RATE_40MHZ_MCS15);
++		} else if (get_rf_type(rtlphy) == RF_1T1R) {
++			RT_TRACE(rtlpriv, COMP_INIT, DBG_DMESG, "1T1R\n");
++
++			ht_cap->mcs.rx_mask[0] = 0xFF;
++			ht_cap->mcs.rx_mask[1] = 0x00;
++			ht_cap->mcs.rx_mask[4] = 0x01;
++
++			ht_cap->mcs.rx_highest =
++				 cpu_to_le16(MAX_BIT_RATE_40MHZ_MCS7);
++		}
+ 	}
+ }
+ 
+@@ -311,6 +324,8 @@ static void _rtl_init_mac80211(struct ieee80211_hw *hw)
+ 	    IEEE80211_HW_AMPDU_AGGREGATION |
+ 	    IEEE80211_HW_CONNECTION_MONITOR |
+ 	    /* IEEE80211_HW_SUPPORTS_CQM_RSSI | */
++	    IEEE80211_HW_CONNECTION_MONITOR |
++	    IEEE80211_HW_MFP_CAPABLE |
+ 	    IEEE80211_HW_REPORTS_TX_ACK_STATUS | 0;
+ 
+ 	/* swlps or hwlps has been set in diff chip in init_sw_vars */
+@@ -323,8 +338,12 @@ static void _rtl_init_mac80211(struct ieee80211_hw *hw)
+ 	hw->wiphy->interface_modes =
+ 	    BIT(NL80211_IFTYPE_AP) |
+ 	    BIT(NL80211_IFTYPE_STATION) |
+-	    BIT(NL80211_IFTYPE_ADHOC);
++	    BIT(NL80211_IFTYPE_ADHOC) |
++	    BIT(NL80211_IFTYPE_MESH_POINT) |
++	    BIT(NL80211_IFTYPE_P2P_CLIENT) |
++	    BIT(NL80211_IFTYPE_P2P_GO);
+ 
++	hw->wiphy->flags |= WIPHY_FLAG_IBSS_RSN;
+ 	hw->wiphy->rts_threshold = 2347;
+ 
+ 	hw->queues = AC_MAX;
+@@ -354,9 +373,10 @@ static void _rtl_init_deferred_work(struct ieee80211_hw *hw)
+ 	struct rtl_priv *rtlpriv = rtl_priv(hw);
+ 
+ 	/* <1> timer */
+-	init_timer(&rtlpriv->works.watchdog_timer);
+ 	setup_timer(&rtlpriv->works.watchdog_timer,
+ 		    rtl_watch_dog_timer_callback, (unsigned long)hw);
++	setup_timer(&rtlpriv->works.dualmac_easyconcurrent_retrytimer,
++		    rtl_easy_concurrent_retrytimer_callback, (unsigned long)hw);
+ 
+ 	/* <2> work queue */
+ 	rtlpriv->works.hw = hw;
+@@ -369,6 +389,8 @@ static void _rtl_init_deferred_work(struct ieee80211_hw *hw)
+ 			  (void *)rtl_swlps_wq_callback);
+ 	INIT_DELAYED_WORK(&rtlpriv->works.ps_rfon_wq,
+ 			  (void *)rtl_swlps_rfon_wq_callback);
++	INIT_DELAYED_WORK(&rtlpriv->works.fwevt_wq,
++			  (void *)rtl_fwevt_wq_callback);
+ 
+ }
+ 
+@@ -382,6 +404,7 @@ void rtl_deinit_deferred_work(struct ieee80211_hw *hw)
+ 	cancel_delayed_work(&rtlpriv->works.ips_nic_off_wq);
+ 	cancel_delayed_work(&rtlpriv->works.ps_work);
+ 	cancel_delayed_work(&rtlpriv->works.ps_rfon_wq);
++	cancel_delayed_work(&rtlpriv->works.fwevt_wq);
+ }
+ 
+ void rtl_init_rfkill(struct ieee80211_hw *hw)
+@@ -436,12 +459,6 @@ int rtl_init_core(struct ieee80211_hw *hw)
+ 	if (rtl_regd_init(hw, rtl_reg_notifier)) {
+ 		RT_TRACE(rtlpriv, COMP_ERR, DBG_EMERG, "REGD init failed\n");
+ 		return 1;
+-	} else {
+-		/* CRDA regd hint must after init CRDA */
+-		if (regulatory_hint(hw->wiphy, rtlpriv->regd.alpha2)) {
+-			RT_TRACE(rtlpriv, COMP_ERR, DBG_WARNING,
+-				 "regulatory_hint fail\n");
+-		}
+ 	}
+ 
+ 	/* <4> locks */
+@@ -449,15 +466,24 @@ int rtl_init_core(struct ieee80211_hw *hw)
+ 	mutex_init(&rtlpriv->locks.ps_mutex);
+ 	spin_lock_init(&rtlpriv->locks.ips_lock);
+ 	spin_lock_init(&rtlpriv->locks.irq_th_lock);
++	spin_lock_init(&rtlpriv->locks.irq_pci_lock);
++	spin_lock_init(&rtlpriv->locks.tx_lock);
+ 	spin_lock_init(&rtlpriv->locks.h2c_lock);
+ 	spin_lock_init(&rtlpriv->locks.rf_ps_lock);
+ 	spin_lock_init(&rtlpriv->locks.rf_lock);
+ 	spin_lock_init(&rtlpriv->locks.waitq_lock);
++	spin_lock_init(&rtlpriv->locks.entry_list_lock);
+ 	spin_lock_init(&rtlpriv->locks.cck_and_rw_pagea_lock);
++	spin_lock_init(&rtlpriv->locks.check_sendpkt_lock);
++	spin_lock_init(&rtlpriv->locks.fw_ps_lock);
++	spin_lock_init(&rtlpriv->locks.lps_lock);
++
++	/* <5> init list */
++	INIT_LIST_HEAD(&rtlpriv->entry_list);
+ 
+ 	rtlmac->link_state = MAC80211_NOLINK;
+ 
+-	/* <5> init deferred work */
++	/* <6> init deferred work */
+ 	_rtl_init_deferred_work(hw);
+ 
+ 	return 0;
+@@ -523,7 +549,8 @@ static void _rtl_query_shortgi(struct ieee80211_hw *hw,
+ 	if (mac->opmode == NL80211_IFTYPE_STATION)
+ 		bw_40 = mac->bw_40;
+ 	else if (mac->opmode == NL80211_IFTYPE_AP ||
+-		 mac->opmode == NL80211_IFTYPE_ADHOC)
++		 mac->opmode == NL80211_IFTYPE_ADHOC ||
++		 mac->opmode == NL80211_IFTYPE_MESH_POINT)
+ 		bw_40 = sta->bandwidth >= IEEE80211_STA_RX_BW_40;
+ 
+ 	if (bw_40 && sgi_40)
+@@ -578,23 +605,26 @@ static void _rtl_txrate_selectmode(struct ieee80211_hw *hw,
+ 	if (!tcb_desc->disable_ratefallback || !tcb_desc->use_driver_rate) {
+ 		if (mac->opmode == NL80211_IFTYPE_STATION) {
+ 			tcb_desc->ratr_index = 0;
+-		} else if (mac->opmode == NL80211_IFTYPE_ADHOC) {
++		} else if (mac->opmode == NL80211_IFTYPE_ADHOC ||
++			   mac->opmode == NL80211_IFTYPE_MESH_POINT) {
+ 			if (tcb_desc->multicast || tcb_desc->broadcast) {
+ 				tcb_desc->hw_rate =
+ 				    rtlpriv->cfg->maps[RTL_RC_CCK_RATE2M];
+ 				tcb_desc->use_driver_rate = 1;
++				tcb_desc->ratr_index = RATR_INX_WIRELESS_MC;
+ 			} else {
+-				/* TODO */
++				tcb_desc->ratr_index = ratr_index;
+ 			}
+-			tcb_desc->ratr_index = ratr_index;
+ 		} else if (mac->opmode == NL80211_IFTYPE_AP) {
+ 			tcb_desc->ratr_index = ratr_index;
+ 		}
+ 	}
+ 
+ 	if (rtlpriv->dm.useramask) {
+-		/* TODO we will differentiate adhoc and station futrue  */
+-		if (mac->opmode == NL80211_IFTYPE_STATION) {
++		tcb_desc->ratr_index = ratr_index;
++		/* TODO we will differentiate adhoc and station future  */
++		if (mac->opmode == NL80211_IFTYPE_STATION ||
++		    mac->opmode == NL80211_IFTYPE_MESH_POINT) {
+ 			tcb_desc->mac_id = 0;
+ 
+ 			if (mac->mode == WIRELESS_MODE_N_24G)
+@@ -608,7 +638,7 @@ static void _rtl_txrate_selectmode(struct ieee80211_hw *hw,
+ 			else if (mac->mode & WIRELESS_MODE_A)
+ 				tcb_desc->ratr_index = RATR_INX_WIRELESS_G;
+ 		} else if (mac->opmode == NL80211_IFTYPE_AP ||
+-			mac->opmode == NL80211_IFTYPE_ADHOC) {
++			   mac->opmode == NL80211_IFTYPE_ADHOC) {
+ 			if (NULL != sta) {
+ 				if (sta->aid > 0)
+ 					tcb_desc->mac_id = sta->aid + 1;
+@@ -619,7 +649,6 @@ static void _rtl_txrate_selectmode(struct ieee80211_hw *hw,
+ 			}
+ 		}
+ 	}
+-
+ }
+ 
+ static void _rtl_query_bandwidth_mode(struct ieee80211_hw *hw,
+@@ -633,7 +662,8 @@ static void _rtl_query_bandwidth_mode(struct ieee80211_hw *hw,
+ 	if (!sta)
+ 		return;
+ 	if (mac->opmode == NL80211_IFTYPE_AP ||
+-	    mac->opmode == NL80211_IFTYPE_ADHOC) {
++	    mac->opmode == NL80211_IFTYPE_ADHOC ||
++	    mac->opmode == NL80211_IFTYPE_MESH_POINT) {
+ 		if (sta->bandwidth == IEEE80211_STA_RX_BW_20)
+ 			return;
+ 	} else if (mac->opmode == NL80211_IFTYPE_STATION) {
+@@ -834,8 +864,8 @@ bool rtl_tx_mgmt_proc(struct ieee80211_hw *hw, struct sk_buff *skb)
+ 	if (rtlpriv->dm.supp_phymode_switch &&
+ 	    mac->link_state < MAC80211_LINKED &&
+ 	    (ieee80211_is_auth(fc) || ieee80211_is_probe_req(fc))) {
+-		if (rtlpriv->cfg->ops->check_switch_to_dmdp)
+-			rtlpriv->cfg->ops->check_switch_to_dmdp(hw);
++		if (rtlpriv->cfg->ops->chk_switch_dmdp)
++			rtlpriv->cfg->ops->chk_switch_dmdp(hw);
+ 	}
+ 	if (ieee80211_is_auth(fc)) {
+ 		RT_TRACE(rtlpriv, COMP_SEND, DBG_DMESG, "MAC80211_LINKING\n");
+@@ -924,6 +954,56 @@ void rtl_get_tcb_desc(struct ieee80211_hw *hw,
+ }
+ EXPORT_SYMBOL(rtl_get_tcb_desc);
+ 
++static bool addbareq_rx(struct ieee80211_hw *hw, struct sk_buff *skb)
++{
++	struct rtl_priv *rtlpriv = rtl_priv(hw);
++	struct ieee80211_sta *sta = NULL;
++	struct ieee80211_hdr *hdr = rtl_get_hdr(skb);
++	struct rtl_sta_info *sta_entry = NULL;
++	struct ieee80211_mgmt *mgmt = (void *)skb->data;
++	u16 capab = 0, tid = 0;
++	struct rtl_tid_data *tid_data;
++	struct sk_buff *skb_delba = NULL;
++	struct ieee80211_rx_status rx_status = { 0 };
++
++	rcu_read_lock();
++	sta = rtl_find_sta(hw, hdr->addr3);
++	if (sta == NULL) {
++		RT_TRACE(rtlpriv, (COMP_SEND | COMP_RECV), DBG_EMERG,
++			 "sta is NULL\n");
++		rcu_read_unlock();
++		return true;
++	}
++
++	sta_entry = (struct rtl_sta_info *)sta->drv_priv;
++	if (!sta_entry) {
++		rcu_read_unlock();
++		return true;
++	}
++	capab = le16_to_cpu(mgmt->u.action.u.addba_req.capab);
++	tid = (capab & IEEE80211_ADDBA_PARAM_TID_MASK) >> 2;
++	tid_data = &sta_entry->tids[tid];
++	if (tid_data->agg.rx_agg_state == RTL_RX_AGG_START) {
++		skb_delba = rtl_make_del_ba(hw, hdr->addr2, hdr->addr3, tid);
++		if (skb_delba) {
++			rx_status.freq = hw->conf.channel->center_freq;
++			rx_status.band = hw->conf.channel->band;
++			rx_status.flag |= RX_FLAG_DECRYPTED;
++			rx_status.flag |= RX_FLAG_MACTIME_END;
++			rx_status.rate_idx = 0;
++			rx_status.signal = 50 + 10;
++			memcpy(IEEE80211_SKB_RXCB(skb_delba), &rx_status,
++			       sizeof(rx_status));
++			RT_PRINT_DATA(rtlpriv, COMP_INIT, DBG_DMESG,
++				      "fake del\n", skb_delba->data,
++				      skb_delba->len);
++			ieee80211_rx_irqsafe(hw, skb_delba);
++		}
++	}
++	rcu_read_unlock();
++	return false;
++}
++
+ bool rtl_action_proc(struct ieee80211_hw *hw, struct sk_buff *skb, u8 is_tx)
+ {
+ 	struct rtl_mac *mac = rtl_mac(rtl_priv(hw));
+@@ -948,6 +1028,11 @@ bool rtl_action_proc(struct ieee80211_hw *hw, struct sk_buff *skb, u8 is_tx)
+ 			RT_TRACE(rtlpriv, (COMP_SEND | COMP_RECV), DBG_DMESG,
+ 				 "%s ACT_ADDBAREQ From :%pM\n",
+ 				 is_tx ? "Tx" : "Rx", hdr->addr2);
++			RT_PRINT_DATA(rtlpriv, COMP_INIT, DBG_DMESG, "req\n",
++				      skb->data, skb->len);
++			if (!is_tx)
++				if (addbareq_rx(hw, skb))
++					return true;
+ 			break;
+ 		case ACT_ADDBARSP:
+ 			RT_TRACE(rtlpriv, (COMP_SEND | COMP_RECV), DBG_DMESG,
+@@ -1101,6 +1186,58 @@ int rtl_tx_agg_stop(struct ieee80211_hw *hw,
+ 	return 0;
+ }
+ 
++int rtl_rx_agg_start(struct ieee80211_hw *hw,
++		     struct ieee80211_sta *sta, u16 tid)
++{
++	struct rtl_priv *rtlpriv = rtl_priv(hw);
++	struct rtl_tid_data *tid_data;
++	struct rtl_sta_info *sta_entry = NULL;
++
++	if (sta == NULL)
++		return -EINVAL;
++
++	if (unlikely(tid >= MAX_TID_COUNT))
++		return -EINVAL;
++
++	sta_entry = (struct rtl_sta_info *)sta->drv_priv;
++	if (!sta_entry)
++		return -ENXIO;
++	tid_data = &sta_entry->tids[tid];
++
++	RT_TRACE(rtlpriv, COMP_RECV, DBG_DMESG,
++		 "on ra = %pM tid = %d seq:%d\n", sta->addr, tid,
++		 tid_data->seq_number);
++
++	tid_data->agg.rx_agg_state = RTL_RX_AGG_START;
++	return 0;
++}
++
++int rtl_rx_agg_stop(struct ieee80211_hw *hw,
++		    struct ieee80211_sta *sta, u16 tid)
++{
++	struct rtl_priv *rtlpriv = rtl_priv(hw);
++	struct rtl_sta_info *sta_entry = NULL;
++
++	if (sta == NULL)
++		return -EINVAL;
++
++	if (!sta->addr) {
++		RT_TRACE(rtlpriv, COMP_ERR, DBG_EMERG, "ra = NULL\n");
++		return -EINVAL;
++	}
++
++	RT_TRACE(rtlpriv, COMP_SEND, DBG_DMESG,
++		 "on ra = %pM tid = %d\n", sta->addr, tid);
++
++	if (unlikely(tid >= MAX_TID_COUNT))
++		return -EINVAL;
++
++	sta_entry = (struct rtl_sta_info *)sta->drv_priv;
++	sta_entry->tids[tid].agg.rx_agg_state = RTL_RX_AGG_STOP;
++
++	return 0;
++}
++
+ int rtl_tx_agg_oper(struct ieee80211_hw *hw,
+ 		struct ieee80211_sta *sta, u16 tid)
+ {
+@@ -1132,6 +1269,34 @@ int rtl_tx_agg_oper(struct ieee80211_hw *hw,
+  * wq & timer callback functions
+  *
+  *********************************************************/
++/* this function is used for roaming */
++void rtl_beacon_statistic(struct ieee80211_hw *hw, struct sk_buff *skb)
++{
++	struct rtl_priv *rtlpriv = rtl_priv(hw);
++	struct ieee80211_hdr *hdr = (struct ieee80211_hdr *)skb->data;
++
++	if (rtlpriv->mac80211.opmode != NL80211_IFTYPE_STATION)
++		return;
++
++	if (rtlpriv->mac80211.link_state < MAC80211_LINKED)
++		return;
++
++	/* check if this really is a beacon */
++	if (!ieee80211_is_beacon(hdr->frame_control) &&
++	    !ieee80211_is_probe_resp(hdr->frame_control))
++		return;
++
++	/* min. beacon length + FCS_LEN */
++	if (skb->len <= 40 + FCS_LEN)
++		return;
++
++	/* and only beacons from the associated BSSID, please */
++	if (compare_ether_addr(hdr->addr3, rtlpriv->mac80211.bssid))
++		return;
++
++	rtlpriv->link_info.bcn_rx_inperiod++;
++}
++
+ void rtl_watchdog_wq_callback(void *data)
+ {
+ 	struct rtl_works *rtlworks = container_of_dwork_rtl(data,
+@@ -1142,6 +1307,8 @@ void rtl_watchdog_wq_callback(void *data)
+ 	struct rtl_hal *rtlhal = rtl_hal(rtl_priv(hw));
+ 	struct rtl_mac *mac = rtl_mac(rtl_priv(hw));
+ 	bool busytraffic = false;
++	bool tx_busy_traffic = false;
++	bool rx_busy_traffic = false;
+ 	bool higher_busytraffic = false;
+ 	bool higher_busyrxtraffic = false;
+ 	u8 idx, tid;
+@@ -1191,8 +1358,13 @@ void rtl_watchdog_wq_callback(void *data)
+ 		aver_tx_cnt_inperiod = tx_cnt_inp4eriod / 4;
+ 
+ 		/* (2) check traffic busy */
+-		if (aver_rx_cnt_inperiod > 100 || aver_tx_cnt_inperiod > 100)
++		if (aver_rx_cnt_inperiod > 100 || aver_tx_cnt_inperiod > 100) {
+ 			busytraffic = true;
++			if (aver_rx_cnt_inperiod > aver_tx_cnt_inperiod)
++				rx_busy_traffic = true;
++			else
++				tx_busy_traffic = false;
++		}
+ 
+ 		/* Higher Tx/Rx data. */
+ 		if (aver_rx_cnt_inperiod > 4000 ||
+@@ -1236,7 +1408,7 @@ void rtl_watchdog_wq_callback(void *data)
+ 		if (enter_ps)
+ 			rtl_lps_enter(hw);
+ 		else
+-			rtl_lps_leave(hw);
++			schedule_work(&rtlpriv->works.lps_leave_work);
+ 	}
+ 
+ 	rtlpriv->link_info.num_rx_inperiod = 0;
+@@ -1246,10 +1418,37 @@ void rtl_watchdog_wq_callback(void *data)
+ 
+ 	rtlpriv->link_info.busytraffic = busytraffic;
+ 	rtlpriv->link_info.higher_busytraffic = higher_busytraffic;
++	rtlpriv->link_info.rx_busy_traffic = rx_busy_traffic;
++	rtlpriv->link_info.tx_busy_traffic = tx_busy_traffic;
+ 	rtlpriv->link_info.higher_busyrxtraffic = higher_busyrxtraffic;
+ 
+ 	/* <3> DM */
+ 	rtlpriv->cfg->ops->dm_watchdog(hw);
++
++	/* <4> roaming */
++	if (mac->link_state == MAC80211_LINKED &&
++	    mac->opmode == NL80211_IFTYPE_STATION) {
++		if ((rtlpriv->link_info.bcn_rx_inperiod +
++		     rtlpriv->link_info.num_rx_inperiod) == 0) {
++			rtlpriv->link_info.roam_times++;
++			RT_TRACE(rtlpriv, COMP_ERR, DBG_DMESG,
++				 "AP off for %d s\n",
++				 (rtlpriv->link_info.roam_times * 2));
++
++			/* if we can't recv beacon for 6s, we should
++			 * reconnect this AP
++			 */
++			if (rtlpriv->link_info.roam_times >= 3) {
++				RT_TRACE(rtlpriv, COMP_ERR, DBG_EMERG,
++					 "AP off, try to reconnect now\n");
++				rtlpriv->link_info.roam_times = 0;
++				ieee80211_connection_loss(rtlpriv->mac80211.vif);
++			}
++		} else {
++			rtlpriv->link_info.roam_times = 0;
++		}
++	}
++	rtlpriv->link_info.bcn_rx_inperiod = 0;
+ }
+ 
+ void rtl_watch_dog_timer_callback(unsigned long data)
+@@ -1264,6 +1463,28 @@ void rtl_watch_dog_timer_callback(unsigned long data)
+ 		  jiffies + MSECS(RTL_WATCH_DOG_TIME));
+ }
+ 
++void rtl_fwevt_wq_callback(void *data)
++{
++	struct rtl_works *rtlworks =
++		container_of_dwork_rtl(data, struct rtl_works, fwevt_wq);
++	struct ieee80211_hw *hw = rtlworks->hw;
++	struct rtl_priv *rtlpriv = rtl_priv(hw);
++
++	rtlpriv->cfg->ops->c2h_command_handle(hw);
++}
++
++void rtl_easy_concurrent_retrytimer_callback(unsigned long data)
++{
++	struct ieee80211_hw *hw = (struct ieee80211_hw *)data;
++	struct rtl_priv *rtlpriv = rtl_priv(hw);
++	struct rtl_priv *buddy_priv = rtlpriv->buddy_priv;
++
++	if (buddy_priv == NULL)
++		return;
++
++	rtlpriv->cfg->ops->dualmac_easy_concurrent(hw);
++}
++
+ /*********************************************************
+  *
+  * frame process functions
+@@ -1334,14 +1555,16 @@ static struct sk_buff *rtl_make_smps_action(struct ieee80211_hw *hw,
+ }
+ 
+ int rtl_send_smps_action(struct ieee80211_hw *hw,
+-		struct ieee80211_sta *sta, u8 *da, u8 *bssid,
++		struct ieee80211_sta *sta,
+ 		enum ieee80211_smps_mode smps)
+ {
+ 	struct rtl_priv *rtlpriv = rtl_priv(hw);
+ 	struct rtl_hal *rtlhal = rtl_hal(rtl_priv(hw));
+ 	struct rtl_ps_ctl *ppsc = rtl_psc(rtl_priv(hw));
+-	struct sk_buff *skb = rtl_make_smps_action(hw, smps, da, bssid);
++	struct sk_buff *skb = NULL;
+ 	struct rtl_tcb_desc tcb_desc;
++	u8 bssid[ETH_ALEN] = {0};
++
+ 	memset(&tcb_desc, 0, sizeof(struct rtl_tcb_desc));
+ 
+ 	if (rtlpriv->mac80211.act_scanning)
+@@ -1356,21 +1579,67 @@ int rtl_send_smps_action(struct ieee80211_hw *hw,
+ 	if (!test_bit(RTL_STATUS_INTERFACE_START, &rtlpriv->status))
+ 		goto err_free;
+ 
++	if (rtlpriv->mac80211.opmode == NL80211_IFTYPE_AP)
++		memcpy(bssid, rtlpriv->efuse.dev_addr, ETH_ALEN);
++	else
++		memcpy(bssid, rtlpriv->mac80211.bssid, ETH_ALEN);
++
++	skb = rtl_make_smps_action(hw, smps, sta->addr, bssid);
+ 	/* this is a type = mgmt * stype = action frame */
+ 	if (skb) {
+ 		struct ieee80211_tx_info *info = IEEE80211_SKB_CB(skb);
+ 		struct rtl_sta_info *sta_entry =
+ 			(struct rtl_sta_info *) sta->drv_priv;
+ 		sta_entry->mimo_ps = smps;
+-		rtlpriv->cfg->ops->update_rate_tbl(hw, sta, 0);
+ 
+ 		info->control.rates[0].idx = 0;
+ 		info->band = hw->conf.channel->band;
+ 		rtlpriv->intf_ops->adapter_tx(hw, sta, skb, &tcb_desc);
+ 	}
++	return 1;
++
+ err_free:
+ 	return 0;
+ }
++EXPORT_SYMBOL(rtl_send_smps_action);
++
++/* There seem to be issues in mac80211 regarding when del ba frames can be
++ * received. As a work around, we make a fake del_ba if we receive a ba_req;
++ * however, rx_agg was opened to let mac80211 release some ba related
++ * resources. This del_ba is for tx only.
++ */
++struct sk_buff *rtl_make_del_ba(struct ieee80211_hw *hw,
++				u8 *sa, u8 *bssid, u16 tid)
++{
++	struct rtl_efuse *rtlefuse = rtl_efuse(rtl_priv(hw));
++	struct sk_buff *skb;
++	struct ieee80211_mgmt *action_frame;
++	u16 params;
++
++	/* 27 = header + category + action + smps mode */
++	skb = dev_alloc_skb(34 + hw->extra_tx_headroom);
++	if (!skb)
++		return NULL;
++
++	skb_reserve(skb, hw->extra_tx_headroom);
++	action_frame = (void *)skb_put(skb, 34);
++	memset(action_frame, 0, 34);
++	memcpy(action_frame->sa, sa, ETH_ALEN);
++	memcpy(action_frame->da, rtlefuse->dev_addr, ETH_ALEN);
++	memcpy(action_frame->bssid, bssid, ETH_ALEN);
++	action_frame->frame_control = cpu_to_le16(IEEE80211_FTYPE_MGMT |
++						  IEEE80211_STYPE_ACTION);
++	action_frame->u.action.category = WLAN_CATEGORY_BACK;
++	action_frame->u.action.u.delba.action_code = WLAN_ACTION_DELBA;
++	params = (u16)(1 << 11);	/* bit 11 initiator */
++	params |= (u16)(tid << 12);		/* bit 15:12 TID number */
++
++	action_frame->u.action.u.delba.params = cpu_to_le16(params);
++	action_frame->u.action.u.delba.reason_code =
++		cpu_to_le16(WLAN_REASON_QSTA_TIMEOUT);
++
++	return skb;
++}
+ 
+ /*********************************************************
+  *
+@@ -1587,11 +1856,17 @@ MODULE_AUTHOR("Larry Finger	<Larry.FInger@lwfinger.net>");
+ MODULE_LICENSE("GPL");
+ MODULE_DESCRIPTION("Realtek 802.11n PCI wireless core");
+ 
++struct rtl_global_var global_var = {};
++
+ static int __init rtl_core_module_init(void)
+ {
+ 	if (rtl_rate_control_register())
+ 		pr_err("Unable to register rtl_rc, use default RC !!\n");
+ 
++	/* init some global vars */
++	INIT_LIST_HEAD(&global_var.glb_priv_list);
++	spin_lock_init(&global_var.glb_list_lock);
++
+ 	return 0;
+ }
+ 
+
+commit 675a0b049abf6edf30f8dd84c5610b6edc2296c8
+Author: Karl Beldan <karl.beldan@rivierawaves.com>
+Date:   Mon Mar 25 16:26:57 2013 +0100
+
+    mac80211: Use a cfg80211_chan_def in ieee80211_hw_conf_chan
+    
+    Drivers that don't use chanctxes cannot perform VHT association because
+    they still use a "backward compatibility" pair of {ieee80211_channel,
+    nl80211_channel_type} in ieee80211_conf and ieee80211_local.
+    
+    Signed-off-by: Karl Beldan <karl.beldan@rivierawaves.com>
+    [fix kernel-doc]
+    Signed-off-by: Johannes Berg <johannes.berg@intel.com>
+
+diff --git a/drivers/net/wireless/rtlwifi/base.c b/drivers/net/wireless/rtlwifi/base.c
+index 99c5cea..0e7866d 100644
+--- a/drivers/net/wireless/rtlwifi/base.c
++++ b/drivers/net/wireless/rtlwifi/base.c
+@@ -691,7 +691,7 @@ int rtlwifi_rate_mapping(struct ieee80211_hw *hw,
+ 	int rate_idx;
+ 
+ 	if (false == isht) {
+-		if (IEEE80211_BAND_2GHZ == hw->conf.channel->band) {
++		if (IEEE80211_BAND_2GHZ == hw->conf.chandef.chan->band) {
+ 			switch (desc_rate) {
+ 			case DESC92_RATE1M:
+ 				rate_idx = 0;
+@@ -1365,7 +1365,7 @@ int rtl_send_smps_action(struct ieee80211_hw *hw,
+ 		rtlpriv->cfg->ops->update_rate_tbl(hw, sta, 0);
+ 
+ 		info->control.rates[0].idx = 0;
+-		info->band = hw->conf.channel->band;
++		info->band = hw->conf.chandef.chan->band;
+ 		rtlpriv->intf_ops->adapter_tx(hw, sta, skb, &tcb_desc);
+ 	}
+ err_free:
+
+commit ded652a67464b1fa66616954bc608ead9ec02fb6
+Merge: b56e681 93c78c5
+Author: John W. Linville <linville@tuxdriver.com>
+Date:   Fri Feb 15 13:59:53 2013 -0500
+
+    Merge branch 'for-john' of git://git.kernel.org/pub/scm/linux/kernel/git/jberg/mac80211-next
+
+commit e1a0c6b3a4b27ed5f21291d0bbee2167ec201ef5
+Author: Johannes Berg <johannes.berg@intel.com>
+Date:   Thu Feb 7 11:47:44 2013 +0100
+
+    mac80211: stop toggling IEEE80211_HT_CAP_SUP_WIDTH_20_40
+    
+    For VHT, many more bandwidth changes are possible. As a first
+    step, stop toggling the IEEE80211_HT_CAP_SUP_WIDTH_20_40 flag
+    in the HT capabilities and instead introduce a bandwidth field
+    indicating the currently usable bandwidth to transmit to the
+    station. Of course, make all drivers use it.
+    
+    To achieve this, make ieee80211_ht_cap_ie_to_sta_ht_cap() get
+    the station as an argument, rather than the new capabilities,
+    so it can set up the new bandwidth field.
+    
+    If the station is a VHT station and VHT bandwidth is in use,
+    also set the bandwidth accordingly.
+    
+    Doing this allows us to get rid of the supports_40mhz flag as
+    the HT capabilities now reflect the true capability instead of
+    the current setting.
+    
+    While at it, also fix ieee80211_ht_cap_ie_to_sta_ht_cap() to not
+    ignore HT cap overrides when MCS TX isn't supported (not that it
+    really happens...)
+    
+    Signed-off-by: Johannes Berg <johannes.berg@intel.com>
+
+diff --git a/drivers/net/wireless/rtlwifi/base.c b/drivers/net/wireless/rtlwifi/base.c
+index 4494d13..84ea04d 100644
+--- a/drivers/net/wireless/rtlwifi/base.c
++++ b/drivers/net/wireless/rtlwifi/base.c
+@@ -523,8 +523,8 @@ static void _rtl_query_shortgi(struct ieee80211_hw *hw,
+ 	if (mac->opmode == NL80211_IFTYPE_STATION)
+ 		bw_40 = mac->bw_40;
+ 	else if (mac->opmode == NL80211_IFTYPE_AP ||
+-		mac->opmode == NL80211_IFTYPE_ADHOC)
+-		bw_40 = sta->ht_cap.cap & IEEE80211_HT_CAP_SUP_WIDTH_20_40;
++		 mac->opmode == NL80211_IFTYPE_ADHOC)
++		bw_40 = sta->bandwidth >= IEEE80211_STA_RX_BW_40;
+ 
+ 	if (bw_40 && sgi_40)
+ 		tcb_desc->use_shortgi = true;
+@@ -634,8 +634,7 @@ static void _rtl_query_bandwidth_mode(struct ieee80211_hw *hw,
+ 		return;
+ 	if (mac->opmode == NL80211_IFTYPE_AP ||
+ 	    mac->opmode == NL80211_IFTYPE_ADHOC) {
+-		if (!(sta->ht_cap.ht_supported) ||
+-		    !(sta->ht_cap.cap & IEEE80211_HT_CAP_SUP_WIDTH_20_40))
++		if (sta->bandwidth == IEEE80211_STA_RX_BW_20)
+ 			return;
+ 	} else if (mac->opmode == NL80211_IFTYPE_STATION) {
+ 		if (!mac->bw_40 || !(sta->ht_cap.ht_supported))
+
+commit a5ffbe0a1993a27072742ef7db6cf9839956fce9
+Author: Larry Finger <Larry.Finger@lwfinger.net>
+Date:   Sat Feb 2 15:55:00 2013 -0600
+
+    rtlwifi: Fix scheduling while atomic bug
+    
+    Kernel commits 41affd5 and 6539306 changed the locking in rtl_lps_leave()
+    from a spinlock to a mutex by doing the calls indirectly from a work queue
+    to reduce the time that interrupts were disabled. This change was fine for
+    most systems; however a scheduling while atomic bug was reported in
+    https://bugzilla.redhat.com/show_bug.cgi?id=903881. The backtrace indicates
+    that routine rtl_is_special(), which calls rtl_lps_leave() in three places
+    was entered in atomic context. These direct calls are replaced by putting a
+    request on the appropriate work queue.
+    
+    Signed-off-by: Larry Finger <Larry.Finger@lwfinger.net>
+    Reported-and-tested-by: Nathaniel Doherty <ntdoherty@gmail.com>
+    Cc: Nathaniel Doherty <ntdoherty@gmail.com>
+    Cc: Stanislaw Gruszka <sgruszka@redhat.com>
+    Cc: Stable <stable@vger.kernel.org>
+    Signed-off-by: John W. Linville <linville@tuxdriver.com>
+
+diff --git a/drivers/net/wireless/rtlwifi/base.c b/drivers/net/wireless/rtlwifi/base.c
+index 4494d13..0f8b051 100644
+--- a/drivers/net/wireless/rtlwifi/base.c
++++ b/drivers/net/wireless/rtlwifi/base.c
+@@ -1004,7 +1004,8 @@ u8 rtl_is_special_data(struct ieee80211_hw *hw, struct sk_buff *skb, u8 is_tx)
+ 					 is_tx ? "Tx" : "Rx");
+ 
+ 				if (is_tx) {
+-					rtl_lps_leave(hw);
++					schedule_work(&rtlpriv->
++						      works.lps_leave_work);
+ 					ppsc->last_delaylps_stamp_jiffies =
+ 					    jiffies;
+ 				}
+@@ -1014,7 +1015,7 @@ u8 rtl_is_special_data(struct ieee80211_hw *hw, struct sk_buff *skb, u8 is_tx)
+ 		}
+ 	} else if (ETH_P_ARP == ether_type) {
+ 		if (is_tx) {
+-			rtl_lps_leave(hw);
++			schedule_work(&rtlpriv->works.lps_leave_work);
+ 			ppsc->last_delaylps_stamp_jiffies = jiffies;
+ 		}
+ 
+@@ -1024,7 +1025,7 @@ u8 rtl_is_special_data(struct ieee80211_hw *hw, struct sk_buff *skb, u8 is_tx)
+ 			 "802.1X %s EAPOL pkt!!\n", is_tx ? "Tx" : "Rx");
+ 
+ 		if (is_tx) {
+-			rtl_lps_leave(hw);
++			schedule_work(&rtlpriv->works.lps_leave_work);
+ 			ppsc->last_delaylps_stamp_jiffies = jiffies;
+ 		}
+ 
+
+commit 0f01545346cd97f823fc0aaf0c02d4fc7bec6d46
+Author: Larry Finger <Larry.Finger@lwfinger.net>
+Date:   Thu Oct 25 13:46:46 2012 -0500
+
+    rtlwifi: rtl8192ce: rtl8192cu: rtl8192se: rtl81723ae: Turn on building of the new driver
+    
+    This patch completes the addition of the new driver for the Realtek
+    RTL8723AE devices by adding the make file and by modifying Kconfig
+    and Makefile of rtlwifi. Some variable names were shortened to ease
+    the problem of limiting all lines to 80 characters, thus changes were
+    made to wifi.h and rtl8192{ce,cu,sw}/hw.c.
+    
+    Signed-off-by: Larry Finger <Larry.Finger@lwfinger.net>
+    Cc: <chaoming_li@realsil.com.cn>
+    Signed-off-by: John W. Linville <linville@tuxdriver.com>
+
+diff --git a/drivers/net/wireless/rtlwifi/base.c b/drivers/net/wireless/rtlwifi/base.c
+index 59381fe..4494d13 100644
+--- a/drivers/net/wireless/rtlwifi/base.c
++++ b/drivers/net/wireless/rtlwifi/base.c
+@@ -826,6 +826,30 @@ int rtlwifi_rate_mapping(struct ieee80211_hw *hw,
+ }
+ EXPORT_SYMBOL(rtlwifi_rate_mapping);
+ 
++bool rtl_tx_mgmt_proc(struct ieee80211_hw *hw, struct sk_buff *skb)
++{
++	struct rtl_mac *mac = rtl_mac(rtl_priv(hw));
++	struct rtl_priv *rtlpriv = rtl_priv(hw);
++	__le16 fc = rtl_get_fc(skb);
++
++	if (rtlpriv->dm.supp_phymode_switch &&
++	    mac->link_state < MAC80211_LINKED &&
++	    (ieee80211_is_auth(fc) || ieee80211_is_probe_req(fc))) {
++		if (rtlpriv->cfg->ops->check_switch_to_dmdp)
++			rtlpriv->cfg->ops->check_switch_to_dmdp(hw);
++	}
++	if (ieee80211_is_auth(fc)) {
++		RT_TRACE(rtlpriv, COMP_SEND, DBG_DMESG, "MAC80211_LINKING\n");
++		rtl_ips_nic_on(hw);
++
++		mac->link_state = MAC80211_LINKING;
++		/* Dual mac */
++		rtlpriv->phy.need_iqk = true;
++	}
++
++	return true;
++}
++
+ void rtl_get_tcb_desc(struct ieee80211_hw *hw,
+ 		      struct ieee80211_tx_info *info,
+ 		      struct ieee80211_sta *sta,
+
+commit 36323f817af0376c78612cfdab714b0feb05fea5
+Author: Thomas Huehn <thomas@net.t-labs.tu-berlin.de>
+Date:   Mon Jul 23 21:33:42 2012 +0200
+
+    mac80211: move TX station pointer and restructure TX
+    
+    Remove the control.sta pointer from ieee80211_tx_info to free up
+    sufficient space in the TX skb control buffer for the upcoming
+    Transmit Power Control (TPC).
+    Instead, the pointer is now on the stack in a new control struct
+    that is passed as a function parameter to the drivers' tx method.
+    
+    Signed-off-by: Thomas Huehn <thomas@net.t-labs.tu-berlin.de>
+    Signed-off-by: Alina Friedrichsen <x-alina@gmx.net>
+    Signed-off-by: Felix Fietkau <nbd@openwrt.org>
+    [reworded commit message]
+    Signed-off-by: Johannes Berg <johannes.berg@intel.com>
+
+diff --git a/drivers/net/wireless/rtlwifi/base.c b/drivers/net/wireless/rtlwifi/base.c
+index 942e56b..59381fe 100644
+--- a/drivers/net/wireless/rtlwifi/base.c
++++ b/drivers/net/wireless/rtlwifi/base.c
+@@ -1341,9 +1341,8 @@ int rtl_send_smps_action(struct ieee80211_hw *hw,
+ 		rtlpriv->cfg->ops->update_rate_tbl(hw, sta, 0);
+ 
+ 		info->control.rates[0].idx = 0;
+-		info->control.sta = sta;
+ 		info->band = hw->conf.channel->band;
+-		rtlpriv->intf_ops->adapter_tx(hw, skb, &tcb_desc);
++		rtlpriv->intf_ops->adapter_tx(hw, sta, skb, &tcb_desc);
+ 	}
+ err_free:
+ 	return 0;
+
+commit 90b90f60c4f8e3a8525dfeb4aec46a9c7a29c857
+Merge: 769162e 36eb22e
+Author: John W. Linville <linville@tuxdriver.com>
+Date:   Fri Jul 20 12:30:48 2012 -0400
+
+    Merge branch 'master' of git://git.kernel.org/pub/scm/linux/kernel/git/linville/wireless-next into for-davem
+
+commit 2a00def4d6e50cbfa7588887fdbe2a97042e42bb
+Author: Larry Finger <Larry.Finger@lwfinger.net>
+Date:   Wed Jul 11 14:32:33 2012 -0500
+
+    rtlwifi: Remove extra argument from queue setup routine
+    
+    Remove unused argument hw from call to rtl_tid_to_ac().
+    
+    Signed-off-by: Larry Finger <Larry.Finger@lwfinger.net>
+    Signed-off-by: John W. Linville <linville@tuxdriver.com>
+
+diff --git a/drivers/net/wireless/rtlwifi/base.c b/drivers/net/wireless/rtlwifi/base.c
+index f4c852c..41f7f12 100644
+--- a/drivers/net/wireless/rtlwifi/base.c
++++ b/drivers/net/wireless/rtlwifi/base.c
+@@ -167,7 +167,7 @@ static const u8 tid_to_ac[] = {
+ 	0, /* IEEE80211_AC_VO */
+ };
+ 
+-u8 rtl_tid_to_ac(struct ieee80211_hw *hw, u8 tid)
++u8 rtl_tid_to_ac(u8 tid)
+ {
+ 	return tid_to_ac[tid];
+ }
+
+commit 2c208890c6d4e16076c6664137703ec813e8fa6c
+Author: Joe Perches <joe@perches.com>
+Date:   Mon Jun 4 12:44:17 2012 +0000
+
+    wireless: Remove casts to same type
+    
+    Adding casts of objects to the same type is unnecessary
+    and confusing for a human reader.
+    
+    For example, this cast:
+    
+            int y;
+            int *p = (int *)&y;
+    
+    I used the coccinelle script below to find and remove these
+    unnecessary casts.  I manually removed the conversions this
+    script produces of casts with __force, __iomem and __user.
+    
+    @@
+    type T;
+    T *p;
+    @@
+    
+    -       (T *)p
+    +       p
+    
+    Neatened the mwifiex_deauthenticate_infra function which
+    was doing odd things with array pointers and not using
+    is_zero_ether_addr.
+    
+    Signed-off-by: Joe Perches <joe@perches.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+diff --git a/drivers/net/wireless/rtlwifi/base.c b/drivers/net/wireless/rtlwifi/base.c
+index f4c852c..58e1f7b 100644
+--- a/drivers/net/wireless/rtlwifi/base.c
++++ b/drivers/net/wireless/rtlwifi/base.c
+@@ -907,7 +907,7 @@ bool rtl_action_proc(struct ieee80211_hw *hw, struct sk_buff *skb, u8 is_tx)
+ 	struct ieee80211_hdr *hdr = rtl_get_hdr(skb);
+ 	struct rtl_priv *rtlpriv = rtl_priv(hw);
+ 	__le16 fc = hdr->frame_control;
+-	u8 *act = (u8 *) (((u8 *) skb->data + MAC80211_3ADDR_LEN));
++	u8 *act = (u8 *)skb->data + MAC80211_3ADDR_LEN;
+ 	u8 category;
+ 
+ 	if (!ieee80211_is_action(fc))
+
+commit 2e42e4747ea72943c21551d8a206b51a9893b1e0
+Author: Joe Perches <joe@perches.com>
+Date:   Wed May 9 17:17:46 2012 +0000
+
+    drivers/net: Convert compare_ether_addr to ether_addr_equal
+    
+    Use the new bool function ether_addr_equal to add
+    some clarity and reduce the likelihood for misuse
+    of compare_ether_addr for sorting.
+    
+    Done via cocci script:
+    
+    $ cat compare_ether_addr.cocci
+    @@
+    expression a,b;
+    @@
+    -	!compare_ether_addr(a, b)
+    +	ether_addr_equal(a, b)
+    
+    @@
+    expression a,b;
+    @@
+    -	compare_ether_addr(a, b)
+    +	!ether_addr_equal(a, b)
+    
+    @@
+    expression a,b;
+    @@
+    -	!ether_addr_equal(a, b) == 0
+    +	ether_addr_equal(a, b)
+    
+    @@
+    expression a,b;
+    @@
+    -	!ether_addr_equal(a, b) != 0
+    +	!ether_addr_equal(a, b)
+    
+    @@
+    expression a,b;
+    @@
+    -	ether_addr_equal(a, b) == 0
+    +	!ether_addr_equal(a, b)
+    
+    @@
+    expression a,b;
+    @@
+    -	ether_addr_equal(a, b) != 0
+    +	ether_addr_equal(a, b)
+    
+    @@
+    expression a,b;
+    @@
+    -	!!ether_addr_equal(a, b)
+    +	ether_addr_equal(a, b)
+    
+    Signed-off-by: Joe Perches <joe@perches.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+diff --git a/drivers/net/wireless/rtlwifi/base.c b/drivers/net/wireless/rtlwifi/base.c
+index e54488d..f4c852c 100644
+--- a/drivers/net/wireless/rtlwifi/base.c
++++ b/drivers/net/wireless/rtlwifi/base.c
+@@ -1460,7 +1460,7 @@ void rtl_recognize_peer(struct ieee80211_hw *hw, u8 *data, unsigned int len)
+ 		return;
+ 
+ 	/* and only beacons from the associated BSSID, please */
+-	if (compare_ether_addr(hdr->addr3, rtlpriv->mac80211.bssid))
++	if (!ether_addr_equal(hdr->addr3, rtlpriv->mac80211.bssid))
+ 		return;
+ 
+ 	if (rtl_find_221_ie(hw, data, len))
+
+commit e89f7690a3adbde0af7c294f83c242ba6a367ef0
+Author: Larry Finger <Larry.Finger@lwfinger.net>
+Date:   Fri Apr 6 16:54:17 2012 -0500
+
+    rtlwifi: Fix oops on rate-control failure
+    
+    When the rate-control indexing is incorrectly set up, mac80211 issues
+    a warning and returns NULL from the call to ieee80211_get_tx_rate().
+    When this happens, avoid a NULL pointer dereference.
+    
+    Signed-off-by: Larry Finger <Larry.Finger@lwfinger.net>
+    Signed-off-by: John W. Linville <linville@tuxdriver.com>
+
+diff --git a/drivers/net/wireless/rtlwifi/base.c b/drivers/net/wireless/rtlwifi/base.c
+index 5100235..e54488d 100644
+--- a/drivers/net/wireless/rtlwifi/base.c
++++ b/drivers/net/wireless/rtlwifi/base.c
+@@ -838,7 +838,10 @@ void rtl_get_tcb_desc(struct ieee80211_hw *hw,
+ 	__le16 fc = hdr->frame_control;
+ 
+ 	txrate = ieee80211_get_tx_rate(hw, info);
+-	tcb_desc->hw_rate = txrate->hw_value;
++	if (txrate)
++		tcb_desc->hw_rate = txrate->hw_value;
++	else
++		tcb_desc->hw_rate = 0;
+ 
+ 	if (ieee80211_is_data(fc)) {
+ 		/*
+
+commit e1fa746029252c85b18b3d6ee5b0e066ce14383f
+Author: Tristan Pourcelot <tristan.pourcelot@gmail.com>
+Date:   Thu Feb 9 14:48:09 2012 +0100
+
+    Correcting typos in rtlwifi/base.c
+    
+    This patch correct some typos in a comment.
+    
+    Signed-off-by: Tristan Pourcelot <tristan.pourcelot@gmail.com>
+    Signed-off-by: John W. Linville <linville@tuxdriver.com>
+
+diff --git a/drivers/net/wireless/rtlwifi/base.c b/drivers/net/wireless/rtlwifi/base.c
+index df5655c..5100235 100644
+--- a/drivers/net/wireless/rtlwifi/base.c
++++ b/drivers/net/wireless/rtlwifi/base.c
+@@ -39,10 +39,10 @@
+ #include <linux/module.h>
+ 
+ /*
+- *NOTICE!!!: This file will be very big, we hsould
+- *keep it clear under follwing roles:
++ *NOTICE!!!: This file will be very big, we should
++ *keep it clear under following roles:
+  *
+- *This file include follwing part, so, if you add new
++ *This file include following parts, so, if you add new
+  *functions into this file, please check which part it
+  *should includes. or check if you should add new part
+  *for this file:
+
+commit b0302aba812bcc39291cdab9ad7e37008f352a91
+Author: Larry Finger <Larry.Finger@lwfinger.net>
+Date:   Mon Jan 30 09:54:49 2012 -0600
+
+    rtlwifi: Convert to asynchronous firmware load
+    
+    This patch addresses a kernel bugzilla report and two recent mail threads.
+    
+    The kernel bugzilla report is https://bugzilla.kernel.org/show_bug.cgi?id=42632,
+    which reports a udev timeout on boot.
+    
+    The first mail thread, which was on LKML (http://lkml.indiana.edu/hypermail/
+    linux/kernel/1112.3/00965.html) was for a WARNING that occurs after a
+    suspend/resume cycle for rtl8192cu.
+    
+    The scond mail thread (http://marc.info/?l=linux-wireless&m=132655490826766&w=2)
+    concerned changes in udev that break drivers that delay while firmware is loaded
+    on modprobe.
+    
+    This patch converts all rtlwifi-based drivers to use the asynchronous firmware
+    loading mechanism. Drivers rtl8192ce, rtl8192cu and rtl8192de share a common
+    callback routine. Driver rtl8192se needs different handling of the firmware,
+    thus it has its own code.
+    
+    Signed-off-by: Larry Finger <Larry.Finger@lwfinger.net>
+    Cc: Stable <stable@vger.kernel.org>
+    Signed-off-by: John W. Linville <linville@tuxdriver.com>
+
+diff --git a/drivers/net/wireless/rtlwifi/base.c b/drivers/net/wireless/rtlwifi/base.c
+index 7a95a54..df5655c 100644
+--- a/drivers/net/wireless/rtlwifi/base.c
++++ b/drivers/net/wireless/rtlwifi/base.c
+@@ -410,6 +410,7 @@ void rtl_init_rfkill(struct ieee80211_hw *hw)
+ 
+ 	wiphy_rfkill_start_polling(hw->wiphy);
+ }
++EXPORT_SYMBOL(rtl_init_rfkill);
+ 
+ void rtl_deinit_rfkill(struct ieee80211_hw *hw)
+ {
+
+commit d273bb20c00340748e3ca9730f87524ec5abbd64
+Author: Larry Finger <Larry.Finger@lwfinger.net>
+Date:   Fri Jan 27 13:59:25 2012 -0600
+
+    rtlwifi: Move pr_fmt macros to a single location
+    
+    Although the rtlwifi family of devices contains 11 copies of the pr_fmt
+    macro, the macro is not defined for all routines that need it. By moving
+    the macro to wifi.h, a single copy is available for all routines.
+    
+    Signed-off-by: Larry Finger <Larry.Finger@lwfinger.net>
+    Signed-off-by: John W. Linville <linville@tuxdriver.com>
+
+diff --git a/drivers/net/wireless/rtlwifi/base.c b/drivers/net/wireless/rtlwifi/base.c
+index ff3e393..7a95a54 100644
+--- a/drivers/net/wireless/rtlwifi/base.c
++++ b/drivers/net/wireless/rtlwifi/base.c
+@@ -27,10 +27,6 @@
+  *
+  *****************************************************************************/
+ 
+-#define pr_fmt(fmt) KBUILD_MODNAME ": " fmt
+-
+-#include <linux/ip.h>
+-#include <linux/module.h>
+ #include "wifi.h"
+ #include "rc.h"
+ #include "base.h"
+@@ -39,6 +35,9 @@
+ #include "ps.h"
+ #include "regd.h"
+ 
++#include <linux/ip.h>
++#include <linux/module.h>
++
+ /*
+  *NOTICE!!!: This file will be very big, we hsould
+  *keep it clear under follwing roles:
+
+commit c1288b1278d00169e12495eb53ad128e09560b69
+Author: Johannes Berg <johannes.berg@intel.com>
+Date:   Thu Jan 19 09:29:57 2012 +0100
+
+    mac80211: make beacon filtering per virtual interface
+    
+    Due to firmware limitations, we may not be able to
+    support beacon filtering on all virtual interfaces.
+    To allow this in mac80211, introduce per-interface
+    driver capability flags that the driver sets when
+    an interface is added.
+    
+    Signed-off-by: Johannes Berg <johannes.berg@intel.com>
+    Acked-by: Luciano Coelho <coelho@ti.com>
+    Signed-off-by: John W. Linville <linville@tuxdriver.com>
+
+diff --git a/drivers/net/wireless/rtlwifi/base.c b/drivers/net/wireless/rtlwifi/base.c
+index 6f80142..ff3e393 100644
+--- a/drivers/net/wireless/rtlwifi/base.c
++++ b/drivers/net/wireless/rtlwifi/base.c
+@@ -309,7 +309,6 @@ static void _rtl_init_mac80211(struct ieee80211_hw *hw)
+ 	/* <5> set hw caps */
+ 	hw->flags = IEEE80211_HW_SIGNAL_DBM |
+ 	    IEEE80211_HW_RX_INCLUDES_FCS |
+-	    IEEE80211_HW_BEACON_FILTER |
+ 	    IEEE80211_HW_AMPDU_AGGREGATION |
+ 	    IEEE80211_HW_CONNECTION_MONITOR |
+ 	    /* IEEE80211_HW_SUPPORTS_CQM_RSSI | */
+
+commit a8d760668eebc98915383481cb3d9eaf74c2a615
+Author: Larry Finger <Larry.Finger@lwfinger.net>
+Date:   Sat Jan 7 20:46:42 2012 -0600
+
+    rtlwifi: Update copyright dates
+    
+    Signed-off-by: Larry Finger <Larry.Finger@lwfinger.net>
+    Signed-off-by: John W. Linville <linville@tuxdriver.com>
+
+diff --git a/drivers/net/wireless/rtlwifi/base.c b/drivers/net/wireless/rtlwifi/base.c
+index fa16b1d..6f80142 100644
+--- a/drivers/net/wireless/rtlwifi/base.c
++++ b/drivers/net/wireless/rtlwifi/base.c
+@@ -1,6 +1,6 @@
+ /******************************************************************************
+  *
+- * Copyright(c) 2009-2010  Realtek Corporation.
++ * Copyright(c) 2009-2012  Realtek Corporation.
+  *
+  * This program is free software; you can redistribute it and/or modify it
+  * under the terms of version 2 of the GNU General Public License as
+
+commit f30d7507a8116e2099a9135c873411db8c0a3dc6
+Author: Joe Perches <joe@perches.com>
+Date:   Wed Jan 4 19:40:41 2012 -0800
+
+    rtlwifi: Convert RT_TRACE macro to use ##__VA_ARGS__
+    
+    Consolidate printks to avoid possible message interleaving
+    and reduce the object size.
+    
+    Remove unnecessary RT_TRACE parentheses.
+    
+    Miscellaneous typo and grammar fixes.
+    Add missing newlines to formats.
+    Remove duplicate KERN_DEBUG prefixes.
+    Coalesce formats.
+    Align arguments.
+    
+    $ size drivers/net/wireless/rtlwifi/built-in.o*
+       text    data     bss     dec     hex filename
+     594841   55333  129680  779854   be64e drivers/net/wireless/rtlwifi/built-in.o.new
+     607022   55333  138720  801075   c3933 drivers/net/wireless/rtlwifi/built-in.o.old
+    
+    Signed-off-by: Joe Perches <joe@perches.com>
+    Acked-by: Larry Finger <Larry.Finger@lwfinger.net>
+    Signed-off-by: John W. Linville <linville@tuxdriver.com>
+
+diff --git a/drivers/net/wireless/rtlwifi/base.c b/drivers/net/wireless/rtlwifi/base.c
+index 8d6eb0f..fa16b1d 100644
+--- a/drivers/net/wireless/rtlwifi/base.c
++++ b/drivers/net/wireless/rtlwifi/base.c
+@@ -211,7 +211,7 @@ static void _rtl_init_hw_ht_capab(struct ieee80211_hw *hw,
+ 	 */
+ 	if (get_rf_type(rtlphy) == RF_1T2R || get_rf_type(rtlphy) == RF_2T2R) {
+ 
+-		RT_TRACE(rtlpriv, COMP_INIT, DBG_DMESG, ("1T2R or 2T2R\n"));
++		RT_TRACE(rtlpriv, COMP_INIT, DBG_DMESG, "1T2R or 2T2R\n");
+ 
+ 		ht_cap->mcs.rx_mask[0] = 0xFF;
+ 		ht_cap->mcs.rx_mask[1] = 0xFF;
+@@ -220,7 +220,7 @@ static void _rtl_init_hw_ht_capab(struct ieee80211_hw *hw,
+ 		ht_cap->mcs.rx_highest = cpu_to_le16(MAX_BIT_RATE_40MHZ_MCS15);
+ 	} else if (get_rf_type(rtlphy) == RF_1T1R) {
+ 
+-		RT_TRACE(rtlpriv, COMP_INIT, DBG_DMESG, ("1T1R\n"));
++		RT_TRACE(rtlpriv, COMP_INIT, DBG_DMESG, "1T1R\n");
+ 
+ 		ht_cap->mcs.rx_mask[0] = 0xFF;
+ 		ht_cap->mcs.rx_mask[1] = 0x00;
+@@ -302,9 +302,8 @@ static void _rtl_init_mac80211(struct ieee80211_hw *hw)
+ 			/* <4> set mac->sband to wiphy->sband */
+ 			hw->wiphy->bands[IEEE80211_BAND_5GHZ] = sband;
+ 		} else {
+-			RT_TRACE(rtlpriv, COMP_INIT, DBG_EMERG,
+-				 ("Err BAND %d\n",
+-				 rtlhal->current_bandtype));
++			RT_TRACE(rtlpriv, COMP_INIT, DBG_EMERG, "Err BAND %d\n",
++				 rtlhal->current_bandtype);
+ 		}
+ 	}
+ 	/* <5> set hw caps */
+@@ -436,13 +435,13 @@ int rtl_init_core(struct ieee80211_hw *hw)
+ 	 * mac80211 hw  in _rtl_init_mac80211.
+ 	 */
+ 	if (rtl_regd_init(hw, rtl_reg_notifier)) {
+-		RT_TRACE(rtlpriv, COMP_ERR, DBG_EMERG, ("REGD init failed\n"));
++		RT_TRACE(rtlpriv, COMP_ERR, DBG_EMERG, "REGD init failed\n");
+ 		return 1;
+ 	} else {
+ 		/* CRDA regd hint must after init CRDA */
+ 		if (regulatory_hint(hw->wiphy, rtlpriv->regd.alpha2)) {
+ 			RT_TRACE(rtlpriv, COMP_ERR, DBG_WARNING,
+-				 ("regulatory_hint fail\n"));
++				 "regulatory_hint fail\n");
+ 		}
+ 	}
+ 
+@@ -922,17 +921,17 @@ bool rtl_action_proc(struct ieee80211_hw *hw, struct sk_buff *skb, u8 is_tx)
+ 				return false;
+ 
+ 			RT_TRACE(rtlpriv, (COMP_SEND | COMP_RECV), DBG_DMESG,
+-				 ("%s ACT_ADDBAREQ From :%pM\n",
+-				  is_tx ? "Tx" : "Rx", hdr->addr2));
++				 "%s ACT_ADDBAREQ From :%pM\n",
++				 is_tx ? "Tx" : "Rx", hdr->addr2);
+ 			break;
+ 		case ACT_ADDBARSP:
+ 			RT_TRACE(rtlpriv, (COMP_SEND | COMP_RECV), DBG_DMESG,
+-				 ("%s ACT_ADDBARSP From :%pM\n",
+-				  is_tx ? "Tx" : "Rx", hdr->addr2));
++				 "%s ACT_ADDBARSP From :%pM\n",
++				 is_tx ? "Tx" : "Rx", hdr->addr2);
+ 			break;
+ 		case ACT_DELBA:
+ 			RT_TRACE(rtlpriv, (COMP_SEND | COMP_RECV), DBG_DMESG,
+-				 ("ACT_ADDBADEL From :%pM\n", hdr->addr2));
++				 "ACT_ADDBADEL From :%pM\n", hdr->addr2);
+ 			break;
+ 		}
+ 		break;
+@@ -975,8 +974,8 @@ u8 rtl_is_special_data(struct ieee80211_hw *hw, struct sk_buff *skb, u8 is_tx)
+ 				 * 67 : UDP BOOTP server
+ 				 */
+ 				RT_TRACE(rtlpriv, (COMP_SEND | COMP_RECV),
+-					 DBG_DMESG, ("dhcp %s !!\n",
+-						     (is_tx) ? "Tx" : "Rx"));
++					 DBG_DMESG, "dhcp %s !!\n",
++					 is_tx ? "Tx" : "Rx");
+ 
+ 				if (is_tx) {
+ 					rtl_lps_leave(hw);
+@@ -996,7 +995,7 @@ u8 rtl_is_special_data(struct ieee80211_hw *hw, struct sk_buff *skb, u8 is_tx)
+ 		return true;
+ 	} else if (ETH_P_PAE == ether_type) {
+ 		RT_TRACE(rtlpriv, (COMP_SEND | COMP_RECV), DBG_DMESG,
+-			 ("802.1X %s EAPOL pkt!!\n", (is_tx) ? "Tx" : "Rx"));
++			 "802.1X %s EAPOL pkt!!\n", is_tx ? "Tx" : "Rx");
+ 
+ 		if (is_tx) {
+ 			rtl_lps_leave(hw);
+@@ -1036,9 +1035,8 @@ int rtl_tx_agg_start(struct ieee80211_hw *hw,
+ 		return -ENXIO;
+ 	tid_data = &sta_entry->tids[tid];
+ 
+-	RT_TRACE(rtlpriv, COMP_SEND, DBG_DMESG,
+-		 ("on ra = %pM tid = %d seq:%d\n", sta->addr, tid,
+-		 tid_data->seq_number));
++	RT_TRACE(rtlpriv, COMP_SEND, DBG_DMESG, "on ra = %pM tid = %d seq:%d\n",
++		 sta->addr, tid, tid_data->seq_number);
+ 
+ 	*ssn = tid_data->seq_number;
+ 	tid_data->agg.agg_state = RTL_AGG_START;
+@@ -1059,12 +1057,12 @@ int rtl_tx_agg_stop(struct ieee80211_hw *hw,
+ 		return -EINVAL;
+ 
+ 	if (!sta->addr) {
+-		RT_TRACE(rtlpriv, COMP_ERR, DBG_EMERG, ("ra = NULL\n"));
++		RT_TRACE(rtlpriv, COMP_ERR, DBG_EMERG, "ra = NULL\n");
+ 		return -EINVAL;
+ 	}
+ 
+-	RT_TRACE(rtlpriv, COMP_SEND, DBG_DMESG,
+-		 ("on ra = %pM tid = %d\n", sta->addr, tid));
++	RT_TRACE(rtlpriv, COMP_SEND, DBG_DMESG, "on ra = %pM tid = %d\n",
++		 sta->addr, tid);
+ 
+ 	if (unlikely(tid >= MAX_TID_COUNT))
+ 		return -EINVAL;
+@@ -1087,12 +1085,12 @@ int rtl_tx_agg_oper(struct ieee80211_hw *hw,
+ 		return -EINVAL;
+ 
+ 	if (!sta->addr) {
+-		RT_TRACE(rtlpriv, COMP_ERR, DBG_EMERG, ("ra = NULL\n"));
++		RT_TRACE(rtlpriv, COMP_ERR, DBG_EMERG, "ra = NULL\n");
+ 		return -EINVAL;
+ 	}
+ 
+-	RT_TRACE(rtlpriv, COMP_SEND, DBG_DMESG,
+-		 ("on ra = %pM tid = %d\n", sta->addr, tid));
++	RT_TRACE(rtlpriv, COMP_SEND, DBG_DMESG, "on ra = %pM tid = %d\n",
++		 sta->addr, tid);
+ 
+ 	if (unlikely(tid >= MAX_TID_COUNT))
+ 		return -EINVAL;
+@@ -1474,29 +1472,29 @@ void rtl_recognize_peer(struct ieee80211_hw *hw, u8 *data, unsigned int len)
+ 		(memcmp(mac->bssid, ap5_6, 3) == 0) ||
+ 		vendor == PEER_ATH) {
+ 		vendor = PEER_ATH;
+-		RT_TRACE(rtlpriv, COMP_MAC80211, DBG_LOUD, ("=>ath find\n"));
++		RT_TRACE(rtlpriv, COMP_MAC80211, DBG_LOUD, "=>ath find\n");
+ 	} else if ((memcmp(mac->bssid, ap4_4, 3) == 0) ||
+ 		(memcmp(mac->bssid, ap4_5, 3) == 0) ||
+ 		(memcmp(mac->bssid, ap4_1, 3) == 0) ||
+ 		(memcmp(mac->bssid, ap4_2, 3) == 0) ||
+ 		(memcmp(mac->bssid, ap4_3, 3) == 0) ||
+ 		vendor == PEER_RAL) {
+-		RT_TRACE(rtlpriv, COMP_MAC80211, DBG_LOUD, ("=>ral findn\n"));
++		RT_TRACE(rtlpriv, COMP_MAC80211, DBG_LOUD, "=>ral find\n");
+ 		vendor = PEER_RAL;
+ 	} else if (memcmp(mac->bssid, ap6_1, 3) == 0 ||
+ 		vendor == PEER_CISCO) {
+ 		vendor = PEER_CISCO;
+-		RT_TRACE(rtlpriv, COMP_MAC80211, DBG_LOUD, ("=>cisco find\n"));
++		RT_TRACE(rtlpriv, COMP_MAC80211, DBG_LOUD, "=>cisco find\n");
+ 	} else if ((memcmp(mac->bssid, ap3_1, 3) == 0) ||
+ 		(memcmp(mac->bssid, ap3_2, 3) == 0) ||
+ 		(memcmp(mac->bssid, ap3_3, 3) == 0) ||
+ 		vendor == PEER_BROAD) {
+-		RT_TRACE(rtlpriv, COMP_MAC80211, DBG_LOUD, ("=>broad find\n"));
++		RT_TRACE(rtlpriv, COMP_MAC80211, DBG_LOUD, "=>broad find\n");
+ 		vendor = PEER_BROAD;
+ 	} else if (memcmp(mac->bssid, ap7_1, 3) == 0 ||
+ 		vendor == PEER_MARV) {
+ 		vendor = PEER_MARV;
+-		RT_TRACE(rtlpriv, COMP_MAC80211, DBG_LOUD, ("=>marv find\n"));
++		RT_TRACE(rtlpriv, COMP_MAC80211, DBG_LOUD, "=>marv find\n");
+ 	}
+ 
+ 	mac->vendor = vendor;
+
+commit 57adc1fcbae2c13104ce291b40f23e40a414fa87
+Merge: faa85aa dc0d633
+Author: John W. Linville <linville@tuxdriver.com>
+Date:   Tue Jan 3 15:16:34 2012 -0500
+
+    Merge branch 'master' of git://git.kernel.org/pub/scm/linux/kernel/git/linville/wireless-next into for-davem
+    
+    Conflicts:
+    	drivers/net/wireless/b43/dma.c
+    	drivers/net/wireless/brcm80211/brcmfmac/dhd_linux.c
+
+commit 3db1cd5c05f35fb43eb134df6f321de4e63141f2
+Author: Rusty Russell <rusty@rustcorp.com.au>
+Date:   Mon Dec 19 13:56:45 2011 +0000
+
+    net: fix assignment of 0/1 to bool variables.
+    
+    DaveM said:
+       Please, this kind of stuff rots forever and not using bool properly
+       drives me crazy.
+    
+    Joe Perches <joe@perches.com> gave me the spatch script:
+    
+    	@@
+    	bool b;
+    	@@
+    	-b = 0
+    	+b = false
+    	@@
+    	bool b;
+    	@@
+    	-b = 1
+    	+b = true
+    
+    I merely installed coccinelle, read the documentation and took credit.
+    
+    Signed-off-by: Rusty Russell <rusty@rustcorp.com.au>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+diff --git a/drivers/net/wireless/rtlwifi/base.c b/drivers/net/wireless/rtlwifi/base.c
+index d81a602..74c0214 100644
+--- a/drivers/net/wireless/rtlwifi/base.c
++++ b/drivers/net/wireless/rtlwifi/base.c
+@@ -396,7 +396,7 @@ void rtl_init_rfkill(struct ieee80211_hw *hw)
+ 	u8 valid = 0;
+ 
+ 	/*set init state to on */
+-	rtlpriv->rfkill.rfkill_state = 1;
++	rtlpriv->rfkill.rfkill_state = true;
+ 	wiphy_rfkill_set_hw_state(hw->wiphy, 0);
+ 
+ 	radio_state = rtlpriv->cfg->ops->radio_onoff_checking(hw, &valid);
+
+commit b9116b9a2b5db63187d28f99e038f473fad036dc
+Author: Larry Finger <Larry.Finger@lwfinger.net>
+Date:   Fri Dec 16 21:17:16 2011 -0600
+
+    rtlwifi: Fix locking problem introduces with commit 6539306b
+    
+    When I tested commit 6539306, I did not notice that loading an out-of-tree
+    module turns off lockdep testing in kernel 3.2. For that reason, I missed
+    the kernel WARNING shown below:
+    
+    The solution fixes the warning by partially reverting commit 6539306.
+    
+    [   84.168146] ------------[ cut here ]------------
+    [   84.168155] WARNING: at kernel/mutex.c:198 mutex_lock_nested+0x309/0x310()
+    [   84.168158] Hardware name: HP Pavilion dv2700 Notebook PC
+    [   84.168161] Modules linked in: nfs lockd auth_rpcgss nfs_acl sunrpc af_packet cpufreq_conservative cpufreq_userspace cpufreq_powersave powernow_k8 mperf e
+    xt3 jbd ide_cd_mod cdrom snd_hda_codec_conexant arc4 rtl8192ce ide_pci_generic rtl8192c_common rtlwifi snd_hda_intel mac80211 snd_hda_codec snd_pcm snd_timer
+     amd74xx ide_core cfg80211 k8temp snd joydev soundcore hwmon battery forcedeth i2c_nforce2 sg rfkill ac serio_raw snd_page_alloc button video i2c_core ipv6 a
+    utofs4 ext4 mbcache jbd2 crc16 sd_mod ahci ohci_hcd libahci libata scsi_mod ehci_hcd usbcore usb_common fan processor thermal
+    [   84.168231] Pid: 1218, comm: kworker/u:2 Not tainted 3.2.0-rc5-wl+ #155
+    [   84.168234] Call Trace:
+    [   84.168240]  [<ffffffff81048aaa>] warn_slowpath_common+0x7a/0xb0
+    [   84.168245]  [<ffffffff81048af5>] warn_slowpath_null+0x15/0x20
+    [   84.168249]  [<ffffffff813811f9>] mutex_lock_nested+0x309/0x310
+    [   84.168269]  [<ffffffffa00793f9>] ? rtl_ips_nic_on+0x49/0xb0 [rtlwifi]
+    [   84.168277]  [<ffffffffa00793f9>] rtl_ips_nic_on+0x49/0xb0 [rtlwifi]
+    [   84.168284]  [<ffffffffa007ab85>] rtl_pci_tx+0x1b5/0x560 [rtlwifi]
+    [   84.168291]  [<ffffffffa007635a>] rtl_op_tx+0x9a/0xa0 [rtlwifi]
+    [   84.168359]  [<ffffffffa043cf51>] __ieee80211_tx+0x181/0x2b0 [mac80211]
+    [   84.168375]  [<ffffffffa043ef06>] ieee80211_tx+0xf6/0x120 [mac80211]
+    [   84.168391]  [<ffffffffa043ee49>] ? ieee80211_tx+0x39/0x120 [mac80211]
+    [   84.168408]  [<ffffffffa043f80b>] ieee80211_xmit+0xdb/0x100 [mac80211]
+    [   84.168425]  [<ffffffffa043f730>] ? ieee80211_skb_resize.isra.26+0xb0/0xb0 [mac80211]
+    [   84.168441]  [<ffffffffa0440b2a>] ieee80211_tx_skb_tid+0x5a/0x70 [mac80211]
+    [   84.168458]  [<ffffffffa0443da2>] ieee80211_send_auth+0x152/0x1b0 [mac80211]
+    [   84.168474]  [<ffffffffa042e169>] ieee80211_work_work+0x1049/0x1860 [mac80211]
+    [   84.168489]  [<ffffffffa042d120>] ? free_work+0x20/0x20 [mac80211]
+    [   84.168504]  [<ffffffffa042d120>] ? free_work+0x20/0x20 [mac80211]
+    [   84.168510]  [<ffffffff81065ffc>] process_one_work+0x17c/0x530
+    [   84.168514]  [<ffffffff81065f92>] ? process_one_work+0x112/0x530
+    [   84.168519]  [<ffffffff81066994>] worker_thread+0x164/0x350
+    [   84.168524]  [<ffffffff8108420d>] ? trace_hardirqs_on+0xd/0x10
+    [   84.168528]  [<ffffffff81066830>] ? manage_workers.isra.28+0x220/0x220
+    [   84.168533]  [<ffffffff8106bc17>] kthread+0x87/0x90
+    [   84.168539]  [<ffffffff813854b4>] kernel_thread_helper+0x4/0x10
+    [   84.168543]  [<ffffffff81382bdd>] ? retint_restore_args+0xe/0xe
+    [   84.168547]  [<ffffffff8106bb90>] ? __init_kthread_worker+0x70/0x70
+    [   84.168552]  [<ffffffff813854b0>] ? gs_change+0xb/0xb
+    [   84.168554] ---[ end trace f25a4fdc768c028f ]---
+    
+    Signed-off-by: Larry Finger <Larry.Finger@lwfinger.net>
+    Cc: Stanislaw Gruska <sgruszka@redhat.com>
+    Cc: Chaoming Li <chaoming_li@realsil.com.cn>
+    Signed-off-by: John W. Linville <linville@tuxdriver.com>
+
+diff --git a/drivers/net/wireless/rtlwifi/base.c b/drivers/net/wireless/rtlwifi/base.c
+index d81a602..7c1d82d 100644
+--- a/drivers/net/wireless/rtlwifi/base.c
++++ b/drivers/net/wireless/rtlwifi/base.c
+@@ -449,6 +449,7 @@ int rtl_init_core(struct ieee80211_hw *hw)
+ 	/* <4> locks */
+ 	mutex_init(&rtlpriv->locks.conf_mutex);
+ 	mutex_init(&rtlpriv->locks.ps_mutex);
++	spin_lock_init(&rtlpriv->locks.ips_lock);
+ 	spin_lock_init(&rtlpriv->locks.irq_th_lock);
+ 	spin_lock_init(&rtlpriv->locks.h2c_lock);
+ 	spin_lock_init(&rtlpriv->locks.rf_ps_lock);
+
+commit 6539306b2c3ceafbc4094cf68c58094c282da053
+Author: Stanislaw Gruszka <sgruszka@redhat.com>
+Date:   Mon Dec 12 12:43:24 2011 +0100
+
+    rtlwifi: merge ips,lps spinlocks into one mutex
+    
+    With previous patch "rtlwifi: use work for lps" we can now use mutex for
+    protecting ps mode changing critical sections. This fixes running system
+    with interrupts disabled for long time.
+    
+    Merge ips_lock and lps_lock as they seems to protect the same data
+    structures (accessed in rtl_ps_set_rf_state() function).
+    
+    Reported-by: Philipp Dreimann <philipp@dreimann.net>
+    Tested-by: Larry Finger <Larry.Finger@lwfinger.net>
+    Cc: Mike McCormack <mikem@ring3k.org>
+    Cc: Chaoming Li <chaoming_li@realsil.com.cn>
+    Signed-off-by: Stanislaw Gruszka <sgruszka@redhat.com>
+    Signed-off-by: Larry Finger <Larry.Finger@lwfinger.net>
+    Tested-by: Tim Gardner <tim.gardner@canonical.com>
+    Signed-off-by: John W. Linville <linville@tuxdriver.com>
+
+diff --git a/drivers/net/wireless/rtlwifi/base.c b/drivers/net/wireless/rtlwifi/base.c
+index a13ecfc..d81a602 100644
+--- a/drivers/net/wireless/rtlwifi/base.c
++++ b/drivers/net/wireless/rtlwifi/base.c
+@@ -448,12 +448,11 @@ int rtl_init_core(struct ieee80211_hw *hw)
+ 
+ 	/* <4> locks */
+ 	mutex_init(&rtlpriv->locks.conf_mutex);
+-	spin_lock_init(&rtlpriv->locks.ips_lock);
++	mutex_init(&rtlpriv->locks.ps_mutex);
+ 	spin_lock_init(&rtlpriv->locks.irq_th_lock);
+ 	spin_lock_init(&rtlpriv->locks.h2c_lock);
+ 	spin_lock_init(&rtlpriv->locks.rf_ps_lock);
+ 	spin_lock_init(&rtlpriv->locks.rf_lock);
+-	spin_lock_init(&rtlpriv->locks.lps_lock);
+ 	spin_lock_init(&rtlpriv->locks.waitq_lock);
+ 	spin_lock_init(&rtlpriv->locks.cck_and_rw_pagea_lock);
+ 
+
+commit 515db09338704a6ad7d27b5f1e33820d3052edd2
+Merge: 30be52e cfcfc9e
+Author: John W. Linville <linville@tuxdriver.com>
+Date:   Tue Nov 22 14:05:46 2011 -0500
+
+    Merge branch 'master' of git://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux
+    
+    Conflicts:
+    	drivers/net/wireless/iwlegacy/iwl-debugfs.c
+    	drivers/net/wireless/iwlegacy/iwl-rx.c
+    	drivers/net/wireless/iwlegacy/iwl-scan.c
+    	drivers/net/wireless/iwlegacy/iwl-tx.c
+    	include/net/bluetooth/bluetooth.h
+
+commit abfabc9b48f6943dbb707fcfc2ef2a04c329e3e8
+Author: Larry Finger <Larry.Finger@lwfinger.net>
+Date:   Thu Nov 17 12:14:44 2011 -0600
+
+    rtlwifi: rtl8192cu: Fix endianian issues
+    
+    Driver rtlwifi fails on a big-endian host.
+    
+    These changes have been tested on a Mac PowerBook G4, which has
+    a PPC processor.
+    
+    Although this patch touches some of the code that will affect endian
+    issues on PCI hardware through drivers rtl8192ce, rtl8192se, and
+    rtl8192de, these have not been tested due to lack of suitable hardware.
+    
+    Signed-off-by: Larry Finger <Larry.Finger@lwfinger.net>
+    Signed-off-by: John W. Linville <linville@tuxdriver.com>
+
+diff --git a/drivers/net/wireless/rtlwifi/base.c b/drivers/net/wireless/rtlwifi/base.c
+index d4fdd2a..c968458 100644
+--- a/drivers/net/wireless/rtlwifi/base.c
++++ b/drivers/net/wireless/rtlwifi/base.c
+@@ -344,9 +344,9 @@ static void _rtl_init_mac80211(struct ieee80211_hw *hw)
+ 	if (is_valid_ether_addr(rtlefuse->dev_addr)) {
+ 		SET_IEEE80211_PERM_ADDR(hw, rtlefuse->dev_addr);
+ 	} else {
+-		u8 rtlmac[] = { 0x00, 0xe0, 0x4c, 0x81, 0x92, 0x00 };
+-		get_random_bytes((rtlmac + (ETH_ALEN - 1)), 1);
+-		SET_IEEE80211_PERM_ADDR(hw, rtlmac);
++		u8 rtlmac1[] = { 0x00, 0xe0, 0x4c, 0x81, 0x92, 0x00 };
++		get_random_bytes((rtlmac1 + (ETH_ALEN - 1)), 1);
++		SET_IEEE80211_PERM_ADDR(hw, rtlmac1);
+ 	}
+ 
+ }
+
+commit 9d9779e723a5d23b94abbe5bb7d1197921f6f3dd
+Author: Paul Gortmaker <paul.gortmaker@windriver.com>
+Date:   Sun Jul 3 15:21:01 2011 -0400
+
+    drivers/net: Add module.h to drivers who were implicitly using it
+    
+    The device.h header was including module.h, making it present for
+    most of these drivers.  But we want to clean that up.  Call out the
+    include of module.h in the modular network drivers.
+    
+    Signed-off-by: Paul Gortmaker <paul.gortmaker@windriver.com>
+
+diff --git a/drivers/net/wireless/rtlwifi/base.c b/drivers/net/wireless/rtlwifi/base.c
+index d4fdd2a..b4ce934 100644
+--- a/drivers/net/wireless/rtlwifi/base.c
++++ b/drivers/net/wireless/rtlwifi/base.c
+@@ -30,6 +30,7 @@
+ #define pr_fmt(fmt) KBUILD_MODNAME ": " fmt
+ 
+ #include <linux/ip.h>
++#include <linux/module.h>
+ #include "wifi.h"
+ #include "rc.h"
+ #include "base.h"
+
+commit 09e92f0be2cc14dc808de0c0f12b57981b8c027d
+Author: Chaoming Li <chaoming_li@realsil.com.cn>
+Date:   Tue Oct 11 21:28:48 2011 -0500
+
+    rtlwifi: Update to new Realtek version - Part I
+    
+    This patch incorporate the differences between the 06/20/2011 and
+    08/16/2011 Realtek releases of the rtlwifi driver.
+    
+    The changes include:
+    
+    1. Handling of IEEE80211_HW_CONNECTION_MONITOR.
+    2. Fix typo to get proper response to nullfunc frames.
+    
+    Signed-off-by: Chaoming Li <chaoming_li@realsil.com.cn>
+    Signed-off-by: Larry Finger <Larry.Finger@lwfinger.net>
+    Signed-off-by: John W. Linville <linville@tuxdriver.com>
+
+diff --git a/drivers/net/wireless/rtlwifi/base.c b/drivers/net/wireless/rtlwifi/base.c
+index 098fc55..d4fdd2a 100644
+--- a/drivers/net/wireless/rtlwifi/base.c
++++ b/drivers/net/wireless/rtlwifi/base.c
+@@ -311,6 +311,8 @@ static void _rtl_init_mac80211(struct ieee80211_hw *hw)
+ 	    IEEE80211_HW_RX_INCLUDES_FCS |
+ 	    IEEE80211_HW_BEACON_FILTER |
+ 	    IEEE80211_HW_AMPDU_AGGREGATION |
++	    IEEE80211_HW_CONNECTION_MONITOR |
++	    /* IEEE80211_HW_SUPPORTS_CQM_RSSI | */
+ 	    IEEE80211_HW_REPORTS_TX_ACK_STATUS | 0;
+ 
+ 	/* swlps or hwlps has been set in diff chip in init_sw_vars */
+@@ -850,7 +852,7 @@ void rtl_get_tcb_desc(struct ieee80211_hw *hw,
+ 		 *So tcb_desc->hw_rate is just used for
+ 		 *special data and mgt frames
+ 		 */
+-		if (info->control.rates[0].idx == 0 &&
++		if (info->control.rates[0].idx == 0 ||
+ 				ieee80211_is_nullfunc(fc)) {
+ 			tcb_desc->use_driver_rate = true;
+ 			tcb_desc->ratr_index = RATR_INX_WIRELESS_MC;
+@@ -1138,7 +1140,7 @@ void rtl_watchdog_wq_callback(void *data)
+ 	}
+ 
+ 	/*
+-	 *<3> to check if traffic busy, if
++	 *<2> to check if traffic busy, if
+ 	 * busytraffic we don't change channel
+ 	 */
+ 	if (mac->link_state >= MAC80211_LINKED) {
+
+commit 7ad0ce3576edb2ea65bd5c93a83c4a6afaa1dd76
+Author: Larry Finger <Larry.Finger@lwfinger.net>
+Date:   Mon Aug 22 16:50:14 2011 -0500
+
+    rtlwifi: Install updated rate-mapping routine
+    
+    In preparation for fixing the rate-mapping situation, place a driver-agnostic
+    version in rtlwifi. This one contains the updated rate incormation.
+    
+    Signed-off-by: Larry Finger <Larry.Finger@lwfinger.net>
+    Cc: Chaoming Li <chaoming_li@realsil.com.cn>
+    Signed-off-by: John W. Linville <linville@tuxdriver.com>
+
+diff --git a/drivers/net/wireless/rtlwifi/base.c b/drivers/net/wireless/rtlwifi/base.c
+index 0b598db..098fc55 100644
+--- a/drivers/net/wireless/rtlwifi/base.c
++++ b/drivers/net/wireless/rtlwifi/base.c
+@@ -664,6 +664,167 @@ static u8 _rtl_get_highest_n_rate(struct ieee80211_hw *hw)
+ 	return hw_rate;
+ }
+ 
++/* mac80211's rate_idx is like this:
++ *
++ * 2.4G band:rx_status->band == IEEE80211_BAND_2GHZ
++ *
++ * B/G rate:
++ * (rx_status->flag & RX_FLAG_HT) = 0,
++ * DESC92_RATE1M-->DESC92_RATE54M ==> idx is 0-->11,
++ *
++ * N rate:
++ * (rx_status->flag & RX_FLAG_HT) = 1,
++ * DESC92_RATEMCS0-->DESC92_RATEMCS15 ==> idx is 0-->15
++ *
++ * 5G band:rx_status->band == IEEE80211_BAND_5GHZ
++ * A rate:
++ * (rx_status->flag & RX_FLAG_HT) = 0,
++ * DESC92_RATE6M-->DESC92_RATE54M ==> idx is 0-->7,
++ *
++ * N rate:
++ * (rx_status->flag & RX_FLAG_HT) = 1,
++ * DESC92_RATEMCS0-->DESC92_RATEMCS15 ==> idx is 0-->15
++ */
++int rtlwifi_rate_mapping(struct ieee80211_hw *hw,
++			 bool isht, u8 desc_rate, bool first_ampdu)
++{
++	int rate_idx;
++
++	if (false == isht) {
++		if (IEEE80211_BAND_2GHZ == hw->conf.channel->band) {
++			switch (desc_rate) {
++			case DESC92_RATE1M:
++				rate_idx = 0;
++				break;
++			case DESC92_RATE2M:
++				rate_idx = 1;
++				break;
++			case DESC92_RATE5_5M:
++				rate_idx = 2;
++				break;
++			case DESC92_RATE11M:
++				rate_idx = 3;
++				break;
++			case DESC92_RATE6M:
++				rate_idx = 4;
++				break;
++			case DESC92_RATE9M:
++				rate_idx = 5;
++				break;
++			case DESC92_RATE12M:
++				rate_idx = 6;
++				break;
++			case DESC92_RATE18M:
++				rate_idx = 7;
++				break;
++			case DESC92_RATE24M:
++				rate_idx = 8;
++				break;
++			case DESC92_RATE36M:
++				rate_idx = 9;
++				break;
++			case DESC92_RATE48M:
++				rate_idx = 10;
++				break;
++			case DESC92_RATE54M:
++				rate_idx = 11;
++				break;
++			default:
++				rate_idx = 0;
++				break;
++			}
++		} else {
++			switch (desc_rate) {
++			case DESC92_RATE6M:
++				rate_idx = 0;
++				break;
++			case DESC92_RATE9M:
++				rate_idx = 1;
++				break;
++			case DESC92_RATE12M:
++				rate_idx = 2;
++				break;
++			case DESC92_RATE18M:
++				rate_idx = 3;
++				break;
++			case DESC92_RATE24M:
++				rate_idx = 4;
++				break;
++			case DESC92_RATE36M:
++				rate_idx = 5;
++				break;
++			case DESC92_RATE48M:
++				rate_idx = 6;
++				break;
++			case DESC92_RATE54M:
++				rate_idx = 7;
++				break;
++			default:
++				rate_idx = 0;
++				break;
++			}
++		}
++
++	} else {
++
++		switch (desc_rate) {
++		case DESC92_RATEMCS0:
++			rate_idx = 0;
++			break;
++		case DESC92_RATEMCS1:
++			rate_idx = 1;
++			break;
++		case DESC92_RATEMCS2:
++			rate_idx = 2;
++			break;
++		case DESC92_RATEMCS3:
++			rate_idx = 3;
++			break;
++		case DESC92_RATEMCS4:
++			rate_idx = 4;
++			break;
++		case DESC92_RATEMCS5:
++			rate_idx = 5;
++			break;
++		case DESC92_RATEMCS6:
++			rate_idx = 6;
++			break;
++		case DESC92_RATEMCS7:
++			rate_idx = 7;
++			break;
++		case DESC92_RATEMCS8:
++			rate_idx = 8;
++			break;
++		case DESC92_RATEMCS9:
++			rate_idx = 9;
++			break;
++		case DESC92_RATEMCS10:
++			rate_idx = 10;
++			break;
++		case DESC92_RATEMCS11:
++			rate_idx = 11;
++			break;
++		case DESC92_RATEMCS12:
++			rate_idx = 12;
++			break;
++		case DESC92_RATEMCS13:
++			rate_idx = 13;
++			break;
++		case DESC92_RATEMCS14:
++			rate_idx = 14;
++			break;
++		case DESC92_RATEMCS15:
++			rate_idx = 15;
++			break;
++		default:
++			rate_idx = 0;
++			break;
++		}
++	}
++	return rate_idx;
++}
++EXPORT_SYMBOL(rtlwifi_rate_mapping);
++
+ void rtl_get_tcb_desc(struct ieee80211_hw *hw,
+ 		      struct ieee80211_tx_info *info,
+ 		      struct ieee80211_sta *sta,
+
+commit 292b11926fec139c0ff103bc229bc6c079d0862f
+Author: Joe Perches <joe@perches.com>
+Date:   Wed Jul 20 08:51:35 2011 -0700
+
+    rtlwifi: Convert printks to pr_<level>
+    
+    Use the current logging styles.
+    Add pr_fmt where appropriate.
+    Remove now unnecessary prefixes from printks.
+    Convert hard coded prefix to __func__.
+    Add a missing "\n" to a format.
+    
+    Signed-off-by: Joe Perches <joe@perches.com>
+    Acked-by: Larry Finger <Larry.Finger@lwfinger.net>
+    Signed-off-by: John W. Linville <linville@tuxdriver.com>
+
+diff --git a/drivers/net/wireless/rtlwifi/base.c b/drivers/net/wireless/rtlwifi/base.c
+index 5f46efd..0b598db 100644
+--- a/drivers/net/wireless/rtlwifi/base.c
++++ b/drivers/net/wireless/rtlwifi/base.c
+@@ -27,6 +27,8 @@
+  *
+  *****************************************************************************/
+ 
++#define pr_fmt(fmt) KBUILD_MODNAME ": " fmt
++
+ #include <linux/ip.h>
+ #include "wifi.h"
+ #include "rc.h"
+@@ -397,8 +399,8 @@ void rtl_init_rfkill(struct ieee80211_hw *hw)
+ 	radio_state = rtlpriv->cfg->ops->radio_onoff_checking(hw, &valid);
+ 
+ 	if (valid) {
+-		printk(KERN_INFO "rtlwifi: wireless switch is %s\n",
+-				rtlpriv->rfkill.rfkill_state ? "on" : "off");
++		pr_info("wireless switch is %s\n",
++			rtlpriv->rfkill.rfkill_state ? "on" : "off");
+ 
+ 		rtlpriv->rfkill.rfkill_state = radio_state;
+ 
+@@ -1401,8 +1403,7 @@ MODULE_DESCRIPTION("Realtek 802.11n PCI wireless core");
+ static int __init rtl_core_module_init(void)
+ {
+ 	if (rtl_rate_control_register())
+-		printk(KERN_ERR "rtlwifi: Unable to register rtl_rc,"
+-		       "use default RC !!\n");
++		pr_err("Unable to register rtl_rc, use default RC !!\n");
+ 
+ 	return 0;
+ }
+
+commit 1d15b5f2d380186761d49588de27b2a6538afacb
+Author: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
+Date:   Wed Jul 20 16:34:29 2011 +0300
+
+    wireless: rtlwifi: throw away MAC_FMT and use %pM instead
+    
+    Signed-off-by: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
+    Cc: Larry Finger <Larry.Finger@lwfinger.net>
+    Signed-off-by: John W. Linville <linville@tuxdriver.com>
+
+diff --git a/drivers/net/wireless/rtlwifi/base.c b/drivers/net/wireless/rtlwifi/base.c
+index bc13533..5f46efd 100644
+--- a/drivers/net/wireless/rtlwifi/base.c
++++ b/drivers/net/wireless/rtlwifi/base.c
+@@ -756,18 +756,17 @@ bool rtl_action_proc(struct ieee80211_hw *hw, struct sk_buff *skb, u8 is_tx)
+ 				return false;
+ 
+ 			RT_TRACE(rtlpriv, (COMP_SEND | COMP_RECV), DBG_DMESG,
+-				 ("%s ACT_ADDBAREQ From :" MAC_FMT "\n",
+-				  is_tx ? "Tx" : "Rx", MAC_ARG(hdr->addr2)));
++				 ("%s ACT_ADDBAREQ From :%pM\n",
++				  is_tx ? "Tx" : "Rx", hdr->addr2));
+ 			break;
+ 		case ACT_ADDBARSP:
+ 			RT_TRACE(rtlpriv, (COMP_SEND | COMP_RECV), DBG_DMESG,
+-				 ("%s ACT_ADDBARSP From :" MAC_FMT "\n",
+-				  is_tx ? "Tx" : "Rx", MAC_ARG(hdr->addr2)));
++				 ("%s ACT_ADDBARSP From :%pM\n",
++				  is_tx ? "Tx" : "Rx", hdr->addr2));
+ 			break;
+ 		case ACT_DELBA:
+ 			RT_TRACE(rtlpriv, (COMP_SEND | COMP_RECV), DBG_DMESG,
+-				 ("ACT_ADDBADEL From :" MAC_FMT "\n",
+-				  MAC_ARG(hdr->addr2)));
++				 ("ACT_ADDBADEL From :%pM\n", hdr->addr2));
+ 			break;
+ 		}
+ 		break;
+
+commit e10542c447abf7c840931ff12f7d0dee976ca2ea
+Author: Mike McCormack <mikem@ring3k.org>
+Date:   Mon Jun 20 10:47:51 2011 +0900
+
+    rtlwifi: rtl8192{c,ce,cu,se}: Remove comparisons of booleans with true
+    
+    These are a potential source of confusion, as most C code treats all
+    non-zero values as true.
+    
+    Signed-off-by: Mike McCormack <mikem@ring3k.org>
+    Acked-by: Larry Finger <Larry.Finger@lwfinger.net>
+    Signed-off-by: John W. Linville <linville@tuxdriver.com>
+
+diff --git a/drivers/net/wireless/rtlwifi/base.c b/drivers/net/wireless/rtlwifi/base.c
+index fb5e43b..bc13533 100644
+--- a/drivers/net/wireless/rtlwifi/base.c
++++ b/drivers/net/wireless/rtlwifi/base.c
+@@ -523,7 +523,7 @@ static void _rtl_query_shortgi(struct ieee80211_hw *hw,
+ 		mac->opmode == NL80211_IFTYPE_ADHOC)
+ 		bw_40 = sta->ht_cap.cap & IEEE80211_HT_CAP_SUP_WIDTH_20_40;
+ 
+-	if ((bw_40 == true) && sgi_40)
++	if (bw_40 && sgi_40)
+ 		tcb_desc->use_shortgi = true;
+ 	else if ((bw_40 == false) && sgi_20)
+ 		tcb_desc->use_shortgi = true;
+
+commit 19086fcef1de1fa7350d8122910a506481acf94b
+Author: Larry Finger <Larry.Finger@lwfinger.net>
+Date:   Sun May 22 20:54:31 2011 -0500
+
+    rtlwifi: Fix warnings from gcc 4.6.0
+    
+    gcc 4.6.0 warnings for rtlwifi:
+    
+      CC [M]  drivers/net/wireless/rtlwifi/base.o
+    drivers/net/wireless/rtlwifi/base.c: In function ‘rtl_tx_agg_stop’:
+    drivers/net/wireless/rtlwifi/base.c:891:23: warning: variable ‘tid_data’ set but not used [-Wunused-but-set-variable]
+    drivers/net/wireless/rtlwifi/base.c: In function ‘rtl_tx_agg_oper’:
+    drivers/net/wireless/rtlwifi/base.c:921:23: warning: variable ‘tid_data’ set but not used [-Wunused-but-set-variable]
+      CC [M]  drivers/net/wireless/rtlwifi/efuse.o
+    drivers/net/wireless/rtlwifi/efuse.c: In function ‘efuse_pg_packet_write’:
+    drivers/net/wireless/rtlwifi/efuse.c:928:24: warning: variable ‘dataempty’ set but not used [-Wunused-but-set-variable]
+    drivers/net/wireless/rtlwifi/efuse.c: In function ‘efuse_get_current_size’:
+    drivers/net/wireless/rtlwifi/efuse.c:1179:5: warning: variable ‘hoffset’ set but not used [-Wunused-but-set-variable]
+      CC [M]  drivers/net/wireless/rtlwifi/ps.o
+    drivers/net/wireless/rtlwifi/ps.c: In function ‘rtl_ps_set_rf_state’:
+    drivers/net/wireless/rtlwifi/ps.c:85:19: warning: variable ‘rtstate’ set but not used [-Wunused-but-set-variable]
+      CC [M]  drivers/net/wireless/rtlwifi/regd.o
+    drivers/net/wireless/rtlwifi/regd.c: In function ‘_rtl_dump_channel_map’:
+    drivers/net/wireless/rtlwifi/regd.c:310:28: warning: variable ‘ch’ set but not used [-Wunused-but-set-variable]
+      CC [M]  drivers/net/wireless/rtlwifi/usb.o
+    drivers/net/wireless/rtlwifi/usb.c: In function ‘_rtl_usb_transmit’:
+    drivers/net/wireless/rtlwifi/usb.c:826:21: warning: variable ‘urb_list’ set but not used [-Wunused-but-set-variable]
+    drivers/net/wireless/rtlwifi/usb.c:825:23: warning: variable ‘skb_list’ set but not used [-Wunused-but-set-variable]
+    
+    Signed-off-by: Larry Finger <Larry.Finger@lwfinger.net>
+    Signed-off-by: John W. Linville <linville@tuxdriver.com>
+
+diff --git a/drivers/net/wireless/rtlwifi/base.c b/drivers/net/wireless/rtlwifi/base.c
+index ccb6da3..fb5e43b 100644
+--- a/drivers/net/wireless/rtlwifi/base.c
++++ b/drivers/net/wireless/rtlwifi/base.c
+@@ -888,7 +888,6 @@ int rtl_tx_agg_stop(struct ieee80211_hw *hw,
+ {
+ 	struct rtl_priv *rtlpriv = rtl_priv(hw);
+ 	struct rtl_mac *mac = rtl_mac(rtl_priv(hw));
+-	struct rtl_tid_data *tid_data;
+ 	struct rtl_sta_info *sta_entry = NULL;
+ 
+ 	if (sta == NULL)
+@@ -906,7 +905,6 @@ int rtl_tx_agg_stop(struct ieee80211_hw *hw,
+ 		return -EINVAL;
+ 
+ 	sta_entry = (struct rtl_sta_info *)sta->drv_priv;
+-	tid_data = &sta_entry->tids[tid];
+ 	sta_entry->tids[tid].agg.agg_state = RTL_AGG_STOP;
+ 
+ 	ieee80211_stop_tx_ba_cb_irqsafe(mac->vif, sta->addr, tid);
+@@ -918,7 +916,6 @@ int rtl_tx_agg_oper(struct ieee80211_hw *hw,
+ 		struct ieee80211_sta *sta, u16 tid)
+ {
+ 	struct rtl_priv *rtlpriv = rtl_priv(hw);
+-	struct rtl_tid_data *tid_data;
+ 	struct rtl_sta_info *sta_entry = NULL;
+ 
+ 	if (sta == NULL)
+@@ -936,7 +933,6 @@ int rtl_tx_agg_oper(struct ieee80211_hw *hw,
+ 		return -EINVAL;
+ 
+ 	sta_entry = (struct rtl_sta_info *)sta->drv_priv;
+-	tid_data = &sta_entry->tids[tid];
+ 	sta_entry->tids[tid].agg.agg_state = RTL_AGG_OPERATIONAL;
+ 
+ 	return 0;
+
+commit a70171dce9cd44cb06c7d299eba9fa87a8933045
+Merge: 5a412ad eaef6a9
+Author: John W. Linville <linville@tuxdriver.com>
+Date:   Thu May 5 13:32:35 2011 -0400
+
+    Merge branch 'master' of git://git.kernel.org/pub/scm/linux/kernel/git/linville/wireless-next-2.6 into for-davem
+    
+    Conflicts:
+    	drivers/net/wireless/libertas/if_cs.c
+    	drivers/net/wireless/rtlwifi/pci.c
+    	net/bluetooth/l2cap_sock.c
+
+commit d3bb1429a2c1470d1f84646c00e34dc6784ee06e
+Author: Larry Finger <Larry.Finger@lwfinger.net>
+Date:   Mon Apr 25 13:23:20 2011 -0500
+
+    rtlwifi: rtl8192ce: rtl8192cu: Fix most sparse warnings
+    
+    Fix most sparse warnings in rtlwifi, rtl8192ce and rtl8192cu drivers.
+    
+    Signed-off-by: Larry Finger <Larry.Finger@lwfinger.net>
+    Signed-off-by: John W. Linville <linville@tuxdriver.com>
+
+diff --git a/drivers/net/wireless/rtlwifi/base.c b/drivers/net/wireless/rtlwifi/base.c
+index 2df9946..d366657 100644
+--- a/drivers/net/wireless/rtlwifi/base.c
++++ b/drivers/net/wireless/rtlwifi/base.c
+@@ -795,7 +795,7 @@ u8 rtl_is_special_data(struct ieee80211_hw *hw, struct sk_buff *skb, u8 is_tx)
+ 	ip = (struct iphdr *)((u8 *) skb->data + mac_hdr_len +
+ 			      SNAP_SIZE + PROTOC_TYPE_SIZE);
+ 	ether_type = *(u16 *) ((u8 *) skb->data + mac_hdr_len + SNAP_SIZE);
+-	ether_type = ntohs(ether_type);
++	/*	ether_type = ntohs(ether_type); */
+ 
+ 	if (ETH_P_IP == ether_type) {
+ 		if (IPPROTO_UDP == ip->protocol) {
+@@ -1105,7 +1105,7 @@ u8 *rtl_find_ie(u8 *data, unsigned int len, u8 ie)
+ 
+ /* when we use 2 rx ants we send IEEE80211_SMPS_OFF */
+ /* when we use 1 rx ant we send IEEE80211_SMPS_STATIC */
+-struct sk_buff *rtl_make_smps_action(struct ieee80211_hw *hw,
++static struct sk_buff *rtl_make_smps_action(struct ieee80211_hw *hw,
+ 		enum ieee80211_smps_mode smps, u8 *da, u8 *bssid)
+ {
+ 	struct rtl_efuse *rtlefuse = rtl_efuse(rtl_priv(hw));
+@@ -1230,7 +1230,7 @@ static bool rtl_chk_vendor_ouisub(struct ieee80211_hw *hw,
+ 	return matched;
+ }
+ 
+-bool rtl_find_221_ie(struct ieee80211_hw *hw, u8 *data,
++static bool rtl_find_221_ie(struct ieee80211_hw *hw, u8 *data,
+ 		unsigned int len)
+ {
+ 	struct ieee80211_mgmt *mgmt = (void *)data;
+
+commit 0baa0fd76f3f5a134461d6cf30294f6bb1bb824c
+Author: Chaoming_Li <chaoming_li@realsil.com.cn>
+Date:   Mon Apr 25 13:23:10 2011 -0500
+
+    rtlwifi: Convert core routines for addition of rtl8192se and rtl8192de
+    
+    Convert core routines for addition of RTL8192SE and RTL8192DE code.
+    
+    Additional files are changed to allow compilation.
+    
+    Signed-off-by: Chaoming_Li <chaoming_li@realsil.com.cn>
+    Signed-off-by: Larry Finger <Larry.Finger@lwfinger.net>
+    Signed-off-by: John W. Linville <linville@tuxdriver.com>
+
+diff --git a/drivers/net/wireless/rtlwifi/base.c b/drivers/net/wireless/rtlwifi/base.c
+index 7b3eadf..2df9946 100644
+--- a/drivers/net/wireless/rtlwifi/base.c
++++ b/drivers/net/wireless/rtlwifi/base.c
+@@ -1182,14 +1182,8 @@ int rtl_send_smps_action(struct ieee80211_hw *hw,
+ 		info->control.rates[0].idx = 0;
+ 		info->control.sta = sta;
+ 		info->band = hw->conf.channel->band;
+-#if 0
+ 		rtlpriv->intf_ops->adapter_tx(hw, skb, &tcb_desc);
+-#else
+-		rtlpriv->intf_ops->adapter_tx(hw, skb);
+-#endif
+ 	}
+-	return 1;
+-
+ err_free:
+ 	return 0;
+ }
+
+commit acd48572c396364bb480175d7de83944eefa2563
+Author: Chaoming_Li <chaoming_li@realsil.com.cn>
+Date:   Mon Apr 25 12:52:54 2011 -0500
+
+    rtlwifi: Change base routines for addition of rtl8192se and rtl8192de
+    
+    Change base routines for addition of RTL8192SE and RTL8192DE code.
+    
+    Additional files are modified to allow compilation.
+    
+    Signed-off-by: Chaoming_Li <chaoming_li@realsil.com.cn>
+    Signed-off-by: Larry Finger <Larry.Finger@lwfinger.net>
+    Signed-off-by: John W. Linville <linville@tuxdriver.com>
+
+diff --git a/drivers/net/wireless/rtlwifi/base.c b/drivers/net/wireless/rtlwifi/base.c
+index 9477785..7b3eadf 100644
+--- a/drivers/net/wireless/rtlwifi/base.c
++++ b/drivers/net/wireless/rtlwifi/base.c
+@@ -50,8 +50,9 @@
+  *3) functions called by core.c
+  *4) wq & timer callback functions
+  *5) frame process functions
+- *6) sysfs functions
+- *7) ...
++ *6) IOT functions
++ *7) sysfs functions
++ *8) ...
+  */
+ 
+ /*********************************************************
+@@ -59,7 +60,7 @@
+  * mac80211 init functions
+  *
+  *********************************************************/
+-static struct ieee80211_channel rtl_channeltable[] = {
++static struct ieee80211_channel rtl_channeltable_2g[] = {
+ 	{.center_freq = 2412, .hw_value = 1,},
+ 	{.center_freq = 2417, .hw_value = 2,},
+ 	{.center_freq = 2422, .hw_value = 3,},
+@@ -76,7 +77,34 @@ static struct ieee80211_channel rtl_channeltable[] = {
+ 	{.center_freq = 2484, .hw_value = 14,},
+ };
+ 
+-static struct ieee80211_rate rtl_ratetable[] = {
++static struct ieee80211_channel rtl_channeltable_5g[] = {
++	{.center_freq = 5180, .hw_value = 36,},
++	{.center_freq = 5200, .hw_value = 40,},
++	{.center_freq = 5220, .hw_value = 44,},
++	{.center_freq = 5240, .hw_value = 48,},
++	{.center_freq = 5260, .hw_value = 52,},
++	{.center_freq = 5280, .hw_value = 56,},
++	{.center_freq = 5300, .hw_value = 60,},
++	{.center_freq = 5320, .hw_value = 64,},
++	{.center_freq = 5500, .hw_value = 100,},
++	{.center_freq = 5520, .hw_value = 104,},
++	{.center_freq = 5540, .hw_value = 108,},
++	{.center_freq = 5560, .hw_value = 112,},
++	{.center_freq = 5580, .hw_value = 116,},
++	{.center_freq = 5600, .hw_value = 120,},
++	{.center_freq = 5620, .hw_value = 124,},
++	{.center_freq = 5640, .hw_value = 128,},
++	{.center_freq = 5660, .hw_value = 132,},
++	{.center_freq = 5680, .hw_value = 136,},
++	{.center_freq = 5700, .hw_value = 140,},
++	{.center_freq = 5745, .hw_value = 149,},
++	{.center_freq = 5765, .hw_value = 153,},
++	{.center_freq = 5785, .hw_value = 157,},
++	{.center_freq = 5805, .hw_value = 161,},
++	{.center_freq = 5825, .hw_value = 165,},
++};
++
++static struct ieee80211_rate rtl_ratetable_2g[] = {
+ 	{.bitrate = 10, .hw_value = 0x00,},
+ 	{.bitrate = 20, .hw_value = 0x01,},
+ 	{.bitrate = 55, .hw_value = 0x02,},
+@@ -91,18 +119,57 @@ static struct ieee80211_rate rtl_ratetable[] = {
+ 	{.bitrate = 540, .hw_value = 0x0b,},
+ };
+ 
++static struct ieee80211_rate rtl_ratetable_5g[] = {
++	{.bitrate = 60, .hw_value = 0x04,},
++	{.bitrate = 90, .hw_value = 0x05,},
++	{.bitrate = 120, .hw_value = 0x06,},
++	{.bitrate = 180, .hw_value = 0x07,},
++	{.bitrate = 240, .hw_value = 0x08,},
++	{.bitrate = 360, .hw_value = 0x09,},
++	{.bitrate = 480, .hw_value = 0x0a,},
++	{.bitrate = 540, .hw_value = 0x0b,},
++};
++
+ static const struct ieee80211_supported_band rtl_band_2ghz = {
+ 	.band = IEEE80211_BAND_2GHZ,
+ 
+-	.channels = rtl_channeltable,
+-	.n_channels = ARRAY_SIZE(rtl_channeltable),
++	.channels = rtl_channeltable_2g,
++	.n_channels = ARRAY_SIZE(rtl_channeltable_2g),
+ 
+-	.bitrates = rtl_ratetable,
+-	.n_bitrates = ARRAY_SIZE(rtl_ratetable),
++	.bitrates = rtl_ratetable_2g,
++	.n_bitrates = ARRAY_SIZE(rtl_ratetable_2g),
+ 
+ 	.ht_cap = {0},
+ };
+ 
++static struct ieee80211_supported_band rtl_band_5ghz = {
++	.band = IEEE80211_BAND_5GHZ,
++
++	.channels = rtl_channeltable_5g,
++	.n_channels = ARRAY_SIZE(rtl_channeltable_5g),
++
++	.bitrates = rtl_ratetable_5g,
++	.n_bitrates = ARRAY_SIZE(rtl_ratetable_5g),
++
++	.ht_cap = {0},
++};
++
++static const u8 tid_to_ac[] = {
++	2, /* IEEE80211_AC_BE */
++	3, /* IEEE80211_AC_BK */
++	3, /* IEEE80211_AC_BK */
++	2, /* IEEE80211_AC_BE */
++	1, /* IEEE80211_AC_VI */
++	1, /* IEEE80211_AC_VI */
++	0, /* IEEE80211_AC_VO */
++	0, /* IEEE80211_AC_VO */
++};
++
++u8 rtl_tid_to_ac(struct ieee80211_hw *hw, u8 tid)
++{
++	return tid_to_ac[tid];
++}
++
+ static void _rtl_init_hw_ht_capab(struct ieee80211_hw *hw,
+ 				  struct ieee80211_sta_ht_cap *ht_cap)
+ {
+@@ -115,6 +182,9 @@ static void _rtl_init_hw_ht_capab(struct ieee80211_hw *hw,
+ 	    IEEE80211_HT_CAP_SGI_20 |
+ 	    IEEE80211_HT_CAP_DSSSCCK40 | IEEE80211_HT_CAP_MAX_AMSDU;
+ 
++	if (rtlpriv->rtlhal.disable_amsdu_8k)
++		ht_cap->cap &= ~IEEE80211_HT_CAP_MAX_AMSDU;
++
+ 	/*
+ 	 *Maximum length of AMPDU that the STA can receive.
+ 	 *Length = 2 ^ (13 + max_ampdu_length_exp) - 1 (octets)
+@@ -159,37 +229,99 @@ static void _rtl_init_hw_ht_capab(struct ieee80211_hw *hw,
+ 
+ static void _rtl_init_mac80211(struct ieee80211_hw *hw)
+ {
++	struct rtl_priv *rtlpriv = rtl_priv(hw);
++	struct rtl_hal *rtlhal = rtl_hal(rtlpriv);
+ 	struct rtl_mac *rtlmac = rtl_mac(rtl_priv(hw));
+ 	struct rtl_efuse *rtlefuse = rtl_efuse(rtl_priv(hw));
+ 	struct ieee80211_supported_band *sband;
+ 
+-	/* <1> use  mac->bands as mem for hw->wiphy->bands */
+-	sband = &(rtlmac->bands[IEEE80211_BAND_2GHZ]);
+ 
+-	/*
+-	 * <2> set hw->wiphy->bands[IEEE80211_BAND_2GHZ]
+-	 * to default value(1T1R)
+-	 */
+-	memcpy(&(rtlmac->bands[IEEE80211_BAND_2GHZ]), &rtl_band_2ghz,
+-	       sizeof(struct ieee80211_supported_band));
++	if (rtlhal->macphymode == SINGLEMAC_SINGLEPHY && rtlhal->bandset ==
++	    BAND_ON_BOTH) {
++		/* 1: 2.4 G bands */
++		/* <1> use  mac->bands as mem for hw->wiphy->bands */
++		sband = &(rtlmac->bands[IEEE80211_BAND_2GHZ]);
++
++		/* <2> set hw->wiphy->bands[IEEE80211_BAND_2GHZ]
++		 * to default value(1T1R) */
++		memcpy(&(rtlmac->bands[IEEE80211_BAND_2GHZ]), &rtl_band_2ghz,
++				sizeof(struct ieee80211_supported_band));
+ 
+-	/* <3> init ht cap base on ant_num */
+-	_rtl_init_hw_ht_capab(hw, &sband->ht_cap);
++		/* <3> init ht cap base on ant_num */
++		_rtl_init_hw_ht_capab(hw, &sband->ht_cap);
+ 
+-	/* <4> set mac->sband to wiphy->sband */
+-	hw->wiphy->bands[IEEE80211_BAND_2GHZ] = sband;
++		/* <4> set mac->sband to wiphy->sband */
++		hw->wiphy->bands[IEEE80211_BAND_2GHZ] = sband;
+ 
++		/* 2: 5 G bands */
++		/* <1> use  mac->bands as mem for hw->wiphy->bands */
++		sband = &(rtlmac->bands[IEEE80211_BAND_5GHZ]);
++
++		/* <2> set hw->wiphy->bands[IEEE80211_BAND_5GHZ]
++		 * to default value(1T1R) */
++		memcpy(&(rtlmac->bands[IEEE80211_BAND_5GHZ]), &rtl_band_5ghz,
++				sizeof(struct ieee80211_supported_band));
++
++		/* <3> init ht cap base on ant_num */
++		_rtl_init_hw_ht_capab(hw, &sband->ht_cap);
++
++		/* <4> set mac->sband to wiphy->sband */
++		hw->wiphy->bands[IEEE80211_BAND_5GHZ] = sband;
++	} else {
++		if (rtlhal->current_bandtype == BAND_ON_2_4G) {
++			/* <1> use  mac->bands as mem for hw->wiphy->bands */
++			sband = &(rtlmac->bands[IEEE80211_BAND_2GHZ]);
++
++			/* <2> set hw->wiphy->bands[IEEE80211_BAND_2GHZ]
++			 * to default value(1T1R) */
++			memcpy(&(rtlmac->bands[IEEE80211_BAND_2GHZ]),
++				 &rtl_band_2ghz,
++				 sizeof(struct ieee80211_supported_band));
++
++			/* <3> init ht cap base on ant_num */
++			_rtl_init_hw_ht_capab(hw, &sband->ht_cap);
++
++			/* <4> set mac->sband to wiphy->sband */
++			hw->wiphy->bands[IEEE80211_BAND_2GHZ] = sband;
++		} else if (rtlhal->current_bandtype == BAND_ON_5G) {
++			/* <1> use  mac->bands as mem for hw->wiphy->bands */
++			sband = &(rtlmac->bands[IEEE80211_BAND_5GHZ]);
++
++			/* <2> set hw->wiphy->bands[IEEE80211_BAND_5GHZ]
++			 * to default value(1T1R) */
++			memcpy(&(rtlmac->bands[IEEE80211_BAND_5GHZ]),
++				 &rtl_band_5ghz,
++				 sizeof(struct ieee80211_supported_band));
++
++			/* <3> init ht cap base on ant_num */
++			_rtl_init_hw_ht_capab(hw, &sband->ht_cap);
++
++			/* <4> set mac->sband to wiphy->sband */
++			hw->wiphy->bands[IEEE80211_BAND_5GHZ] = sband;
++		} else {
++			RT_TRACE(rtlpriv, COMP_INIT, DBG_EMERG,
++				 ("Err BAND %d\n",
++				 rtlhal->current_bandtype));
++		}
++	}
+ 	/* <5> set hw caps */
+ 	hw->flags = IEEE80211_HW_SIGNAL_DBM |
+ 	    IEEE80211_HW_RX_INCLUDES_FCS |
+-	    IEEE80211_HW_BEACON_FILTER | IEEE80211_HW_AMPDU_AGGREGATION | /*PS*/
+-	    /*IEEE80211_HW_SUPPORTS_PS | */
+-	    /*IEEE80211_HW_PS_NULLFUNC_STACK | */
+-	    /*IEEE80211_HW_SUPPORTS_DYNAMIC_PS | */
++	    IEEE80211_HW_BEACON_FILTER |
++	    IEEE80211_HW_AMPDU_AGGREGATION |
+ 	    IEEE80211_HW_REPORTS_TX_ACK_STATUS | 0;
+ 
++	/* swlps or hwlps has been set in diff chip in init_sw_vars */
++	if (rtlpriv->psc.swctrl_lps)
++		hw->flags |= IEEE80211_HW_SUPPORTS_PS |
++			IEEE80211_HW_PS_NULLFUNC_STACK |
++			/* IEEE80211_HW_SUPPORTS_DYNAMIC_PS | */
++			0;
++
+ 	hw->wiphy->interface_modes =
+-	    BIT(NL80211_IFTYPE_STATION) | BIT(NL80211_IFTYPE_ADHOC);
++	    BIT(NL80211_IFTYPE_AP) |
++	    BIT(NL80211_IFTYPE_STATION) |
++	    BIT(NL80211_IFTYPE_ADHOC);
+ 
+ 	hw->wiphy->rts_threshold = 2347;
+ 
+@@ -199,9 +331,10 @@ static void _rtl_init_mac80211(struct ieee80211_hw *hw)
+ 	/* TODO: Correct this value for our hw */
+ 	/* TODO: define these hard code value */
+ 	hw->channel_change_time = 100;
+-	hw->max_listen_interval = 5;
++	hw->max_listen_interval = 10;
+ 	hw->max_rate_tries = 4;
+ 	/* hw->max_rates = 1; */
++	hw->sta_data_size = sizeof(struct rtl_sta_info);
+ 
+ 	/* <6> mac address */
+ 	if (is_valid_ether_addr(rtlefuse->dev_addr)) {
+@@ -230,6 +363,10 @@ static void _rtl_init_deferred_work(struct ieee80211_hw *hw)
+ 			  (void *)rtl_watchdog_wq_callback);
+ 	INIT_DELAYED_WORK(&rtlpriv->works.ips_nic_off_wq,
+ 			  (void *)rtl_ips_nic_off_wq_callback);
++	INIT_DELAYED_WORK(&rtlpriv->works.ps_work,
++			  (void *)rtl_swlps_wq_callback);
++	INIT_DELAYED_WORK(&rtlpriv->works.ps_rfon_wq,
++			  (void *)rtl_swlps_rfon_wq_callback);
+ 
+ }
+ 
+@@ -241,6 +378,8 @@ void rtl_deinit_deferred_work(struct ieee80211_hw *hw)
+ 
+ 	cancel_delayed_work(&rtlpriv->works.watchdog_wq);
+ 	cancel_delayed_work(&rtlpriv->works.ips_nic_off_wq);
++	cancel_delayed_work(&rtlpriv->works.ps_work);
++	cancel_delayed_work(&rtlpriv->works.ps_rfon_wq);
+ }
+ 
+ void rtl_init_rfkill(struct ieee80211_hw *hw)
+@@ -310,6 +449,8 @@ int rtl_init_core(struct ieee80211_hw *hw)
+ 	spin_lock_init(&rtlpriv->locks.rf_ps_lock);
+ 	spin_lock_init(&rtlpriv->locks.rf_lock);
+ 	spin_lock_init(&rtlpriv->locks.lps_lock);
++	spin_lock_init(&rtlpriv->locks.waitq_lock);
++	spin_lock_init(&rtlpriv->locks.cck_and_rw_pagea_lock);
+ 
+ 	rtlmac->link_state = MAC80211_NOLINK;
+ 
+@@ -329,12 +470,6 @@ void rtl_init_rx_config(struct ieee80211_hw *hw)
+ 	struct rtl_mac *mac = rtl_mac(rtl_priv(hw));
+ 
+ 	rtlpriv->cfg->ops->get_hw_reg(hw, HW_VAR_RCR, (u8 *) (&mac->rx_conf));
+-	rtlpriv->cfg->ops->get_hw_reg(hw, HW_VAR_MGT_FILTER,
+-				      (u8 *) (&mac->rx_mgt_filter));
+-	rtlpriv->cfg->ops->get_hw_reg(hw, HW_VAR_CTRL_FILTER,
+-				      (u8 *) (&mac->rx_ctrl_filter));
+-	rtlpriv->cfg->ops->get_hw_reg(hw, HW_VAR_DATA_FILTER,
+-				      (u8 *) (&mac->rx_data_filter));
+ }
+ 
+ /*********************************************************
+@@ -361,28 +496,40 @@ static void _rtl_qurey_shortpreamble_mode(struct ieee80211_hw *hw,
+ }
+ 
+ static void _rtl_query_shortgi(struct ieee80211_hw *hw,
++			       struct ieee80211_sta *sta,
+ 			       struct rtl_tcb_desc *tcb_desc,
+ 			       struct ieee80211_tx_info *info)
+ {
+ 	struct rtl_mac *mac = rtl_mac(rtl_priv(hw));
+ 	u8 rate_flag = info->control.rates[0].flags;
+-
++	u8 sgi_40 = 0, sgi_20 = 0, bw_40 = 0;
+ 	tcb_desc->use_shortgi = false;
+ 
+-	if (!mac->ht_enable)
++	if (sta == NULL)
++		return;
++
++	sgi_40 = sta->ht_cap.cap & IEEE80211_HT_CAP_SGI_40;
++	sgi_20 = sta->ht_cap.cap & IEEE80211_HT_CAP_SGI_20;
++
++	if (!(sta->ht_cap.ht_supported))
+ 		return;
+ 
+-	if (!mac->sgi_40 && !mac->sgi_20)
++	if (!sgi_40 && !sgi_20)
+ 		return;
+ 
+-	if ((mac->bw_40 == true) && mac->sgi_40)
++	if (mac->opmode == NL80211_IFTYPE_STATION)
++		bw_40 = mac->bw_40;
++	else if (mac->opmode == NL80211_IFTYPE_AP ||
++		mac->opmode == NL80211_IFTYPE_ADHOC)
++		bw_40 = sta->ht_cap.cap & IEEE80211_HT_CAP_SUP_WIDTH_20_40;
++
++	if ((bw_40 == true) && sgi_40)
+ 		tcb_desc->use_shortgi = true;
+-	else if ((mac->bw_40 == false) && mac->sgi_20)
++	else if ((bw_40 == false) && sgi_20)
+ 		tcb_desc->use_shortgi = true;
+ 
+ 	if (!(rate_flag & IEEE80211_TX_RC_SHORT_GI))
+ 		tcb_desc->use_shortgi = false;
+-
+ }
+ 
+ static void _rtl_query_protection_mode(struct ieee80211_hw *hw,
+@@ -410,19 +557,25 @@ static void _rtl_query_protection_mode(struct ieee80211_hw *hw,
+ 		tcb_desc->rts_enable = true;
+ 		tcb_desc->rts_rate = rtlpriv->cfg->maps[RTL_RC_OFDM_RATE24M];
+ 	}
+-
+ }
+ 
+ static void _rtl_txrate_selectmode(struct ieee80211_hw *hw,
++				   struct ieee80211_sta *sta,
+ 				   struct rtl_tcb_desc *tcb_desc)
+ {
+ 	struct rtl_priv *rtlpriv = rtl_priv(hw);
+ 	struct rtl_mac *mac = rtl_mac(rtl_priv(hw));
++	struct rtl_sta_info *sta_entry = NULL;
++	u8 ratr_index = 7;
+ 
++	if (sta) {
++		sta_entry = (struct rtl_sta_info *) sta->drv_priv;
++		ratr_index = sta_entry->ratr_index;
++	}
+ 	if (!tcb_desc->disable_ratefallback || !tcb_desc->use_driver_rate) {
+-		if (mac->opmode == NL80211_IFTYPE_STATION)
++		if (mac->opmode == NL80211_IFTYPE_STATION) {
+ 			tcb_desc->ratr_index = 0;
+-		else if (mac->opmode == NL80211_IFTYPE_ADHOC) {
++		} else if (mac->opmode == NL80211_IFTYPE_ADHOC) {
+ 			if (tcb_desc->multicast || tcb_desc->broadcast) {
+ 				tcb_desc->hw_rate =
+ 				    rtlpriv->cfg->maps[RTL_RC_CCK_RATE2M];
+@@ -430,36 +583,61 @@ static void _rtl_txrate_selectmode(struct ieee80211_hw *hw,
+ 			} else {
+ 				/* TODO */
+ 			}
++			tcb_desc->ratr_index = ratr_index;
++		} else if (mac->opmode == NL80211_IFTYPE_AP) {
++			tcb_desc->ratr_index = ratr_index;
+ 		}
+ 	}
+ 
+ 	if (rtlpriv->dm.useramask) {
+-		/* TODO adhoc and station handled differently in the future */
+-		tcb_desc->mac_id = 0;
+-
+-		if ((mac->mode == WIRELESS_MODE_N_24G) ||
+-		    (mac->mode == WIRELESS_MODE_N_5G)) {
+-			tcb_desc->ratr_index = RATR_INX_WIRELESS_NGB;
+-		} else if (mac->mode & WIRELESS_MODE_G) {
+-			tcb_desc->ratr_index = RATR_INX_WIRELESS_GB;
+-		} else if (mac->mode & WIRELESS_MODE_B) {
+-			tcb_desc->ratr_index = RATR_INX_WIRELESS_B;
++		/* TODO we will differentiate adhoc and station futrue  */
++		if (mac->opmode == NL80211_IFTYPE_STATION) {
++			tcb_desc->mac_id = 0;
++
++			if (mac->mode == WIRELESS_MODE_N_24G)
++				tcb_desc->ratr_index = RATR_INX_WIRELESS_NGB;
++			else if (mac->mode == WIRELESS_MODE_N_5G)
++				tcb_desc->ratr_index = RATR_INX_WIRELESS_NG;
++			else if (mac->mode & WIRELESS_MODE_G)
++				tcb_desc->ratr_index = RATR_INX_WIRELESS_GB;
++			else if (mac->mode & WIRELESS_MODE_B)
++				tcb_desc->ratr_index = RATR_INX_WIRELESS_B;
++			else if (mac->mode & WIRELESS_MODE_A)
++				tcb_desc->ratr_index = RATR_INX_WIRELESS_G;
++		} else if (mac->opmode == NL80211_IFTYPE_AP ||
++			mac->opmode == NL80211_IFTYPE_ADHOC) {
++			if (NULL != sta) {
++				if (sta->aid > 0)
++					tcb_desc->mac_id = sta->aid + 1;
++				else
++					tcb_desc->mac_id = 1;
++			} else {
++				tcb_desc->mac_id = 0;
++			}
+ 		}
+ 	}
+ 
+ }
+ 
+ static void _rtl_query_bandwidth_mode(struct ieee80211_hw *hw,
++				      struct ieee80211_sta *sta,
+ 				      struct rtl_tcb_desc *tcb_desc)
+ {
+ 	struct rtl_priv *rtlpriv = rtl_priv(hw);
+ 	struct rtl_mac *mac = rtl_mac(rtl_priv(hw));
+ 
+ 	tcb_desc->packet_bw = false;
+-
+-	if (!mac->bw_40 || !mac->ht_enable)
++	if (!sta)
+ 		return;
+-
++	if (mac->opmode == NL80211_IFTYPE_AP ||
++	    mac->opmode == NL80211_IFTYPE_ADHOC) {
++		if (!(sta->ht_cap.ht_supported) ||
++		    !(sta->ht_cap.cap & IEEE80211_HT_CAP_SUP_WIDTH_20_40))
++			return;
++	} else if (mac->opmode == NL80211_IFTYPE_STATION) {
++		if (!mac->bw_40 || !(sta->ht_cap.ht_supported))
++			return;
++	}
+ 	if (tcb_desc->multicast || tcb_desc->broadcast)
+ 		return;
+ 
+@@ -486,22 +664,21 @@ static u8 _rtl_get_highest_n_rate(struct ieee80211_hw *hw)
+ 
+ void rtl_get_tcb_desc(struct ieee80211_hw *hw,
+ 		      struct ieee80211_tx_info *info,
++		      struct ieee80211_sta *sta,
+ 		      struct sk_buff *skb, struct rtl_tcb_desc *tcb_desc)
+ {
+ 	struct rtl_priv *rtlpriv = rtl_priv(hw);
+ 	struct rtl_mac *rtlmac = rtl_mac(rtl_priv(hw));
+-	struct ieee80211_hdr *hdr = (struct ieee80211_hdr *)(skb->data);
++	struct ieee80211_hdr *hdr = rtl_get_hdr(skb);
+ 	struct ieee80211_rate *txrate;
+ 	__le16 fc = hdr->frame_control;
+ 
+-	memset(tcb_desc, 0, sizeof(struct rtl_tcb_desc));
++	txrate = ieee80211_get_tx_rate(hw, info);
++	tcb_desc->hw_rate = txrate->hw_value;
+ 
+ 	if (ieee80211_is_data(fc)) {
+-		txrate = ieee80211_get_tx_rate(hw, info);
+-		tcb_desc->hw_rate = txrate->hw_value;
+-
+ 		/*
+-		 *we set data rate RTL_RC_CCK_RATE1M
++		 *we set data rate INX 0
+ 		 *in rtl_rc.c   if skb is special data or
+ 		 *mgt which need low data rate.
+ 		 */
+@@ -510,12 +687,11 @@ void rtl_get_tcb_desc(struct ieee80211_hw *hw,
+ 		 *So tcb_desc->hw_rate is just used for
+ 		 *special data and mgt frames
+ 		 */
+-		if (tcb_desc->hw_rate < rtlpriv->cfg->maps[RTL_RC_CCK_RATE11M]) {
++		if (info->control.rates[0].idx == 0 &&
++				ieee80211_is_nullfunc(fc)) {
+ 			tcb_desc->use_driver_rate = true;
+-			tcb_desc->ratr_index = 7;
++			tcb_desc->ratr_index = RATR_INX_WIRELESS_MC;
+ 
+-			tcb_desc->hw_rate =
+-			    rtlpriv->cfg->maps[RTL_RC_CCK_RATE1M];
+ 			tcb_desc->disable_ratefallback = 1;
+ 		} else {
+ 			/*
+@@ -525,7 +701,7 @@ void rtl_get_tcb_desc(struct ieee80211_hw *hw,
+ 			 *and N rate will all be controled by FW
+ 			 *when tcb_desc->use_driver_rate = false
+ 			 */
+-			if (rtlmac->ht_enable) {
++			if (sta && (sta->ht_cap.ht_supported)) {
+ 				tcb_desc->hw_rate = _rtl_get_highest_n_rate(hw);
+ 			} else {
+ 				if (rtlmac->mode == WIRELESS_MODE_B) {
+@@ -543,43 +719,25 @@ void rtl_get_tcb_desc(struct ieee80211_hw *hw,
+ 		else if (is_broadcast_ether_addr(ieee80211_get_DA(hdr)))
+ 			tcb_desc->broadcast = 1;
+ 
+-		_rtl_txrate_selectmode(hw, tcb_desc);
+-		_rtl_query_bandwidth_mode(hw, tcb_desc);
++		_rtl_txrate_selectmode(hw, sta, tcb_desc);
++		_rtl_query_bandwidth_mode(hw, sta, tcb_desc);
+ 		_rtl_qurey_shortpreamble_mode(hw, tcb_desc, info);
+-		_rtl_query_shortgi(hw, tcb_desc, info);
++		_rtl_query_shortgi(hw, sta, tcb_desc, info);
+ 		_rtl_query_protection_mode(hw, tcb_desc, info);
+ 	} else {
+ 		tcb_desc->use_driver_rate = true;
+-		tcb_desc->ratr_index = 7;
++		tcb_desc->ratr_index = RATR_INX_WIRELESS_MC;
+ 		tcb_desc->disable_ratefallback = 1;
+ 		tcb_desc->mac_id = 0;
+-
+-		tcb_desc->hw_rate = rtlpriv->cfg->maps[RTL_RC_CCK_RATE1M];
++		tcb_desc->packet_bw = false;
+ 	}
+ }
+ EXPORT_SYMBOL(rtl_get_tcb_desc);
+ 
+-bool rtl_tx_mgmt_proc(struct ieee80211_hw *hw, struct sk_buff *skb)
+-{
+-	struct rtl_mac *mac = rtl_mac(rtl_priv(hw));
+-	struct rtl_priv *rtlpriv = rtl_priv(hw);
+-	struct ieee80211_hdr *hdr = (struct ieee80211_hdr *)(skb->data);
+-	__le16 fc = hdr->frame_control;
+-
+-	if (ieee80211_is_auth(fc)) {
+-		RT_TRACE(rtlpriv, COMP_SEND, DBG_DMESG, ("MAC80211_LINKING\n"));
+-		rtl_ips_nic_on(hw);
+-
+-		mac->link_state = MAC80211_LINKING;
+-	}
+-
+-	return true;
+-}
+-
+ bool rtl_action_proc(struct ieee80211_hw *hw, struct sk_buff *skb, u8 is_tx)
+ {
+ 	struct rtl_mac *mac = rtl_mac(rtl_priv(hw));
+-	struct ieee80211_hdr *hdr = (struct ieee80211_hdr *)(skb->data);
++	struct ieee80211_hdr *hdr = rtl_get_hdr(skb);
+ 	struct rtl_priv *rtlpriv = rtl_priv(hw);
+ 	__le16 fc = hdr->frame_control;
+ 	u8 *act = (u8 *) (((u8 *) skb->data + MAC80211_3ADDR_LEN));
+@@ -624,9 +782,8 @@ bool rtl_action_proc(struct ieee80211_hw *hw, struct sk_buff *skb, u8 is_tx)
+ u8 rtl_is_special_data(struct ieee80211_hw *hw, struct sk_buff *skb, u8 is_tx)
+ {
+ 	struct rtl_priv *rtlpriv = rtl_priv(hw);
+-	struct ieee80211_hdr *hdr = (struct ieee80211_hdr *)(skb->data);
+ 	struct rtl_ps_ctl *ppsc = rtl_psc(rtl_priv(hw));
+-	__le16 fc = hdr->frame_control;
++	__le16 fc = rtl_get_fc(skb);
+ 	u16 ether_type;
+ 	u8 mac_hdr_len = ieee80211_get_hdrlen_from_skb(skb);
+ 	const struct iphdr *ip;
+@@ -634,12 +791,11 @@ u8 rtl_is_special_data(struct ieee80211_hw *hw, struct sk_buff *skb, u8 is_tx)
+ 	if (!ieee80211_is_data(fc))
+ 		return false;
+ 
+-	if (ieee80211_is_nullfunc(fc))
+-		return true;
+ 
+ 	ip = (struct iphdr *)((u8 *) skb->data + mac_hdr_len +
+ 			      SNAP_SIZE + PROTOC_TYPE_SIZE);
+ 	ether_type = *(u16 *) ((u8 *) skb->data + mac_hdr_len + SNAP_SIZE);
++	ether_type = ntohs(ether_type);
+ 
+ 	if (ETH_P_IP == ether_type) {
+ 		if (IPPROTO_UDP == ip->protocol) {
+@@ -696,61 +852,92 @@ u8 rtl_is_special_data(struct ieee80211_hw *hw, struct sk_buff *skb, u8 is_tx)
+  * functions called by core.c
+  *
+  *********************************************************/
+-int rtl_tx_agg_start(struct ieee80211_hw *hw, const u8 *ra, u16 tid, u16 *ssn)
++int rtl_tx_agg_start(struct ieee80211_hw *hw,
++		struct ieee80211_sta *sta, u16 tid, u16 *ssn)
+ {
+ 	struct rtl_priv *rtlpriv = rtl_priv(hw);
+ 	struct rtl_tid_data *tid_data;
+ 	struct rtl_mac *mac = rtl_mac(rtl_priv(hw));
++	struct rtl_sta_info *sta_entry = NULL;
+ 
+-	RT_TRACE(rtlpriv, COMP_SEND, DBG_DMESG,
+-		 ("on ra = %pM tid = %d\n", ra, tid));
++	if (sta == NULL)
++		return -EINVAL;
+ 
+ 	if (unlikely(tid >= MAX_TID_COUNT))
+ 		return -EINVAL;
+ 
+-	if (mac->tids[tid].agg.agg_state != RTL_AGG_OFF) {
+-		RT_TRACE(rtlpriv, COMP_ERR, DBG_WARNING,
+-			 ("Start AGG when state is not RTL_AGG_OFF !\n"));
++	sta_entry = (struct rtl_sta_info *)sta->drv_priv;
++	if (!sta_entry)
+ 		return -ENXIO;
+-	}
+-
+-	tid_data = &mac->tids[tid];
+-	*ssn = SEQ_TO_SN(tid_data->seq_number);
++	tid_data = &sta_entry->tids[tid];
+ 
+ 	RT_TRACE(rtlpriv, COMP_SEND, DBG_DMESG,
+-		 ("HW queue is empty tid:%d\n", tid));
+-	tid_data->agg.agg_state = RTL_AGG_ON;
++		 ("on ra = %pM tid = %d seq:%d\n", sta->addr, tid,
++		 tid_data->seq_number));
+ 
+-	ieee80211_start_tx_ba_cb_irqsafe(mac->vif, ra, tid);
++	*ssn = tid_data->seq_number;
++	tid_data->agg.agg_state = RTL_AGG_START;
++
++	ieee80211_start_tx_ba_cb_irqsafe(mac->vif, sta->addr, tid);
+ 
+ 	return 0;
+ }
+ 
+-int rtl_tx_agg_stop(struct ieee80211_hw *hw, const u8 * ra, u16 tid)
++int rtl_tx_agg_stop(struct ieee80211_hw *hw,
++		struct ieee80211_sta *sta, u16 tid)
+ {
+-	int ssn = -1;
+ 	struct rtl_priv *rtlpriv = rtl_priv(hw);
+ 	struct rtl_mac *mac = rtl_mac(rtl_priv(hw));
+ 	struct rtl_tid_data *tid_data;
++	struct rtl_sta_info *sta_entry = NULL;
++
++	if (sta == NULL)
++		return -EINVAL;
+ 
+-	if (!ra) {
++	if (!sta->addr) {
+ 		RT_TRACE(rtlpriv, COMP_ERR, DBG_EMERG, ("ra = NULL\n"));
+ 		return -EINVAL;
+ 	}
+ 
++	RT_TRACE(rtlpriv, COMP_SEND, DBG_DMESG,
++		 ("on ra = %pM tid = %d\n", sta->addr, tid));
++
+ 	if (unlikely(tid >= MAX_TID_COUNT))
+ 		return -EINVAL;
+ 
+-	if (mac->tids[tid].agg.agg_state != RTL_AGG_ON)
+-		RT_TRACE(rtlpriv, COMP_ERR, DBG_WARNING,
+-			 ("Stopping AGG while state not ON or starting\n"));
++	sta_entry = (struct rtl_sta_info *)sta->drv_priv;
++	tid_data = &sta_entry->tids[tid];
++	sta_entry->tids[tid].agg.agg_state = RTL_AGG_STOP;
+ 
+-	tid_data = &mac->tids[tid];
+-	ssn = (tid_data->seq_number & IEEE80211_SCTL_SEQ) >> 4;
++	ieee80211_stop_tx_ba_cb_irqsafe(mac->vif, sta->addr, tid);
+ 
+-	mac->tids[tid].agg.agg_state = RTL_AGG_OFF;
++	return 0;
++}
++
++int rtl_tx_agg_oper(struct ieee80211_hw *hw,
++		struct ieee80211_sta *sta, u16 tid)
++{
++	struct rtl_priv *rtlpriv = rtl_priv(hw);
++	struct rtl_tid_data *tid_data;
++	struct rtl_sta_info *sta_entry = NULL;
+ 
+-	ieee80211_stop_tx_ba_cb_irqsafe(mac->vif, ra, tid);
++	if (sta == NULL)
++		return -EINVAL;
++
++	if (!sta->addr) {
++		RT_TRACE(rtlpriv, COMP_ERR, DBG_EMERG, ("ra = NULL\n"));
++		return -EINVAL;
++	}
++
++	RT_TRACE(rtlpriv, COMP_SEND, DBG_DMESG,
++		 ("on ra = %pM tid = %d\n", sta->addr, tid));
++
++	if (unlikely(tid >= MAX_TID_COUNT))
++		return -EINVAL;
++
++	sta_entry = (struct rtl_sta_info *)sta->drv_priv;
++	tid_data = &sta_entry->tids[tid];
++	sta_entry->tids[tid].agg.agg_state = RTL_AGG_OPERATIONAL;
+ 
+ 	return 0;
+ }
+@@ -769,18 +956,16 @@ void rtl_watchdog_wq_callback(void *data)
+ 	struct rtl_priv *rtlpriv = rtl_priv(hw);
+ 	struct rtl_hal *rtlhal = rtl_hal(rtl_priv(hw));
+ 	struct rtl_mac *mac = rtl_mac(rtl_priv(hw));
+-
+ 	bool busytraffic = false;
+ 	bool higher_busytraffic = false;
+ 	bool higher_busyrxtraffic = false;
+-	bool higher_busytxtraffic = false;
+-
+-	u8 idx = 0;
++	u8 idx, tid;
+ 	u32 rx_cnt_inp4eriod = 0;
+ 	u32 tx_cnt_inp4eriod = 0;
+ 	u32 aver_rx_cnt_inperiod = 0;
+ 	u32 aver_tx_cnt_inperiod = 0;
+-
++	u32 aver_tidtx_inperiod[MAX_TID_COUNT] = {0};
++	u32 tidtx_inp4eriod[MAX_TID_COUNT] = {0};
+ 	bool enter_ps = false;
+ 
+ 	if (is_hal_stop(rtlhal))
+@@ -794,9 +979,6 @@ void rtl_watchdog_wq_callback(void *data)
+ 		mac->cnt_after_linked = 0;
+ 	}
+ 
+-	/* <2> DM */
+-	rtlpriv->cfg->ops->dm_watchdog(hw);
+-
+ 	/*
+ 	 *<3> to check if traffic busy, if
+ 	 * busytraffic we don't change channel
+@@ -835,8 +1017,27 @@ void rtl_watchdog_wq_callback(void *data)
+ 			/* Extremely high Rx data. */
+ 			if (aver_rx_cnt_inperiod > 5000)
+ 				higher_busyrxtraffic = true;
++		}
++
++		/* check every tid's tx traffic */
++		for (tid = 0; tid <= 7; tid++) {
++			for (idx = 0; idx <= 2; idx++)
++				rtlpriv->link_info.tidtx_in4period[tid][idx] =
++				  rtlpriv->link_info.tidtx_in4period[tid]
++				  [idx + 1];
++			rtlpriv->link_info.tidtx_in4period[tid][3] =
++				rtlpriv->link_info.tidtx_inperiod[tid];
++
++			for (idx = 0; idx <= 3; idx++)
++				tidtx_inp4eriod[tid] +=
++				  rtlpriv->link_info.tidtx_in4period[tid][idx];
++			aver_tidtx_inperiod[tid] = tidtx_inp4eriod[tid] / 4;
++			if (aver_tidtx_inperiod[tid] > 5000)
++				rtlpriv->link_info.higher_busytxtraffic[tid] =
++						   true;
+ 			else
+-				higher_busytxtraffic = false;
++				rtlpriv->link_info.higher_busytxtraffic[tid] =
++						   false;
+ 		}
+ 
+ 		if (((rtlpriv->link_info.num_rx_inperiod +
+@@ -855,11 +1056,15 @@ void rtl_watchdog_wq_callback(void *data)
+ 
+ 	rtlpriv->link_info.num_rx_inperiod = 0;
+ 	rtlpriv->link_info.num_tx_inperiod = 0;
++	for (tid = 0; tid <= 7; tid++)
++		rtlpriv->link_info.tidtx_inperiod[tid] = 0;
+ 
+ 	rtlpriv->link_info.busytraffic = busytraffic;
+ 	rtlpriv->link_info.higher_busytraffic = higher_busytraffic;
+ 	rtlpriv->link_info.higher_busyrxtraffic = higher_busyrxtraffic;
+ 
++	/* <3> DM */
++	rtlpriv->cfg->ops->dm_watchdog(hw);
+ }
+ 
+ void rtl_watch_dog_timer_callback(unsigned long data)
+@@ -876,6 +1081,274 @@ void rtl_watch_dog_timer_callback(unsigned long data)
+ 
+ /*********************************************************
+  *
++ * frame process functions
++ *
++ *********************************************************/
++u8 *rtl_find_ie(u8 *data, unsigned int len, u8 ie)
++{
++	struct ieee80211_mgmt *mgmt = (void *)data;
++	u8 *pos, *end;
++
++	pos = (u8 *)mgmt->u.beacon.variable;
++	end = data + len;
++	while (pos < end) {
++		if (pos + 2 + pos[1] > end)
++			return NULL;
++
++		if (pos[0] == ie)
++			return pos;
++
++		pos += 2 + pos[1];
++	}
++	return NULL;
++}
++
++/* when we use 2 rx ants we send IEEE80211_SMPS_OFF */
++/* when we use 1 rx ant we send IEEE80211_SMPS_STATIC */
++struct sk_buff *rtl_make_smps_action(struct ieee80211_hw *hw,
++		enum ieee80211_smps_mode smps, u8 *da, u8 *bssid)
++{
++	struct rtl_efuse *rtlefuse = rtl_efuse(rtl_priv(hw));
++	struct sk_buff *skb;
++	struct ieee80211_mgmt *action_frame;
++
++	/* 27 = header + category + action + smps mode */
++	skb = dev_alloc_skb(27 + hw->extra_tx_headroom);
++	if (!skb)
++		return NULL;
++
++	skb_reserve(skb, hw->extra_tx_headroom);
++	action_frame = (void *)skb_put(skb, 27);
++	memset(action_frame, 0, 27);
++	memcpy(action_frame->da, da, ETH_ALEN);
++	memcpy(action_frame->sa, rtlefuse->dev_addr, ETH_ALEN);
++	memcpy(action_frame->bssid, bssid, ETH_ALEN);
++	action_frame->frame_control = cpu_to_le16(IEEE80211_FTYPE_MGMT |
++						  IEEE80211_STYPE_ACTION);
++	action_frame->u.action.category = WLAN_CATEGORY_HT;
++	action_frame->u.action.u.ht_smps.action = WLAN_HT_ACTION_SMPS;
++	switch (smps) {
++	case IEEE80211_SMPS_AUTOMATIC:/* 0 */
++	case IEEE80211_SMPS_NUM_MODES:/* 4 */
++		WARN_ON(1);
++	case IEEE80211_SMPS_OFF:/* 1 */ /*MIMO_PS_NOLIMIT*/
++		action_frame->u.action.u.ht_smps.smps_control =
++				WLAN_HT_SMPS_CONTROL_DISABLED;/* 0 */
++		break;
++	case IEEE80211_SMPS_STATIC:/* 2 */ /*MIMO_PS_STATIC*/
++		action_frame->u.action.u.ht_smps.smps_control =
++				WLAN_HT_SMPS_CONTROL_STATIC;/* 1 */
++		break;
++	case IEEE80211_SMPS_DYNAMIC:/* 3 */ /*MIMO_PS_DYNAMIC*/
++		action_frame->u.action.u.ht_smps.smps_control =
++				WLAN_HT_SMPS_CONTROL_DYNAMIC;/* 3 */
++		break;
++	}
++
++	return skb;
++}
++
++int rtl_send_smps_action(struct ieee80211_hw *hw,
++		struct ieee80211_sta *sta, u8 *da, u8 *bssid,
++		enum ieee80211_smps_mode smps)
++{
++	struct rtl_priv *rtlpriv = rtl_priv(hw);
++	struct rtl_hal *rtlhal = rtl_hal(rtl_priv(hw));
++	struct rtl_ps_ctl *ppsc = rtl_psc(rtl_priv(hw));
++	struct sk_buff *skb = rtl_make_smps_action(hw, smps, da, bssid);
++	struct rtl_tcb_desc tcb_desc;
++	memset(&tcb_desc, 0, sizeof(struct rtl_tcb_desc));
++
++	if (rtlpriv->mac80211.act_scanning)
++		goto err_free;
++
++	if (!sta)
++		goto err_free;
++
++	if (unlikely(is_hal_stop(rtlhal) || ppsc->rfpwr_state != ERFON))
++		goto err_free;
++
++	if (!test_bit(RTL_STATUS_INTERFACE_START, &rtlpriv->status))
++		goto err_free;
++
++	/* this is a type = mgmt * stype = action frame */
++	if (skb) {
++		struct ieee80211_tx_info *info = IEEE80211_SKB_CB(skb);
++		struct rtl_sta_info *sta_entry =
++			(struct rtl_sta_info *) sta->drv_priv;
++		sta_entry->mimo_ps = smps;
++		rtlpriv->cfg->ops->update_rate_tbl(hw, sta, 0);
++
++		info->control.rates[0].idx = 0;
++		info->control.sta = sta;
++		info->band = hw->conf.channel->band;
++#if 0
++		rtlpriv->intf_ops->adapter_tx(hw, skb, &tcb_desc);
++#else
++		rtlpriv->intf_ops->adapter_tx(hw, skb);
++#endif
++	}
++	return 1;
++
++err_free:
++	return 0;
++}
++
++/*********************************************************
++ *
++ * IOT functions
++ *
++ *********************************************************/
++static bool rtl_chk_vendor_ouisub(struct ieee80211_hw *hw,
++		struct octet_string vendor_ie)
++{
++	struct rtl_priv *rtlpriv = rtl_priv(hw);
++	bool matched = false;
++	static u8 athcap_1[] = { 0x00, 0x03, 0x7F };
++	static u8 athcap_2[] = { 0x00, 0x13, 0x74 };
++	static u8 broadcap_1[] = { 0x00, 0x10, 0x18 };
++	static u8 broadcap_2[] = { 0x00, 0x0a, 0xf7 };
++	static u8 broadcap_3[] = { 0x00, 0x05, 0xb5 };
++	static u8 racap[] = { 0x00, 0x0c, 0x43 };
++	static u8 ciscocap[] = { 0x00, 0x40, 0x96 };
++	static u8 marvcap[] = { 0x00, 0x50, 0x43 };
++
++	if (memcmp(vendor_ie.octet, athcap_1, 3) == 0 ||
++		memcmp(vendor_ie.octet, athcap_2, 3) == 0) {
++		rtlpriv->mac80211.vendor = PEER_ATH;
++		matched = true;
++	} else if (memcmp(vendor_ie.octet, broadcap_1, 3) == 0 ||
++		memcmp(vendor_ie.octet, broadcap_2, 3) == 0 ||
++		memcmp(vendor_ie.octet, broadcap_3, 3) == 0) {
++		rtlpriv->mac80211.vendor = PEER_BROAD;
++		matched = true;
++	} else if (memcmp(vendor_ie.octet, racap, 3) == 0) {
++		rtlpriv->mac80211.vendor = PEER_RAL;
++		matched = true;
++	} else if (memcmp(vendor_ie.octet, ciscocap, 3) == 0) {
++		rtlpriv->mac80211.vendor = PEER_CISCO;
++		matched = true;
++	} else if (memcmp(vendor_ie.octet, marvcap, 3) == 0) {
++		rtlpriv->mac80211.vendor = PEER_MARV;
++		matched = true;
++	}
++
++	return matched;
++}
++
++bool rtl_find_221_ie(struct ieee80211_hw *hw, u8 *data,
++		unsigned int len)
++{
++	struct ieee80211_mgmt *mgmt = (void *)data;
++	struct octet_string vendor_ie;
++	u8 *pos, *end;
++
++	pos = (u8 *)mgmt->u.beacon.variable;
++	end = data + len;
++	while (pos < end) {
++		if (pos[0] == 221) {
++			vendor_ie.length = pos[1];
++			vendor_ie.octet = &pos[2];
++			if (rtl_chk_vendor_ouisub(hw, vendor_ie))
++				return true;
++		}
++
++		if (pos + 2 + pos[1] > end)
++			return false;
++
++		pos += 2 + pos[1];
++	}
++	return false;
++}
++
++void rtl_recognize_peer(struct ieee80211_hw *hw, u8 *data, unsigned int len)
++{
++	struct rtl_priv *rtlpriv = rtl_priv(hw);
++	struct rtl_mac *mac = rtl_mac(rtl_priv(hw));
++	struct ieee80211_hdr *hdr = (void *)data;
++	u32 vendor = PEER_UNKNOWN;
++
++	static u8 ap3_1[3] = { 0x00, 0x14, 0xbf };
++	static u8 ap3_2[3] = { 0x00, 0x1a, 0x70 };
++	static u8 ap3_3[3] = { 0x00, 0x1d, 0x7e };
++	static u8 ap4_1[3] = { 0x00, 0x90, 0xcc };
++	static u8 ap4_2[3] = { 0x00, 0x0e, 0x2e };
++	static u8 ap4_3[3] = { 0x00, 0x18, 0x02 };
++	static u8 ap4_4[3] = { 0x00, 0x17, 0x3f };
++	static u8 ap4_5[3] = { 0x00, 0x1c, 0xdf };
++	static u8 ap5_1[3] = { 0x00, 0x1c, 0xf0 };
++	static u8 ap5_2[3] = { 0x00, 0x21, 0x91 };
++	static u8 ap5_3[3] = { 0x00, 0x24, 0x01 };
++	static u8 ap5_4[3] = { 0x00, 0x15, 0xe9 };
++	static u8 ap5_5[3] = { 0x00, 0x17, 0x9A };
++	static u8 ap5_6[3] = { 0x00, 0x18, 0xE7 };
++	static u8 ap6_1[3] = { 0x00, 0x17, 0x94 };
++	static u8 ap7_1[3] = { 0x00, 0x14, 0xa4 };
++
++	if (mac->opmode != NL80211_IFTYPE_STATION)
++		return;
++
++	if (mac->link_state == MAC80211_NOLINK) {
++		mac->vendor = PEER_UNKNOWN;
++		return;
++	}
++
++	if (mac->cnt_after_linked > 2)
++		return;
++
++	/* check if this really is a beacon */
++	if (!ieee80211_is_beacon(hdr->frame_control))
++		return;
++
++	/* min. beacon length + FCS_LEN */
++	if (len <= 40 + FCS_LEN)
++		return;
++
++	/* and only beacons from the associated BSSID, please */
++	if (compare_ether_addr(hdr->addr3, rtlpriv->mac80211.bssid))
++		return;
++
++	if (rtl_find_221_ie(hw, data, len))
++		vendor = mac->vendor;
++
++	if ((memcmp(mac->bssid, ap5_1, 3) == 0) ||
++		(memcmp(mac->bssid, ap5_2, 3) == 0) ||
++		(memcmp(mac->bssid, ap5_3, 3) == 0) ||
++		(memcmp(mac->bssid, ap5_4, 3) == 0) ||
++		(memcmp(mac->bssid, ap5_5, 3) == 0) ||
++		(memcmp(mac->bssid, ap5_6, 3) == 0) ||
++		vendor == PEER_ATH) {
++		vendor = PEER_ATH;
++		RT_TRACE(rtlpriv, COMP_MAC80211, DBG_LOUD, ("=>ath find\n"));
++	} else if ((memcmp(mac->bssid, ap4_4, 3) == 0) ||
++		(memcmp(mac->bssid, ap4_5, 3) == 0) ||
++		(memcmp(mac->bssid, ap4_1, 3) == 0) ||
++		(memcmp(mac->bssid, ap4_2, 3) == 0) ||
++		(memcmp(mac->bssid, ap4_3, 3) == 0) ||
++		vendor == PEER_RAL) {
++		RT_TRACE(rtlpriv, COMP_MAC80211, DBG_LOUD, ("=>ral findn\n"));
++		vendor = PEER_RAL;
++	} else if (memcmp(mac->bssid, ap6_1, 3) == 0 ||
++		vendor == PEER_CISCO) {
++		vendor = PEER_CISCO;
++		RT_TRACE(rtlpriv, COMP_MAC80211, DBG_LOUD, ("=>cisco find\n"));
++	} else if ((memcmp(mac->bssid, ap3_1, 3) == 0) ||
++		(memcmp(mac->bssid, ap3_2, 3) == 0) ||
++		(memcmp(mac->bssid, ap3_3, 3) == 0) ||
++		vendor == PEER_BROAD) {
++		RT_TRACE(rtlpriv, COMP_MAC80211, DBG_LOUD, ("=>broad find\n"));
++		vendor = PEER_BROAD;
++	} else if (memcmp(mac->bssid, ap7_1, 3) == 0 ||
++		vendor == PEER_MARV) {
++		vendor = PEER_MARV;
++		RT_TRACE(rtlpriv, COMP_MAC80211, DBG_LOUD, ("=>marv find\n"));
++	}
++
++	mac->vendor = vendor;
++}
++
++/*********************************************************
++ *
+  * sysfs functions
+  *
+  *********************************************************/
+@@ -941,12 +1414,13 @@ static int __init rtl_core_module_init(void)
+ 	if (rtl_rate_control_register())
+ 		printk(KERN_ERR "rtlwifi: Unable to register rtl_rc,"
+ 		       "use default RC !!\n");
++
+ 	return 0;
+ }
+ 
+ static void __exit rtl_core_module_exit(void)
+ {
+-	 /*RC*/
++	/*RC*/
+ 	rtl_rate_control_unregister();
+ }
+ 
+
+commit cfef6047c4027a8448ec8dafeaf2bb362cc882e4
+Merge: b71d1d4 73b4809
+Author: John W. Linville <linville@tuxdriver.com>
+Date:   Mon Apr 25 14:34:25 2011 -0400
+
+    Merge branch 'master' of git://git.kernel.org/pub/scm/linux/kernel/git/linville/wireless-next-2.6 into for-davem
+    
+    Conflicts:
+    	drivers/net/wireless/iwlwifi/iwl-core.c
+    	drivers/net/wireless/rt2x00/rt2x00queue.c
+    	drivers/net/wireless/rt2x00/rt2x00queue.h
+
+commit 228bdfca9a09c1263c24509b4bc23a67be168e1a
+Author: Chaoming Li <chaoming_li@realsil.com.cn>
+Date:   Sun Apr 10 18:30:23 2011 -0500
+
+    rtlwifi: rtl8192ce: Fix LED initialization
+    
+    Driver rtl8192ce does not initialize the LED correctly.
+    
+    Signed-off-by: Chaoming Li <chaoming_li@realsil.com.cn>
+    Signed-off-by: Larry Finger <Larry.Finger@lwfinger.net>
+    Signed-off-by: John W. Linville <linville@tuxdriver.com>
+
+diff --git a/drivers/net/wireless/rtlwifi/base.c b/drivers/net/wireless/rtlwifi/base.c
+index dd5318e..9477785 100644
+--- a/drivers/net/wireless/rtlwifi/base.c
++++ b/drivers/net/wireless/rtlwifi/base.c
+@@ -251,14 +251,16 @@ void rtl_init_rfkill(struct ieee80211_hw *hw)
+ 	bool blocked;
+ 	u8 valid = 0;
+ 
+-	radio_state = rtlpriv->cfg->ops->radio_onoff_checking(hw, &valid);
++	/*set init state to on */
++	rtlpriv->rfkill.rfkill_state = 1;
++	wiphy_rfkill_set_hw_state(hw->wiphy, 0);
+ 
+-	/*set init state to that of switch */
+-	rtlpriv->rfkill.rfkill_state = radio_state;
+-	printk(KERN_INFO "rtlwifi: wireless switch is %s\n",
+-	       rtlpriv->rfkill.rfkill_state ? "on" : "off");
++	radio_state = rtlpriv->cfg->ops->radio_onoff_checking(hw, &valid);
+ 
+ 	if (valid) {
++		printk(KERN_INFO "rtlwifi: wireless switch is %s\n",
++				rtlpriv->rfkill.rfkill_state ? "on" : "off");
++
+ 		rtlpriv->rfkill.rfkill_state = radio_state;
+ 
+ 		blocked = (rtlpriv->rfkill.rfkill_state == 1) ? 0 : 1;
+
+commit 252f4bf400df1712408fe83ba199a66a1b57ab1d
+Merge: 6ba1037 b37e3b6
+Author: John W. Linville <linville@tuxdriver.com>
+Date:   Tue Apr 12 16:18:44 2011 -0400
+
+    Merge branch 'master' of git://git.kernel.org/pub/scm/linux/kernel/git/linville/wireless-next-2.6 into for-davem
+    
+    Conflicts:
+    	drivers/net/wireless/ath/ar9170/main.c
+    	drivers/net/wireless/ath/ar9170/phy.c
+    	drivers/net/wireless/zd1211rw/zd_rf_rf2959.c
+
+commit 324732848c42bf79988479ee1b4359e15f08154b
+Author: Larry Finger <Larry.Finger@lwfinger.net>
+Date:   Sun Mar 27 16:19:57 2011 -0500
+
+    rtlwifi: Remove unused/unneeded variables
+    
+    Remove some unused variables and correct spelling errors.
+    
+    Signed-off-by: Larry Finger <Larry.Finger@lwfinger.net>
+    Signed-off-by: John W. Linville <linville@tuxdriver.com>
+
+diff --git a/drivers/net/wireless/rtlwifi/base.c b/drivers/net/wireless/rtlwifi/base.c
+index bb0c781..dd5318e 100644
+--- a/drivers/net/wireless/rtlwifi/base.c
++++ b/drivers/net/wireless/rtlwifi/base.c
+@@ -432,7 +432,7 @@ static void _rtl_txrate_selectmode(struct ieee80211_hw *hw,
+ 	}
+ 
+ 	if (rtlpriv->dm.useramask) {
+-		/* TODO we will differentiate adhoc and station futrue  */
++		/* TODO adhoc and station handled differently in the future */
+ 		tcb_desc->mac_id = 0;
+ 
+ 		if ((mac->mode == WIRELESS_MODE_N_24G) ||
+@@ -630,7 +630,7 @@ u8 rtl_is_special_data(struct ieee80211_hw *hw, struct sk_buff *skb, u8 is_tx)
+ 	const struct iphdr *ip;
+ 
+ 	if (!ieee80211_is_data(fc))
+-		goto end;
++		return false;
+ 
+ 	if (ieee80211_is_nullfunc(fc))
+ 		return true;
+@@ -686,7 +686,6 @@ u8 rtl_is_special_data(struct ieee80211_hw *hw, struct sk_buff *skb, u8 is_tx)
+ 		return true;
+ 	}
+ 
+-end:
+ 	return false;
+ }
+ 
+
+commit 25985edcedea6396277003854657b5f3cb31a628
+Author: Lucas De Marchi <lucas.demarchi@profusion.mobi>
+Date:   Wed Mar 30 22:57:33 2011 -0300
+
+    Fix common misspellings
+    
+    Fixes generated by 'codespell' and manually reviewed.
+    
+    Signed-off-by: Lucas De Marchi <lucas.demarchi@profusion.mobi>
+
+diff --git a/drivers/net/wireless/rtlwifi/base.c b/drivers/net/wireless/rtlwifi/base.c
+index bb0c781..0d7d93e 100644
+--- a/drivers/net/wireless/rtlwifi/base.c
++++ b/drivers/net/wireless/rtlwifi/base.c
+@@ -520,7 +520,7 @@ void rtl_get_tcb_desc(struct ieee80211_hw *hw,
+ 			 *because hw will nerver use hw_rate
+ 			 *when tcb_desc->use_driver_rate = false
+ 			 *so we never set highest N rate here,
+-			 *and N rate will all be controled by FW
++			 *and N rate will all be controlled by FW
+ 			 *when tcb_desc->use_driver_rate = false
+ 			 */
+ 			if (rtlmac->ht_enable) {
+
+commit 375ff4c7780e88bc4e0de4145099a7ed9aa57995
+Author: Chaoming Li <chaoming_li@realsil.com.cn>
+Date:   Mon Feb 28 16:40:28 2011 -0600
+
+    rtlwifi: Fix error registering rate-control
+    
+    When a second module such as rtl8192ce or rtl8192cu links to rtlwifi, the attempt
+    to register a rate-control mechanism fails with the warning shown below. The fix is to
+    select the RC mechanism when rtlwifi is initialized.
+    
+    WARNING: at net/mac80211/rate.c:42 ieee80211_rate_control_register+0xc9/0x100 [mac80211]()
+    Hardware name: HP Pavilion dv2700 Notebook PC
+    Modules linked in: arc4 ecb rtl8192ce rtl8192cu(+) rtl8192c_common rtlwifi snd_hda_codec_conexant amd74xx(+) ide_core sg mac80211 snd_hda_intel snd_hda_codec i2c_nforce2 snd_pcm snd_timer cfg80211 snd k8temp hwmon serio_raw joydev i2c_core soundcore snd_page_alloc rfkill forcedeth video ac battery button ext3 jbd mbcache sd_mod ohci_hcd ahci libahci libata scsi_mod ehci_hcd usbcore fan processor thermal
+    Pid: 2227, comm: modprobe Not tainted 2.6.38-rc6-wl+ #468
+    Call Trace:
+     [<ffffffff8104a3da>] ? warn_slowpath_common+0x7a/0xb0
+     [<ffffffff8104a425>] ? warn_slowpath_null+0x15/0x20
+     [<ffffffffa02de409>] ? ieee80211_rate_control_register+0xc9/0x100 [mac80211]
+     [<ffffffffa03b3790>] ? rtl_rate_control_register+0x10/0x20 [rtlwifi]
+     [<ffffffffa03ab9c9>] ? rtl_init_core+0x189/0x620 [rtlwifi]
+     [<ffffffff811cfff8>] ? __raw_spin_lock_init+0x38/0x70
+     [<ffffffffa03b9dea>] ? rtl_usb_probe+0x709/0x82e [rtlwifi]
+     [<ffffffffa002a7fd>] ? usb_match_one_id+0x3d/0xc0 [usbcore]
+     [<ffffffffa002aae9>] ? usb_probe_interface+0xb9/0x160 [usbcore]
+     [<ffffffff8126ed19>] ? driver_probe_device+0x89/0x1a0
+     [<ffffffff8126eed3>] ? __driver_attach+0xa3/0xb0
+     [<ffffffff8126ee30>] ? __driver_attach+0x0/0xb0
+     [<ffffffff8126dd4e>] ? bus_for_each_dev+0x5e/0x90
+     [<ffffffff8126e9d9>] ? driver_attach+0x19/0x20
+     [<ffffffff8126e5e8>] ? bus_add_driver+0x158/0x290
+     [<ffffffff8126f151>] ? driver_register+0x71/0x140
+     [<ffffffff811cfff8>] ? __raw_spin_lock_init+0x38/0x70
+     [<ffffffffa002a2cc>] ? usb_register_driver+0xdc/0x190 [usbcore]
+     [<ffffffffa0013000>] ? rtl8192cu_init+0x0/0x20 [rtl8192cu]
+     [<ffffffffa001301e>] ? rtl8192cu_init+0x1e/0x20 [rtl8192cu]
+     [<ffffffff810002cf>] ? do_one_initcall+0x3f/0x180
+     [<ffffffff8108fd4b>] ? sys_init_module+0xbb/0x200
+     [<ffffffff81002c7b>] ? system_call_fastpath+0x16/0x1b
+     ---[ end trace 726271c07a47439e ]---
+    rtlwifi:rtl_init_core():<0-0> rtl: Unable to register rtl_rc,use default RC !!
+    ieee80211 phy0: Selected rate control algorithm 'minstrel_ht'
+    
+    Signed-off-by: Chaoming Li <chaoming_li@realsil.com.cn>
+    Signed-off-by: Larry Finger <Larry.Finger@lwfinger.net>
+    Signed-off-by: John W. Linville <linville@tuxdriver.com>
+
+diff --git a/drivers/net/wireless/rtlwifi/base.c b/drivers/net/wireless/rtlwifi/base.c
+index 3f40dc2..bb0c781 100644
+--- a/drivers/net/wireless/rtlwifi/base.c
++++ b/drivers/net/wireless/rtlwifi/base.c
+@@ -283,13 +283,7 @@ int rtl_init_core(struct ieee80211_hw *hw)
+ 	rtlmac->hw = hw;
+ 
+ 	/* <2> rate control register */
+-	if (rtl_rate_control_register()) {
+-		RT_TRACE(rtlpriv, COMP_ERR, DBG_EMERG,
+-			 ("rtl: Unable to register rtl_rc,"
+-			  "use default RC !!\n"));
+-	} else {
+-		hw->rate_control_algorithm = "rtl_rc";
+-	}
++	hw->rate_control_algorithm = "rtl_rc";
+ 
+ 	/*
+ 	 * <3> init CRDA must come after init
+@@ -325,8 +319,6 @@ int rtl_init_core(struct ieee80211_hw *hw)
+ 
+ void rtl_deinit_core(struct ieee80211_hw *hw)
+ {
+-	 /*RC*/
+-	rtl_rate_control_unregister();
+ }
+ 
+ void rtl_init_rx_config(struct ieee80211_hw *hw)
+@@ -945,11 +937,16 @@ MODULE_DESCRIPTION("Realtek 802.11n PCI wireless core");
+ 
+ static int __init rtl_core_module_init(void)
+ {
++	if (rtl_rate_control_register())
++		printk(KERN_ERR "rtlwifi: Unable to register rtl_rc,"
++		       "use default RC !!\n");
+ 	return 0;
+ }
+ 
+ static void __exit rtl_core_module_exit(void)
+ {
++	 /*RC*/
++	rtl_rate_control_unregister();
+ }
+ 
+ module_init(rtl_core_module_init);
+
+commit 17c9ac62812b58aacefc7336215aecbb522f6547
+Author: Larry Finger <Larry.Finger@lwfinger.net>
+Date:   Sat Feb 19 16:29:57 2011 -0600
+
+    rtlwifi: rtl8192ce: Fix endian warnings
+    
+    Drivers rtlwifi, and rtl8192ce generate a large number of
+    sparse warnings. This patch fixes most of them.
+    
+    Signed-off-by: Larry Finger <Larry.Finger@lwfinger.net>
+    Signed-off-by: John W. Linville <linville@tuxdriver.com>
+
+diff --git a/drivers/net/wireless/rtlwifi/base.c b/drivers/net/wireless/rtlwifi/base.c
+index 1d6cc1f..3f40dc2 100644
+--- a/drivers/net/wireless/rtlwifi/base.c
++++ b/drivers/net/wireless/rtlwifi/base.c
+@@ -144,7 +144,7 @@ static void _rtl_init_hw_ht_capab(struct ieee80211_hw *hw,
+ 		ht_cap->mcs.rx_mask[1] = 0xFF;
+ 		ht_cap->mcs.rx_mask[4] = 0x01;
+ 
+-		ht_cap->mcs.rx_highest = MAX_BIT_RATE_40MHZ_MCS15;
++		ht_cap->mcs.rx_highest = cpu_to_le16(MAX_BIT_RATE_40MHZ_MCS15);
+ 	} else if (get_rf_type(rtlphy) == RF_1T1R) {
+ 
+ 		RT_TRACE(rtlpriv, COMP_INIT, DBG_DMESG, ("1T1R\n"));
+@@ -153,7 +153,7 @@ static void _rtl_init_hw_ht_capab(struct ieee80211_hw *hw,
+ 		ht_cap->mcs.rx_mask[1] = 0x00;
+ 		ht_cap->mcs.rx_mask[4] = 0x01;
+ 
+-		ht_cap->mcs.rx_highest = MAX_BIT_RATE_40MHZ_MCS7;
++		ht_cap->mcs.rx_highest = cpu_to_le16(MAX_BIT_RATE_40MHZ_MCS7);
+ 	}
+ }
+ 
+@@ -498,7 +498,7 @@ void rtl_get_tcb_desc(struct ieee80211_hw *hw,
+ 	struct rtl_mac *rtlmac = rtl_mac(rtl_priv(hw));
+ 	struct ieee80211_hdr *hdr = (struct ieee80211_hdr *)(skb->data);
+ 	struct ieee80211_rate *txrate;
+-	u16 fc = le16_to_cpu(hdr->frame_control);
++	__le16 fc = hdr->frame_control;
+ 
+ 	memset(tcb_desc, 0, sizeof(struct rtl_tcb_desc));
+ 
+@@ -570,7 +570,7 @@ bool rtl_tx_mgmt_proc(struct ieee80211_hw *hw, struct sk_buff *skb)
+ 	struct rtl_mac *mac = rtl_mac(rtl_priv(hw));
+ 	struct rtl_priv *rtlpriv = rtl_priv(hw);
+ 	struct ieee80211_hdr *hdr = (struct ieee80211_hdr *)(skb->data);
+-	u16 fc = le16_to_cpu(hdr->frame_control);
++	__le16 fc = hdr->frame_control;
+ 
+ 	if (ieee80211_is_auth(fc)) {
+ 		RT_TRACE(rtlpriv, COMP_SEND, DBG_DMESG, ("MAC80211_LINKING\n"));
+@@ -587,7 +587,7 @@ bool rtl_action_proc(struct ieee80211_hw *hw, struct sk_buff *skb, u8 is_tx)
+ 	struct rtl_mac *mac = rtl_mac(rtl_priv(hw));
+ 	struct ieee80211_hdr *hdr = (struct ieee80211_hdr *)(skb->data);
+ 	struct rtl_priv *rtlpriv = rtl_priv(hw);
+-	u16 fc = le16_to_cpu(hdr->frame_control);
++	__le16 fc = hdr->frame_control;
+ 	u8 *act = (u8 *) (((u8 *) skb->data + MAC80211_3ADDR_LEN));
+ 	u8 category;
+ 
+@@ -632,7 +632,7 @@ u8 rtl_is_special_data(struct ieee80211_hw *hw, struct sk_buff *skb, u8 is_tx)
+ 	struct rtl_priv *rtlpriv = rtl_priv(hw);
+ 	struct ieee80211_hdr *hdr = (struct ieee80211_hdr *)(skb->data);
+ 	struct rtl_ps_ctl *ppsc = rtl_psc(rtl_priv(hw));
+-	u16 fc = le16_to_cpu(hdr->frame_control);
++	__le16 fc = hdr->frame_control;
+ 	u16 ether_type;
+ 	u8 mac_hdr_len = ieee80211_get_hdrlen_from_skb(skb);
+ 	const struct iphdr *ip;
+@@ -646,7 +646,6 @@ u8 rtl_is_special_data(struct ieee80211_hw *hw, struct sk_buff *skb, u8 is_tx)
+ 	ip = (struct iphdr *)((u8 *) skb->data + mac_hdr_len +
+ 			      SNAP_SIZE + PROTOC_TYPE_SIZE);
+ 	ether_type = *(u16 *) ((u8 *) skb->data + mac_hdr_len + SNAP_SIZE);
+-	ether_type = ntohs(ether_type);
+ 
+ 	if (ETH_P_IP == ether_type) {
+ 		if (IPPROTO_UDP == ip->protocol) {
+@@ -690,7 +689,8 @@ u8 rtl_is_special_data(struct ieee80211_hw *hw, struct sk_buff *skb, u8 is_tx)
+ 		}
+ 
+ 		return true;
+-	} else if (0x86DD == ether_type) {
++	} else if (ETH_P_IPV6 == ether_type) {
++		/* IPv6 */
+ 		return true;
+ 	}
+ 
+
+commit 7ea4724036ed17ec811cb8082af7760f04484ef7
+Author: Larry Finger <Larry.Finger@lwfinger.net>
+Date:   Sat Feb 19 16:28:57 2011 -0600
+
+    rtlwifi: Modify some rtl8192ce routines for merging rtl8192cu
+    
+    Modify some rtl8192ce routines for merging with rtl8192cu. In addition,
+    remove some usage of Hungarian notation.
+    
+    Signed-off-by: Larry Finger <Larry.Finger@lwfinger.net>
+    Signed-off-by: John W. Linville <linville@tuxdriver.com>
+
+diff --git a/drivers/net/wireless/rtlwifi/base.c b/drivers/net/wireless/rtlwifi/base.c
+index cf0b73e..1d6cc1f 100644
+--- a/drivers/net/wireless/rtlwifi/base.c
++++ b/drivers/net/wireless/rtlwifi/base.c
+@@ -399,21 +399,21 @@ static void _rtl_query_protection_mode(struct ieee80211_hw *hw,
+ 	u8 rate_flag = info->control.rates[0].flags;
+ 
+ 	/* Common Settings */
+-	tcb_desc->b_rts_stbc = false;
+-	tcb_desc->b_cts_enable = false;
++	tcb_desc->rts_stbc = false;
++	tcb_desc->cts_enable = false;
+ 	tcb_desc->rts_sc = 0;
+-	tcb_desc->b_rts_bw = false;
+-	tcb_desc->b_rts_use_shortpreamble = false;
+-	tcb_desc->b_rts_use_shortgi = false;
++	tcb_desc->rts_bw = false;
++	tcb_desc->rts_use_shortpreamble = false;
++	tcb_desc->rts_use_shortgi = false;
+ 
+ 	if (rate_flag & IEEE80211_TX_RC_USE_CTS_PROTECT) {
+ 		/* Use CTS-to-SELF in protection mode. */
+-		tcb_desc->b_rts_enable = true;
+-		tcb_desc->b_cts_enable = true;
++		tcb_desc->rts_enable = true;
++		tcb_desc->cts_enable = true;
+ 		tcb_desc->rts_rate = rtlpriv->cfg->maps[RTL_RC_OFDM_RATE24M];
+ 	} else if (rate_flag & IEEE80211_TX_RC_USE_RTS_CTS) {
+ 		/* Use RTS-CTS in protection mode. */
+-		tcb_desc->b_rts_enable = true;
++		tcb_desc->rts_enable = true;
+ 		tcb_desc->rts_rate = rtlpriv->cfg->maps[RTL_RC_OFDM_RATE24M];
+ 	}
+ 
+@@ -429,7 +429,7 @@ static void _rtl_txrate_selectmode(struct ieee80211_hw *hw,
+ 		if (mac->opmode == NL80211_IFTYPE_STATION)
+ 			tcb_desc->ratr_index = 0;
+ 		else if (mac->opmode == NL80211_IFTYPE_ADHOC) {
+-			if (tcb_desc->b_multicast || tcb_desc->b_broadcast) {
++			if (tcb_desc->multicast || tcb_desc->broadcast) {
+ 				tcb_desc->hw_rate =
+ 				    rtlpriv->cfg->maps[RTL_RC_CCK_RATE2M];
+ 				tcb_desc->use_driver_rate = 1;
+@@ -439,7 +439,7 @@ static void _rtl_txrate_selectmode(struct ieee80211_hw *hw,
+ 		}
+ 	}
+ 
+-	if (rtlpriv->dm.b_useramask) {
++	if (rtlpriv->dm.useramask) {
+ 		/* TODO we will differentiate adhoc and station futrue  */
+ 		tcb_desc->mac_id = 0;
+ 
+@@ -461,19 +461,19 @@ static void _rtl_query_bandwidth_mode(struct ieee80211_hw *hw,
+ 	struct rtl_priv *rtlpriv = rtl_priv(hw);
+ 	struct rtl_mac *mac = rtl_mac(rtl_priv(hw));
+ 
+-	tcb_desc->b_packet_bw = false;
++	tcb_desc->packet_bw = false;
+ 
+ 	if (!mac->bw_40 || !mac->ht_enable)
+ 		return;
+ 
+-	if (tcb_desc->b_multicast || tcb_desc->b_broadcast)
++	if (tcb_desc->multicast || tcb_desc->broadcast)
+ 		return;
+ 
+ 	/*use legency rate, shall use 20MHz */
+ 	if (tcb_desc->hw_rate <= rtlpriv->cfg->maps[RTL_RC_OFDM_RATE54M])
+ 		return;
+ 
+-	tcb_desc->b_packet_bw = true;
++	tcb_desc->packet_bw = true;
+ }
+ 
+ static u8 _rtl_get_highest_n_rate(struct ieee80211_hw *hw)
+@@ -545,9 +545,9 @@ void rtl_get_tcb_desc(struct ieee80211_hw *hw,
+ 		}
+ 
+ 		if (is_multicast_ether_addr(ieee80211_get_DA(hdr)))
+-			tcb_desc->b_multicast = 1;
++			tcb_desc->multicast = 1;
+ 		else if (is_broadcast_ether_addr(ieee80211_get_DA(hdr)))
+-			tcb_desc->b_broadcast = 1;
++			tcb_desc->broadcast = 1;
+ 
+ 		_rtl_txrate_selectmode(hw, tcb_desc);
+ 		_rtl_query_bandwidth_mode(hw, tcb_desc);
+@@ -777,10 +777,10 @@ void rtl_watchdog_wq_callback(void *data)
+ 	struct rtl_hal *rtlhal = rtl_hal(rtl_priv(hw));
+ 	struct rtl_mac *mac = rtl_mac(rtl_priv(hw));
+ 
+-	bool b_busytraffic = false;
+-	bool b_higher_busytraffic = false;
+-	bool b_higher_busyrxtraffic = false;
+-	bool b_higher_busytxtraffic = false;
++	bool busytraffic = false;
++	bool higher_busytraffic = false;
++	bool higher_busyrxtraffic = false;
++	bool higher_busytxtraffic = false;
+ 
+ 	u8 idx = 0;
+ 	u32 rx_cnt_inp4eriod = 0;
+@@ -788,7 +788,7 @@ void rtl_watchdog_wq_callback(void *data)
+ 	u32 aver_rx_cnt_inperiod = 0;
+ 	u32 aver_tx_cnt_inperiod = 0;
+ 
+-	bool benter_ps = false;
++	bool enter_ps = false;
+ 
+ 	if (is_hal_stop(rtlhal))
+ 		return;
+@@ -832,29 +832,29 @@ void rtl_watchdog_wq_callback(void *data)
+ 
+ 		/* (2) check traffic busy */
+ 		if (aver_rx_cnt_inperiod > 100 || aver_tx_cnt_inperiod > 100)
+-			b_busytraffic = true;
++			busytraffic = true;
+ 
+ 		/* Higher Tx/Rx data. */
+ 		if (aver_rx_cnt_inperiod > 4000 ||
+ 		    aver_tx_cnt_inperiod > 4000) {
+-			b_higher_busytraffic = true;
++			higher_busytraffic = true;
+ 
+ 			/* Extremely high Rx data. */
+ 			if (aver_rx_cnt_inperiod > 5000)
+-				b_higher_busyrxtraffic = true;
++				higher_busyrxtraffic = true;
+ 			else
+-				b_higher_busytxtraffic = false;
++				higher_busytxtraffic = false;
+ 		}
+ 
+ 		if (((rtlpriv->link_info.num_rx_inperiod +
+ 		      rtlpriv->link_info.num_tx_inperiod) > 8) ||
+ 		    (rtlpriv->link_info.num_rx_inperiod > 2))
+-			benter_ps = false;
++			enter_ps = false;
+ 		else
+-			benter_ps = true;
++			enter_ps = true;
+ 
+ 		/* LeisurePS only work in infra mode. */
+-		if (benter_ps)
++		if (enter_ps)
+ 			rtl_lps_enter(hw);
+ 		else
+ 			rtl_lps_leave(hw);
+@@ -863,9 +863,9 @@ void rtl_watchdog_wq_callback(void *data)
+ 	rtlpriv->link_info.num_rx_inperiod = 0;
+ 	rtlpriv->link_info.num_tx_inperiod = 0;
+ 
+-	rtlpriv->link_info.b_busytraffic = b_busytraffic;
+-	rtlpriv->link_info.b_higher_busytraffic = b_higher_busytraffic;
+-	rtlpriv->link_info.b_higher_busyrxtraffic = b_higher_busyrxtraffic;
++	rtlpriv->link_info.busytraffic = busytraffic;
++	rtlpriv->link_info.higher_busytraffic = higher_busytraffic;
++	rtlpriv->link_info.higher_busyrxtraffic = higher_busyrxtraffic;
+ 
+ }
+ 
+
+commit e6d8a817d00793eecd063b1548bbc954ab62b124
+Author: Larry Finger <Larry.Finger@lwfinger.net>
+Date:   Tue Dec 21 19:40:40 2010 -0600
+
+    rtlwifi: rtl8192ce: Fix driver problem when radio switch off at module load
+    
+    If the radio enable switch is off when the driver is loaded, it is not
+    possible to get radio output until the driver is unloaded and reloaded
+    with the switch on.
+    
+    Signed-off-by: Larry Finger <Larry.Finger@lwfinger.net>
+    Signed-off-by: John W. Linville <linville@tuxdriver.com>
+
+diff --git a/drivers/net/wireless/rtlwifi/base.c b/drivers/net/wireless/rtlwifi/base.c
+index f6cc073..cf0b73e 100644
+--- a/drivers/net/wireless/rtlwifi/base.c
++++ b/drivers/net/wireless/rtlwifi/base.c
+@@ -251,16 +251,14 @@ void rtl_init_rfkill(struct ieee80211_hw *hw)
+ 	bool blocked;
+ 	u8 valid = 0;
+ 
+-	/*set init state to rf on */
+-	rtlpriv->rfkill.rfkill_state = 1;
+-
+ 	radio_state = rtlpriv->cfg->ops->radio_onoff_checking(hw, &valid);
+ 
+-	if (valid) {
+-		RT_TRACE(rtlpriv, COMP_RF, DBG_DMESG,
+-			 (KERN_INFO "wireless switch is %s\n",
+-			  rtlpriv->rfkill.rfkill_state ? "on" : "off"));
++	/*set init state to that of switch */
++	rtlpriv->rfkill.rfkill_state = radio_state;
++	printk(KERN_INFO "rtlwifi: wireless switch is %s\n",
++	       rtlpriv->rfkill.rfkill_state ? "on" : "off");
+ 
++	if (valid) {
+ 		rtlpriv->rfkill.rfkill_state = radio_state;
+ 
+ 		blocked = (rtlpriv->rfkill.rfkill_state == 1) ? 0 : 1;
+
+commit 3d986b25b5faa50ba6afd94f60f270b6c3061e5e
+Author: John W. Linville <linville@tuxdriver.com>
+Date:   Thu Dec 16 14:59:49 2010 -0500
+
+    rtlwifi: use alloc_workqueue
+    
+    create_workqueue is deprecated.  The workqueue usage does not seem to
+    demand any special treatment, so do not set any flags either.
+    
+    Signed-off-by: John W. Linville <linville@tuxdriver.com>
+    Tested-by: Larry Finger <Larry.Finger@lwfinger.net>
+    Acked-by: Tejun Heo <tj@kernel.org>
+
+diff --git a/drivers/net/wireless/rtlwifi/base.c b/drivers/net/wireless/rtlwifi/base.c
+index 77fa59a..f6cc073 100644
+--- a/drivers/net/wireless/rtlwifi/base.c
++++ b/drivers/net/wireless/rtlwifi/base.c
+@@ -225,7 +225,7 @@ static void _rtl_init_deferred_work(struct ieee80211_hw *hw)
+ 
+ 	/* <2> work queue */
+ 	rtlpriv->works.hw = hw;
+-	rtlpriv->works.rtl_wq = create_workqueue(rtlpriv->cfg->name);
++	rtlpriv->works.rtl_wq = alloc_workqueue(rtlpriv->cfg->name, 0, 0);
+ 	INIT_DELAYED_WORK(&rtlpriv->works.watchdog_wq,
+ 			  (void *)rtl_watchdog_wq_callback);
+ 	INIT_DELAYED_WORK(&rtlpriv->works.ips_nic_off_wq,
+
+commit d704300fa546a613ec3821b908528b20685cb92a
+Author: Larry Finger <Larry.Finger@lwfinger.net>
+Date:   Fri Dec 17 19:36:25 2010 -0600
+
+    rtlwifi: Fix use of mutex in interrupt code
+    
+    A previous conversion from semaphoreto mutexes missed the fact that one
+    of the semaphores was used in interrupt code. Fixed by changing to
+    a spinlock.
+    
+    Signed-off-by: Larry Finger <Larry.Finger@lwfinger.net>
+    Signed-off-by: John W. Linville <linville@tuxdriver.com>
+
+diff --git a/drivers/net/wireless/rtlwifi/base.c b/drivers/net/wireless/rtlwifi/base.c
+index 87530ea..77fa59a 100644
+--- a/drivers/net/wireless/rtlwifi/base.c
++++ b/drivers/net/wireless/rtlwifi/base.c
+@@ -309,8 +309,8 @@ int rtl_init_core(struct ieee80211_hw *hw)
+ 	}
+ 
+ 	/* <4> locks */
+-	mutex_init(&rtlpriv->locks.ips_mutex);
+ 	mutex_init(&rtlpriv->locks.conf_mutex);
++	spin_lock_init(&rtlpriv->locks.ips_lock);
+ 	spin_lock_init(&rtlpriv->locks.irq_th_lock);
+ 	spin_lock_init(&rtlpriv->locks.h2c_lock);
+ 	spin_lock_init(&rtlpriv->locks.rf_ps_lock);
+
+commit 8a09d6d80c90c02f2f8c89f69c702cab0c8d9b42
+Author: Larry Finger <Larry.Finger@lwfinger.net>
+Date:   Thu Dec 16 11:13:57 2010 -0600
+
+    rtlwifi: Switch locking from semaphores to mutexes
+    
+    Signed-off-by: Larry Finger <Larry.Finger@lwfinger.net>
+    Signed-off-by: John W. Linville <linville@tuxdriver.com>
+
+diff --git a/drivers/net/wireless/rtlwifi/base.c b/drivers/net/wireless/rtlwifi/base.c
+index 9e860ff..87530ea 100644
+--- a/drivers/net/wireless/rtlwifi/base.c
++++ b/drivers/net/wireless/rtlwifi/base.c
+@@ -309,8 +309,8 @@ int rtl_init_core(struct ieee80211_hw *hw)
+ 	}
+ 
+ 	/* <4> locks */
+-	sema_init(&rtlpriv->locks.ips_sem, 1);
+-	sema_init(&rtlpriv->locks.conf_sem, 1);
++	mutex_init(&rtlpriv->locks.ips_mutex);
++	mutex_init(&rtlpriv->locks.conf_mutex);
+ 	spin_lock_init(&rtlpriv->locks.irq_th_lock);
+ 	spin_lock_init(&rtlpriv->locks.h2c_lock);
+ 	spin_lock_init(&rtlpriv->locks.rf_ps_lock);
+
+commit 0c8173385e549f95cd80c3fff5aab87b4f881d8d
+Author: Larry Finger <Larry.Finger@lwfinger.net>
+Date:   Wed Dec 8 11:12:31 2010 -0600
+
+    rtl8192ce: Add new driver
+    
+    Signed-off-by: Larry Finger <Larry.Finger@lwfinger.net>
+    Signed-off-by: John W. Linville <linville@tuxdriver.com>
+
+diff --git a/drivers/net/wireless/rtlwifi/base.c b/drivers/net/wireless/rtlwifi/base.c
+new file mode 100644
+index 0000000..9e860ff
+--- /dev/null
++++ b/drivers/net/wireless/rtlwifi/base.c
+@@ -0,0 +1,958 @@
++/******************************************************************************
++ *
++ * Copyright(c) 2009-2010  Realtek Corporation.
++ *
++ * This program is free software; you can redistribute it and/or modify it
++ * under the terms of version 2 of the GNU General Public License as
++ * published by the Free Software Foundation.
++ *
++ * This program is distributed in the hope that it will be useful, but WITHOUT
++ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
++ * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
++ * more details.
++ *
++ * You should have received a copy of the GNU General Public License along with
++ * this program; if not, write to the Free Software Foundation, Inc.,
++ * 51 Franklin Street, Fifth Floor, Boston, MA 02110, USA
++ *
++ * The full GNU General Public License is included in this distribution in the
++ * file called LICENSE.
++ *
++ * Contact Information:
++ * wlanfae <wlanfae@realtek.com>
++ * Realtek Corporation, No. 2, Innovation Road II, Hsinchu Science Park,
++ * Hsinchu 300, Taiwan.
++ *
++ * Larry Finger <Larry.Finger@lwfinger.net>
++ *
++ *****************************************************************************/
++
++#include <linux/ip.h>
++#include "wifi.h"
++#include "rc.h"
++#include "base.h"
++#include "efuse.h"
++#include "cam.h"
++#include "ps.h"
++#include "regd.h"
++
++/*
++ *NOTICE!!!: This file will be very big, we hsould
++ *keep it clear under follwing roles:
++ *
++ *This file include follwing part, so, if you add new
++ *functions into this file, please check which part it
++ *should includes. or check if you should add new part
++ *for this file:
++ *
++ *1) mac80211 init functions
++ *2) tx information functions
++ *3) functions called by core.c
++ *4) wq & timer callback functions
++ *5) frame process functions
++ *6) sysfs functions
++ *7) ...
++ */
++
++/*********************************************************
++ *
++ * mac80211 init functions
++ *
++ *********************************************************/
++static struct ieee80211_channel rtl_channeltable[] = {
++	{.center_freq = 2412, .hw_value = 1,},
++	{.center_freq = 2417, .hw_value = 2,},
++	{.center_freq = 2422, .hw_value = 3,},
++	{.center_freq = 2427, .hw_value = 4,},
++	{.center_freq = 2432, .hw_value = 5,},
++	{.center_freq = 2437, .hw_value = 6,},
++	{.center_freq = 2442, .hw_value = 7,},
++	{.center_freq = 2447, .hw_value = 8,},
++	{.center_freq = 2452, .hw_value = 9,},
++	{.center_freq = 2457, .hw_value = 10,},
++	{.center_freq = 2462, .hw_value = 11,},
++	{.center_freq = 2467, .hw_value = 12,},
++	{.center_freq = 2472, .hw_value = 13,},
++	{.center_freq = 2484, .hw_value = 14,},
++};
++
++static struct ieee80211_rate rtl_ratetable[] = {
++	{.bitrate = 10, .hw_value = 0x00,},
++	{.bitrate = 20, .hw_value = 0x01,},
++	{.bitrate = 55, .hw_value = 0x02,},
++	{.bitrate = 110, .hw_value = 0x03,},
++	{.bitrate = 60, .hw_value = 0x04,},
++	{.bitrate = 90, .hw_value = 0x05,},
++	{.bitrate = 120, .hw_value = 0x06,},
++	{.bitrate = 180, .hw_value = 0x07,},
++	{.bitrate = 240, .hw_value = 0x08,},
++	{.bitrate = 360, .hw_value = 0x09,},
++	{.bitrate = 480, .hw_value = 0x0a,},
++	{.bitrate = 540, .hw_value = 0x0b,},
++};
++
++static const struct ieee80211_supported_band rtl_band_2ghz = {
++	.band = IEEE80211_BAND_2GHZ,
++
++	.channels = rtl_channeltable,
++	.n_channels = ARRAY_SIZE(rtl_channeltable),
++
++	.bitrates = rtl_ratetable,
++	.n_bitrates = ARRAY_SIZE(rtl_ratetable),
++
++	.ht_cap = {0},
++};
++
++static void _rtl_init_hw_ht_capab(struct ieee80211_hw *hw,
++				  struct ieee80211_sta_ht_cap *ht_cap)
++{
++	struct rtl_priv *rtlpriv = rtl_priv(hw);
++	struct rtl_phy *rtlphy = &(rtlpriv->phy);
++
++	ht_cap->ht_supported = true;
++	ht_cap->cap = IEEE80211_HT_CAP_SUP_WIDTH_20_40 |
++	    IEEE80211_HT_CAP_SGI_40 |
++	    IEEE80211_HT_CAP_SGI_20 |
++	    IEEE80211_HT_CAP_DSSSCCK40 | IEEE80211_HT_CAP_MAX_AMSDU;
++
++	/*
++	 *Maximum length of AMPDU that the STA can receive.
++	 *Length = 2 ^ (13 + max_ampdu_length_exp) - 1 (octets)
++	 */
++	ht_cap->ampdu_factor = IEEE80211_HT_MAX_AMPDU_64K;
++
++	/*Minimum MPDU start spacing , */
++	ht_cap->ampdu_density = IEEE80211_HT_MPDU_DENSITY_16;
++
++	ht_cap->mcs.tx_params = IEEE80211_HT_MCS_TX_DEFINED;
++
++	/*
++	 *hw->wiphy->bands[IEEE80211_BAND_2GHZ]
++	 *base on ant_num
++	 *rx_mask: RX mask
++	 *if rx_ant =1 rx_mask[0]=0xff;==>MCS0-MCS7
++	 *if rx_ant =2 rx_mask[1]=0xff;==>MCS8-MCS15
++	 *if rx_ant >=3 rx_mask[2]=0xff;
++	 *if BW_40 rx_mask[4]=0x01;
++	 *highest supported RX rate
++	 */
++	if (get_rf_type(rtlphy) == RF_1T2R || get_rf_type(rtlphy) == RF_2T2R) {
++
++		RT_TRACE(rtlpriv, COMP_INIT, DBG_DMESG, ("1T2R or 2T2R\n"));
++
++		ht_cap->mcs.rx_mask[0] = 0xFF;
++		ht_cap->mcs.rx_mask[1] = 0xFF;
++		ht_cap->mcs.rx_mask[4] = 0x01;
++
++		ht_cap->mcs.rx_highest = MAX_BIT_RATE_40MHZ_MCS15;
++	} else if (get_rf_type(rtlphy) == RF_1T1R) {
++
++		RT_TRACE(rtlpriv, COMP_INIT, DBG_DMESG, ("1T1R\n"));
++
++		ht_cap->mcs.rx_mask[0] = 0xFF;
++		ht_cap->mcs.rx_mask[1] = 0x00;
++		ht_cap->mcs.rx_mask[4] = 0x01;
++
++		ht_cap->mcs.rx_highest = MAX_BIT_RATE_40MHZ_MCS7;
++	}
++}
++
++static void _rtl_init_mac80211(struct ieee80211_hw *hw)
++{
++	struct rtl_mac *rtlmac = rtl_mac(rtl_priv(hw));
++	struct rtl_efuse *rtlefuse = rtl_efuse(rtl_priv(hw));
++	struct ieee80211_supported_band *sband;
++
++	/* <1> use  mac->bands as mem for hw->wiphy->bands */
++	sband = &(rtlmac->bands[IEEE80211_BAND_2GHZ]);
++
++	/*
++	 * <2> set hw->wiphy->bands[IEEE80211_BAND_2GHZ]
++	 * to default value(1T1R)
++	 */
++	memcpy(&(rtlmac->bands[IEEE80211_BAND_2GHZ]), &rtl_band_2ghz,
++	       sizeof(struct ieee80211_supported_band));
++
++	/* <3> init ht cap base on ant_num */
++	_rtl_init_hw_ht_capab(hw, &sband->ht_cap);
++
++	/* <4> set mac->sband to wiphy->sband */
++	hw->wiphy->bands[IEEE80211_BAND_2GHZ] = sband;
++
++	/* <5> set hw caps */
++	hw->flags = IEEE80211_HW_SIGNAL_DBM |
++	    IEEE80211_HW_RX_INCLUDES_FCS |
++	    IEEE80211_HW_BEACON_FILTER | IEEE80211_HW_AMPDU_AGGREGATION | /*PS*/
++	    /*IEEE80211_HW_SUPPORTS_PS | */
++	    /*IEEE80211_HW_PS_NULLFUNC_STACK | */
++	    /*IEEE80211_HW_SUPPORTS_DYNAMIC_PS | */
++	    IEEE80211_HW_REPORTS_TX_ACK_STATUS | 0;
++
++	hw->wiphy->interface_modes =
++	    BIT(NL80211_IFTYPE_STATION) | BIT(NL80211_IFTYPE_ADHOC);
++
++	hw->wiphy->rts_threshold = 2347;
++
++	hw->queues = AC_MAX;
++	hw->extra_tx_headroom = RTL_TX_HEADER_SIZE;
++
++	/* TODO: Correct this value for our hw */
++	/* TODO: define these hard code value */
++	hw->channel_change_time = 100;
++	hw->max_listen_interval = 5;
++	hw->max_rate_tries = 4;
++	/* hw->max_rates = 1; */
++
++	/* <6> mac address */
++	if (is_valid_ether_addr(rtlefuse->dev_addr)) {
++		SET_IEEE80211_PERM_ADDR(hw, rtlefuse->dev_addr);
++	} else {
++		u8 rtlmac[] = { 0x00, 0xe0, 0x4c, 0x81, 0x92, 0x00 };
++		get_random_bytes((rtlmac + (ETH_ALEN - 1)), 1);
++		SET_IEEE80211_PERM_ADDR(hw, rtlmac);
++	}
++
++}
++
++static void _rtl_init_deferred_work(struct ieee80211_hw *hw)
++{
++	struct rtl_priv *rtlpriv = rtl_priv(hw);
++
++	/* <1> timer */
++	init_timer(&rtlpriv->works.watchdog_timer);
++	setup_timer(&rtlpriv->works.watchdog_timer,
++		    rtl_watch_dog_timer_callback, (unsigned long)hw);
++
++	/* <2> work queue */
++	rtlpriv->works.hw = hw;
++	rtlpriv->works.rtl_wq = create_workqueue(rtlpriv->cfg->name);
++	INIT_DELAYED_WORK(&rtlpriv->works.watchdog_wq,
++			  (void *)rtl_watchdog_wq_callback);
++	INIT_DELAYED_WORK(&rtlpriv->works.ips_nic_off_wq,
++			  (void *)rtl_ips_nic_off_wq_callback);
++
++}
++
++void rtl_deinit_deferred_work(struct ieee80211_hw *hw)
++{
++	struct rtl_priv *rtlpriv = rtl_priv(hw);
++
++	del_timer_sync(&rtlpriv->works.watchdog_timer);
++
++	cancel_delayed_work(&rtlpriv->works.watchdog_wq);
++	cancel_delayed_work(&rtlpriv->works.ips_nic_off_wq);
++}
++
++void rtl_init_rfkill(struct ieee80211_hw *hw)
++{
++	struct rtl_priv *rtlpriv = rtl_priv(hw);
++
++	bool radio_state;
++	bool blocked;
++	u8 valid = 0;
++
++	/*set init state to rf on */
++	rtlpriv->rfkill.rfkill_state = 1;
++
++	radio_state = rtlpriv->cfg->ops->radio_onoff_checking(hw, &valid);
++
++	if (valid) {
++		RT_TRACE(rtlpriv, COMP_RF, DBG_DMESG,
++			 (KERN_INFO "wireless switch is %s\n",
++			  rtlpriv->rfkill.rfkill_state ? "on" : "off"));
++
++		rtlpriv->rfkill.rfkill_state = radio_state;
++
++		blocked = (rtlpriv->rfkill.rfkill_state == 1) ? 0 : 1;
++		wiphy_rfkill_set_hw_state(hw->wiphy, blocked);
++	}
++
++	wiphy_rfkill_start_polling(hw->wiphy);
++}
++
++void rtl_deinit_rfkill(struct ieee80211_hw *hw)
++{
++	wiphy_rfkill_stop_polling(hw->wiphy);
++}
++
++int rtl_init_core(struct ieee80211_hw *hw)
++{
++	struct rtl_priv *rtlpriv = rtl_priv(hw);
++	struct rtl_mac *rtlmac = rtl_mac(rtl_priv(hw));
++
++	/* <1> init mac80211 */
++	_rtl_init_mac80211(hw);
++	rtlmac->hw = hw;
++
++	/* <2> rate control register */
++	if (rtl_rate_control_register()) {
++		RT_TRACE(rtlpriv, COMP_ERR, DBG_EMERG,
++			 ("rtl: Unable to register rtl_rc,"
++			  "use default RC !!\n"));
++	} else {
++		hw->rate_control_algorithm = "rtl_rc";
++	}
++
++	/*
++	 * <3> init CRDA must come after init
++	 * mac80211 hw  in _rtl_init_mac80211.
++	 */
++	if (rtl_regd_init(hw, rtl_reg_notifier)) {
++		RT_TRACE(rtlpriv, COMP_ERR, DBG_EMERG, ("REGD init failed\n"));
++		return 1;
++	} else {
++		/* CRDA regd hint must after init CRDA */
++		if (regulatory_hint(hw->wiphy, rtlpriv->regd.alpha2)) {
++			RT_TRACE(rtlpriv, COMP_ERR, DBG_WARNING,
++				 ("regulatory_hint fail\n"));
++		}
++	}
++
++	/* <4> locks */
++	sema_init(&rtlpriv->locks.ips_sem, 1);
++	sema_init(&rtlpriv->locks.conf_sem, 1);
++	spin_lock_init(&rtlpriv->locks.irq_th_lock);
++	spin_lock_init(&rtlpriv->locks.h2c_lock);
++	spin_lock_init(&rtlpriv->locks.rf_ps_lock);
++	spin_lock_init(&rtlpriv->locks.rf_lock);
++	spin_lock_init(&rtlpriv->locks.lps_lock);
++
++	rtlmac->link_state = MAC80211_NOLINK;
++
++	/* <5> init deferred work */
++	_rtl_init_deferred_work(hw);
++
++	return 0;
++}
++
++void rtl_deinit_core(struct ieee80211_hw *hw)
++{
++	 /*RC*/
++	rtl_rate_control_unregister();
++}
++
++void rtl_init_rx_config(struct ieee80211_hw *hw)
++{
++	struct rtl_priv *rtlpriv = rtl_priv(hw);
++	struct rtl_mac *mac = rtl_mac(rtl_priv(hw));
++
++	rtlpriv->cfg->ops->get_hw_reg(hw, HW_VAR_RCR, (u8 *) (&mac->rx_conf));
++	rtlpriv->cfg->ops->get_hw_reg(hw, HW_VAR_MGT_FILTER,
++				      (u8 *) (&mac->rx_mgt_filter));
++	rtlpriv->cfg->ops->get_hw_reg(hw, HW_VAR_CTRL_FILTER,
++				      (u8 *) (&mac->rx_ctrl_filter));
++	rtlpriv->cfg->ops->get_hw_reg(hw, HW_VAR_DATA_FILTER,
++				      (u8 *) (&mac->rx_data_filter));
++}
++
++/*********************************************************
++ *
++ * tx information functions
++ *
++ *********************************************************/
++static void _rtl_qurey_shortpreamble_mode(struct ieee80211_hw *hw,
++					  struct rtl_tcb_desc *tcb_desc,
++					  struct ieee80211_tx_info *info)
++{
++	struct rtl_priv *rtlpriv = rtl_priv(hw);
++	u8 rate_flag = info->control.rates[0].flags;
++
++	tcb_desc->use_shortpreamble = false;
++
++	/* 1M can only use Long Preamble. 11B spec */
++	if (tcb_desc->hw_rate == rtlpriv->cfg->maps[RTL_RC_CCK_RATE1M])
++		return;
++	else if (rate_flag & IEEE80211_TX_RC_USE_SHORT_PREAMBLE)
++		tcb_desc->use_shortpreamble = true;
++
++	return;
++}
++
++static void _rtl_query_shortgi(struct ieee80211_hw *hw,
++			       struct rtl_tcb_desc *tcb_desc,
++			       struct ieee80211_tx_info *info)
++{
++	struct rtl_mac *mac = rtl_mac(rtl_priv(hw));
++	u8 rate_flag = info->control.rates[0].flags;
++
++	tcb_desc->use_shortgi = false;
++
++	if (!mac->ht_enable)
++		return;
++
++	if (!mac->sgi_40 && !mac->sgi_20)
++		return;
++
++	if ((mac->bw_40 == true) && mac->sgi_40)
++		tcb_desc->use_shortgi = true;
++	else if ((mac->bw_40 == false) && mac->sgi_20)
++		tcb_desc->use_shortgi = true;
++
++	if (!(rate_flag & IEEE80211_TX_RC_SHORT_GI))
++		tcb_desc->use_shortgi = false;
++
++}
++
++static void _rtl_query_protection_mode(struct ieee80211_hw *hw,
++				       struct rtl_tcb_desc *tcb_desc,
++				       struct ieee80211_tx_info *info)
++{
++	struct rtl_priv *rtlpriv = rtl_priv(hw);
++	u8 rate_flag = info->control.rates[0].flags;
++
++	/* Common Settings */
++	tcb_desc->b_rts_stbc = false;
++	tcb_desc->b_cts_enable = false;
++	tcb_desc->rts_sc = 0;
++	tcb_desc->b_rts_bw = false;
++	tcb_desc->b_rts_use_shortpreamble = false;
++	tcb_desc->b_rts_use_shortgi = false;
++
++	if (rate_flag & IEEE80211_TX_RC_USE_CTS_PROTECT) {
++		/* Use CTS-to-SELF in protection mode. */
++		tcb_desc->b_rts_enable = true;
++		tcb_desc->b_cts_enable = true;
++		tcb_desc->rts_rate = rtlpriv->cfg->maps[RTL_RC_OFDM_RATE24M];
++	} else if (rate_flag & IEEE80211_TX_RC_USE_RTS_CTS) {
++		/* Use RTS-CTS in protection mode. */
++		tcb_desc->b_rts_enable = true;
++		tcb_desc->rts_rate = rtlpriv->cfg->maps[RTL_RC_OFDM_RATE24M];
++	}
++
++}
++
++static void _rtl_txrate_selectmode(struct ieee80211_hw *hw,
++				   struct rtl_tcb_desc *tcb_desc)
++{
++	struct rtl_priv *rtlpriv = rtl_priv(hw);
++	struct rtl_mac *mac = rtl_mac(rtl_priv(hw));
++
++	if (!tcb_desc->disable_ratefallback || !tcb_desc->use_driver_rate) {
++		if (mac->opmode == NL80211_IFTYPE_STATION)
++			tcb_desc->ratr_index = 0;
++		else if (mac->opmode == NL80211_IFTYPE_ADHOC) {
++			if (tcb_desc->b_multicast || tcb_desc->b_broadcast) {
++				tcb_desc->hw_rate =
++				    rtlpriv->cfg->maps[RTL_RC_CCK_RATE2M];
++				tcb_desc->use_driver_rate = 1;
++			} else {
++				/* TODO */
++			}
++		}
++	}
++
++	if (rtlpriv->dm.b_useramask) {
++		/* TODO we will differentiate adhoc and station futrue  */
++		tcb_desc->mac_id = 0;
++
++		if ((mac->mode == WIRELESS_MODE_N_24G) ||
++		    (mac->mode == WIRELESS_MODE_N_5G)) {
++			tcb_desc->ratr_index = RATR_INX_WIRELESS_NGB;
++		} else if (mac->mode & WIRELESS_MODE_G) {
++			tcb_desc->ratr_index = RATR_INX_WIRELESS_GB;
++		} else if (mac->mode & WIRELESS_MODE_B) {
++			tcb_desc->ratr_index = RATR_INX_WIRELESS_B;
++		}
++	}
++
++}
++
++static void _rtl_query_bandwidth_mode(struct ieee80211_hw *hw,
++				      struct rtl_tcb_desc *tcb_desc)
++{
++	struct rtl_priv *rtlpriv = rtl_priv(hw);
++	struct rtl_mac *mac = rtl_mac(rtl_priv(hw));
++
++	tcb_desc->b_packet_bw = false;
++
++	if (!mac->bw_40 || !mac->ht_enable)
++		return;
++
++	if (tcb_desc->b_multicast || tcb_desc->b_broadcast)
++		return;
++
++	/*use legency rate, shall use 20MHz */
++	if (tcb_desc->hw_rate <= rtlpriv->cfg->maps[RTL_RC_OFDM_RATE54M])
++		return;
++
++	tcb_desc->b_packet_bw = true;
++}
++
++static u8 _rtl_get_highest_n_rate(struct ieee80211_hw *hw)
++{
++	struct rtl_priv *rtlpriv = rtl_priv(hw);
++	struct rtl_phy *rtlphy = &(rtlpriv->phy);
++	u8 hw_rate;
++
++	if (get_rf_type(rtlphy) == RF_2T2R)
++		hw_rate = rtlpriv->cfg->maps[RTL_RC_HT_RATEMCS15];
++	else
++		hw_rate = rtlpriv->cfg->maps[RTL_RC_HT_RATEMCS7];
++
++	return hw_rate;
++}
++
++void rtl_get_tcb_desc(struct ieee80211_hw *hw,
++		      struct ieee80211_tx_info *info,
++		      struct sk_buff *skb, struct rtl_tcb_desc *tcb_desc)
++{
++	struct rtl_priv *rtlpriv = rtl_priv(hw);
++	struct rtl_mac *rtlmac = rtl_mac(rtl_priv(hw));
++	struct ieee80211_hdr *hdr = (struct ieee80211_hdr *)(skb->data);
++	struct ieee80211_rate *txrate;
++	u16 fc = le16_to_cpu(hdr->frame_control);
++
++	memset(tcb_desc, 0, sizeof(struct rtl_tcb_desc));
++
++	if (ieee80211_is_data(fc)) {
++		txrate = ieee80211_get_tx_rate(hw, info);
++		tcb_desc->hw_rate = txrate->hw_value;
++
++		/*
++		 *we set data rate RTL_RC_CCK_RATE1M
++		 *in rtl_rc.c   if skb is special data or
++		 *mgt which need low data rate.
++		 */
++
++		/*
++		 *So tcb_desc->hw_rate is just used for
++		 *special data and mgt frames
++		 */
++		if (tcb_desc->hw_rate < rtlpriv->cfg->maps[RTL_RC_CCK_RATE11M]) {
++			tcb_desc->use_driver_rate = true;
++			tcb_desc->ratr_index = 7;
++
++			tcb_desc->hw_rate =
++			    rtlpriv->cfg->maps[RTL_RC_CCK_RATE1M];
++			tcb_desc->disable_ratefallback = 1;
++		} else {
++			/*
++			 *because hw will nerver use hw_rate
++			 *when tcb_desc->use_driver_rate = false
++			 *so we never set highest N rate here,
++			 *and N rate will all be controled by FW
++			 *when tcb_desc->use_driver_rate = false
++			 */
++			if (rtlmac->ht_enable) {
++				tcb_desc->hw_rate = _rtl_get_highest_n_rate(hw);
++			} else {
++				if (rtlmac->mode == WIRELESS_MODE_B) {
++					tcb_desc->hw_rate =
++					   rtlpriv->cfg->maps[RTL_RC_CCK_RATE11M];
++				} else {
++					tcb_desc->hw_rate =
++					   rtlpriv->cfg->maps[RTL_RC_OFDM_RATE54M];
++				}
++			}
++		}
++
++		if (is_multicast_ether_addr(ieee80211_get_DA(hdr)))
++			tcb_desc->b_multicast = 1;
++		else if (is_broadcast_ether_addr(ieee80211_get_DA(hdr)))
++			tcb_desc->b_broadcast = 1;
++
++		_rtl_txrate_selectmode(hw, tcb_desc);
++		_rtl_query_bandwidth_mode(hw, tcb_desc);
++		_rtl_qurey_shortpreamble_mode(hw, tcb_desc, info);
++		_rtl_query_shortgi(hw, tcb_desc, info);
++		_rtl_query_protection_mode(hw, tcb_desc, info);
++	} else {
++		tcb_desc->use_driver_rate = true;
++		tcb_desc->ratr_index = 7;
++		tcb_desc->disable_ratefallback = 1;
++		tcb_desc->mac_id = 0;
++
++		tcb_desc->hw_rate = rtlpriv->cfg->maps[RTL_RC_CCK_RATE1M];
++	}
++}
++EXPORT_SYMBOL(rtl_get_tcb_desc);
++
++bool rtl_tx_mgmt_proc(struct ieee80211_hw *hw, struct sk_buff *skb)
++{
++	struct rtl_mac *mac = rtl_mac(rtl_priv(hw));
++	struct rtl_priv *rtlpriv = rtl_priv(hw);
++	struct ieee80211_hdr *hdr = (struct ieee80211_hdr *)(skb->data);
++	u16 fc = le16_to_cpu(hdr->frame_control);
++
++	if (ieee80211_is_auth(fc)) {
++		RT_TRACE(rtlpriv, COMP_SEND, DBG_DMESG, ("MAC80211_LINKING\n"));
++		rtl_ips_nic_on(hw);
++
++		mac->link_state = MAC80211_LINKING;
++	}
++
++	return true;
++}
++
++bool rtl_action_proc(struct ieee80211_hw *hw, struct sk_buff *skb, u8 is_tx)
++{
++	struct rtl_mac *mac = rtl_mac(rtl_priv(hw));
++	struct ieee80211_hdr *hdr = (struct ieee80211_hdr *)(skb->data);
++	struct rtl_priv *rtlpriv = rtl_priv(hw);
++	u16 fc = le16_to_cpu(hdr->frame_control);
++	u8 *act = (u8 *) (((u8 *) skb->data + MAC80211_3ADDR_LEN));
++	u8 category;
++
++	if (!ieee80211_is_action(fc))
++		return true;
++
++	category = *act;
++	act++;
++	switch (category) {
++	case ACT_CAT_BA:
++		switch (*act) {
++		case ACT_ADDBAREQ:
++			if (mac->act_scanning)
++				return false;
++
++			RT_TRACE(rtlpriv, (COMP_SEND | COMP_RECV), DBG_DMESG,
++				 ("%s ACT_ADDBAREQ From :" MAC_FMT "\n",
++				  is_tx ? "Tx" : "Rx", MAC_ARG(hdr->addr2)));
++			break;
++		case ACT_ADDBARSP:
++			RT_TRACE(rtlpriv, (COMP_SEND | COMP_RECV), DBG_DMESG,
++				 ("%s ACT_ADDBARSP From :" MAC_FMT "\n",
++				  is_tx ? "Tx" : "Rx", MAC_ARG(hdr->addr2)));
++			break;
++		case ACT_DELBA:
++			RT_TRACE(rtlpriv, (COMP_SEND | COMP_RECV), DBG_DMESG,
++				 ("ACT_ADDBADEL From :" MAC_FMT "\n",
++				  MAC_ARG(hdr->addr2)));
++			break;
++		}
++		break;
++	default:
++		break;
++	}
++
++	return true;
++}
++
++/*should call before software enc*/
++u8 rtl_is_special_data(struct ieee80211_hw *hw, struct sk_buff *skb, u8 is_tx)
++{
++	struct rtl_priv *rtlpriv = rtl_priv(hw);
++	struct ieee80211_hdr *hdr = (struct ieee80211_hdr *)(skb->data);
++	struct rtl_ps_ctl *ppsc = rtl_psc(rtl_priv(hw));
++	u16 fc = le16_to_cpu(hdr->frame_control);
++	u16 ether_type;
++	u8 mac_hdr_len = ieee80211_get_hdrlen_from_skb(skb);
++	const struct iphdr *ip;
++
++	if (!ieee80211_is_data(fc))
++		goto end;
++
++	if (ieee80211_is_nullfunc(fc))
++		return true;
++
++	ip = (struct iphdr *)((u8 *) skb->data + mac_hdr_len +
++			      SNAP_SIZE + PROTOC_TYPE_SIZE);
++	ether_type = *(u16 *) ((u8 *) skb->data + mac_hdr_len + SNAP_SIZE);
++	ether_type = ntohs(ether_type);
++
++	if (ETH_P_IP == ether_type) {
++		if (IPPROTO_UDP == ip->protocol) {
++			struct udphdr *udp = (struct udphdr *)((u8 *) ip +
++							       (ip->ihl << 2));
++			if (((((u8 *) udp)[1] == 68) &&
++			     (((u8 *) udp)[3] == 67)) ||
++			    ((((u8 *) udp)[1] == 67) &&
++			     (((u8 *) udp)[3] == 68))) {
++				/*
++				 * 68 : UDP BOOTP client
++				 * 67 : UDP BOOTP server
++				 */
++				RT_TRACE(rtlpriv, (COMP_SEND | COMP_RECV),
++					 DBG_DMESG, ("dhcp %s !!\n",
++						     (is_tx) ? "Tx" : "Rx"));
++
++				if (is_tx) {
++					rtl_lps_leave(hw);
++					ppsc->last_delaylps_stamp_jiffies =
++					    jiffies;
++				}
++
++				return true;
++			}
++		}
++	} else if (ETH_P_ARP == ether_type) {
++		if (is_tx) {
++			rtl_lps_leave(hw);
++			ppsc->last_delaylps_stamp_jiffies = jiffies;
++		}
++
++		return true;
++	} else if (ETH_P_PAE == ether_type) {
++		RT_TRACE(rtlpriv, (COMP_SEND | COMP_RECV), DBG_DMESG,
++			 ("802.1X %s EAPOL pkt!!\n", (is_tx) ? "Tx" : "Rx"));
++
++		if (is_tx) {
++			rtl_lps_leave(hw);
++			ppsc->last_delaylps_stamp_jiffies = jiffies;
++		}
++
++		return true;
++	} else if (0x86DD == ether_type) {
++		return true;
++	}
++
++end:
++	return false;
++}
++
++/*********************************************************
++ *
++ * functions called by core.c
++ *
++ *********************************************************/
++int rtl_tx_agg_start(struct ieee80211_hw *hw, const u8 *ra, u16 tid, u16 *ssn)
++{
++	struct rtl_priv *rtlpriv = rtl_priv(hw);
++	struct rtl_tid_data *tid_data;
++	struct rtl_mac *mac = rtl_mac(rtl_priv(hw));
++
++	RT_TRACE(rtlpriv, COMP_SEND, DBG_DMESG,
++		 ("on ra = %pM tid = %d\n", ra, tid));
++
++	if (unlikely(tid >= MAX_TID_COUNT))
++		return -EINVAL;
++
++	if (mac->tids[tid].agg.agg_state != RTL_AGG_OFF) {
++		RT_TRACE(rtlpriv, COMP_ERR, DBG_WARNING,
++			 ("Start AGG when state is not RTL_AGG_OFF !\n"));
++		return -ENXIO;
++	}
++
++	tid_data = &mac->tids[tid];
++	*ssn = SEQ_TO_SN(tid_data->seq_number);
++
++	RT_TRACE(rtlpriv, COMP_SEND, DBG_DMESG,
++		 ("HW queue is empty tid:%d\n", tid));
++	tid_data->agg.agg_state = RTL_AGG_ON;
++
++	ieee80211_start_tx_ba_cb_irqsafe(mac->vif, ra, tid);
++
++	return 0;
++}
++
++int rtl_tx_agg_stop(struct ieee80211_hw *hw, const u8 * ra, u16 tid)
++{
++	int ssn = -1;
++	struct rtl_priv *rtlpriv = rtl_priv(hw);
++	struct rtl_mac *mac = rtl_mac(rtl_priv(hw));
++	struct rtl_tid_data *tid_data;
++
++	if (!ra) {
++		RT_TRACE(rtlpriv, COMP_ERR, DBG_EMERG, ("ra = NULL\n"));
++		return -EINVAL;
++	}
++
++	if (unlikely(tid >= MAX_TID_COUNT))
++		return -EINVAL;
++
++	if (mac->tids[tid].agg.agg_state != RTL_AGG_ON)
++		RT_TRACE(rtlpriv, COMP_ERR, DBG_WARNING,
++			 ("Stopping AGG while state not ON or starting\n"));
++
++	tid_data = &mac->tids[tid];
++	ssn = (tid_data->seq_number & IEEE80211_SCTL_SEQ) >> 4;
++
++	mac->tids[tid].agg.agg_state = RTL_AGG_OFF;
++
++	ieee80211_stop_tx_ba_cb_irqsafe(mac->vif, ra, tid);
++
++	return 0;
++}
++
++/*********************************************************
++ *
++ * wq & timer callback functions
++ *
++ *********************************************************/
++void rtl_watchdog_wq_callback(void *data)
++{
++	struct rtl_works *rtlworks = container_of_dwork_rtl(data,
++							    struct rtl_works,
++							    watchdog_wq);
++	struct ieee80211_hw *hw = rtlworks->hw;
++	struct rtl_priv *rtlpriv = rtl_priv(hw);
++	struct rtl_hal *rtlhal = rtl_hal(rtl_priv(hw));
++	struct rtl_mac *mac = rtl_mac(rtl_priv(hw));
++
++	bool b_busytraffic = false;
++	bool b_higher_busytraffic = false;
++	bool b_higher_busyrxtraffic = false;
++	bool b_higher_busytxtraffic = false;
++
++	u8 idx = 0;
++	u32 rx_cnt_inp4eriod = 0;
++	u32 tx_cnt_inp4eriod = 0;
++	u32 aver_rx_cnt_inperiod = 0;
++	u32 aver_tx_cnt_inperiod = 0;
++
++	bool benter_ps = false;
++
++	if (is_hal_stop(rtlhal))
++		return;
++
++	/* <1> Determine if action frame is allowed */
++	if (mac->link_state > MAC80211_NOLINK) {
++		if (mac->cnt_after_linked < 20)
++			mac->cnt_after_linked++;
++	} else {
++		mac->cnt_after_linked = 0;
++	}
++
++	/* <2> DM */
++	rtlpriv->cfg->ops->dm_watchdog(hw);
++
++	/*
++	 *<3> to check if traffic busy, if
++	 * busytraffic we don't change channel
++	 */
++	if (mac->link_state >= MAC80211_LINKED) {
++
++		/* (1) get aver_rx_cnt_inperiod & aver_tx_cnt_inperiod */
++		for (idx = 0; idx <= 2; idx++) {
++			rtlpriv->link_info.num_rx_in4period[idx] =
++			    rtlpriv->link_info.num_rx_in4period[idx + 1];
++			rtlpriv->link_info.num_tx_in4period[idx] =
++			    rtlpriv->link_info.num_tx_in4period[idx + 1];
++		}
++		rtlpriv->link_info.num_rx_in4period[3] =
++		    rtlpriv->link_info.num_rx_inperiod;
++		rtlpriv->link_info.num_tx_in4period[3] =
++		    rtlpriv->link_info.num_tx_inperiod;
++		for (idx = 0; idx <= 3; idx++) {
++			rx_cnt_inp4eriod +=
++			    rtlpriv->link_info.num_rx_in4period[idx];
++			tx_cnt_inp4eriod +=
++			    rtlpriv->link_info.num_tx_in4period[idx];
++		}
++		aver_rx_cnt_inperiod = rx_cnt_inp4eriod / 4;
++		aver_tx_cnt_inperiod = tx_cnt_inp4eriod / 4;
++
++		/* (2) check traffic busy */
++		if (aver_rx_cnt_inperiod > 100 || aver_tx_cnt_inperiod > 100)
++			b_busytraffic = true;
++
++		/* Higher Tx/Rx data. */
++		if (aver_rx_cnt_inperiod > 4000 ||
++		    aver_tx_cnt_inperiod > 4000) {
++			b_higher_busytraffic = true;
++
++			/* Extremely high Rx data. */
++			if (aver_rx_cnt_inperiod > 5000)
++				b_higher_busyrxtraffic = true;
++			else
++				b_higher_busytxtraffic = false;
++		}
++
++		if (((rtlpriv->link_info.num_rx_inperiod +
++		      rtlpriv->link_info.num_tx_inperiod) > 8) ||
++		    (rtlpriv->link_info.num_rx_inperiod > 2))
++			benter_ps = false;
++		else
++			benter_ps = true;
++
++		/* LeisurePS only work in infra mode. */
++		if (benter_ps)
++			rtl_lps_enter(hw);
++		else
++			rtl_lps_leave(hw);
++	}
++
++	rtlpriv->link_info.num_rx_inperiod = 0;
++	rtlpriv->link_info.num_tx_inperiod = 0;
++
++	rtlpriv->link_info.b_busytraffic = b_busytraffic;
++	rtlpriv->link_info.b_higher_busytraffic = b_higher_busytraffic;
++	rtlpriv->link_info.b_higher_busyrxtraffic = b_higher_busyrxtraffic;
++
++}
++
++void rtl_watch_dog_timer_callback(unsigned long data)
++{
++	struct ieee80211_hw *hw = (struct ieee80211_hw *)data;
++	struct rtl_priv *rtlpriv = rtl_priv(hw);
++
++	queue_delayed_work(rtlpriv->works.rtl_wq,
++			   &rtlpriv->works.watchdog_wq, 0);
++
++	mod_timer(&rtlpriv->works.watchdog_timer,
++		  jiffies + MSECS(RTL_WATCH_DOG_TIME));
++}
++
++/*********************************************************
++ *
++ * sysfs functions
++ *
++ *********************************************************/
++static ssize_t rtl_show_debug_level(struct device *d,
++				    struct device_attribute *attr, char *buf)
++{
++	struct ieee80211_hw *hw = dev_get_drvdata(d);
++	struct rtl_priv *rtlpriv = rtl_priv(hw);
++
++	return sprintf(buf, "0x%08X\n", rtlpriv->dbg.global_debuglevel);
++}
++
++static ssize_t rtl_store_debug_level(struct device *d,
++				     struct device_attribute *attr,
++				     const char *buf, size_t count)
++{
++	struct ieee80211_hw *hw = dev_get_drvdata(d);
++	struct rtl_priv *rtlpriv = rtl_priv(hw);
++	unsigned long val;
++	int ret;
++
++	ret = strict_strtoul(buf, 0, &val);
++	if (ret) {
++		printk(KERN_DEBUG "%s is not in hex or decimal form.\n", buf);
++	} else {
++		rtlpriv->dbg.global_debuglevel = val;
++		printk(KERN_DEBUG "debuglevel:%x\n",
++		       rtlpriv->dbg.global_debuglevel);
++	}
++
++	return strnlen(buf, count);
++}
++
++static DEVICE_ATTR(debug_level, S_IWUSR | S_IRUGO,
++		   rtl_show_debug_level, rtl_store_debug_level);
++
++static struct attribute *rtl_sysfs_entries[] = {
++
++	&dev_attr_debug_level.attr,
++
++	NULL
++};
++
++/*
++ * "name" is folder name witch will be
++ * put in device directory like :
++ * sys/devices/pci0000:00/0000:00:1c.4/
++ * 0000:06:00.0/rtl_sysfs
++ */
++struct attribute_group rtl_attribute_group = {
++	.name = "rtlsysfs",
++	.attrs = rtl_sysfs_entries,
++};
++
++MODULE_AUTHOR("lizhaoming	<chaoming_li@realsil.com.cn>");
++MODULE_AUTHOR("Realtek WlanFAE	<wlanfae@realtek.com>");
++MODULE_AUTHOR("Larry Finger	<Larry.FInger@lwfinger.net>");
++MODULE_LICENSE("GPL");
++MODULE_DESCRIPTION("Realtek 802.11n PCI wireless core");
++
++static int __init rtl_core_module_init(void)
++{
++	return 0;
++}
++
++static void __exit rtl_core_module_exit(void)
++{
++}
++
++module_init(rtl_core_module_init);
++module_exit(rtl_core_module_exit);

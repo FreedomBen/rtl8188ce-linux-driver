@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright( c ) 2009-2010  Realtek Corporation.
+ * Copyright( c ) 2009-2012  Realtek Corporation.
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of version 2 of the GNU General Public License as
@@ -25,13 +25,6 @@
  *
  * Larry Finger <Larry.Finger@lwfinger.net>
  *
- *
- * Bug Fixes and enhancements for Linux Kernels >= 3.2
- * by Benjamin Porter <BenjaminPorter86@gmail.com>
- *
- * Project homepage: https://github.com/FreedomBen/rtl8188ce-linux-driver
- *
- *
  *****************************************************************************/
 
 #ifndef __RTL92CE_SW_H__
@@ -40,5 +33,9 @@
 int rtl92c_init_sw_vars( struct ieee80211_hw *hw );
 void rtl92c_deinit_sw_vars( struct ieee80211_hw *hw );
 void rtl92c_init_var_map( struct ieee80211_hw *hw );
+bool _rtl92ce_phy_config_bb_with_headerfile( struct ieee80211_hw *hw,
+					    u8 configtype );
+bool _rtl92ce_phy_config_bb_with_pgheaderfile( struct ieee80211_hw *hw,
+					      u8 configtype );
 
 #endif

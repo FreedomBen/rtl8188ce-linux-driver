@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright( c ) 2009-2010  Realtek Corporation.
+ * Copyright( c ) 2009-2012  Realtek Corporation.
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of version 2 of the GNU General Public License as
@@ -25,13 +25,6 @@
  *
  * Larry Finger <Larry.Finger@lwfinger.net>
  *
- *
- * Bug Fixes and enhancements for Linux Kernels >= 3.2
- * by Benjamin Porter <BenjaminPorter86@gmail.com>
- *
- * Project homepage: https://github.com/FreedomBen/rtl8188ce-linux-driver
- *
- *
  *****************************************************************************/
 
 #ifndef __RTL_EFUSE_H_
@@ -39,33 +32,26 @@
 
 #define EFUSE_IC_ID_OFFSET		506
 
-/*
-#define EFUSE_REAL_CONTENT_LEN	512
-#define EFUSE_MAP_LEN				128
-#define EFUSE_MAX_SECTION			16
+#define EFUSE_MAP_LEN			128
 #define EFUSE_MAX_WORD_UNIT		4
-#define EFUSE_IC_ID_OFFSET		506
-*/
-
-#define EFUSE_MAX_WORD_UNIT		4	
 
 #define EFUSE_INIT_MAP			0
 #define EFUSE_MODIFY_MAP		1
 
-#define PG_STATE_HEADER 		0x01
+#define PG_STATE_HEADER			0x01
 #define PG_STATE_WORD_0			0x02
 #define PG_STATE_WORD_1			0x04
 #define PG_STATE_WORD_2			0x08
 #define PG_STATE_WORD_3			0x10
 #define PG_STATE_DATA			0x20
 
-#define PG_SWBYTE_H				0x01
-#define PG_SWBYTE_L				0x02
+#define PG_SWBYTE_H			0x01
+#define PG_SWBYTE_L			0x02
 
 #define _POWERON_DELAY_
 #define _PRE_EXECUTE_READ_CMD_
 
-#define EFUSE_REPEAT_THRESHOLD_	3
+#define EFUSE_REPEAT_THRESHOLD_		3
 #define EFUSE_ERROE_HANDLE		1
 
 struct efuse_map {
@@ -118,19 +104,19 @@ struct efuse_priv {
 	u8 tx_power_g[14];
 };
 
-extern void read_efuse_byte( struct ieee80211_hw *hw, u16 _offset, u8 *pbuf );
-extern void efuse_initialize( struct ieee80211_hw *hw );
-extern u8 efuse_read_1byte( struct ieee80211_hw *hw, u16 address );
-extern void efuse_write_1byte( struct ieee80211_hw *hw, u16 address, u8 value );
-extern void read_efuse( struct ieee80211_hw *hw, u16 _offset,
-		       u16 _size_byte, u8 * pbuf );
-extern void efuse_shadow_read( struct ieee80211_hw *hw, u8 type,
-			      u16 offset, u32 * value );
-extern void efuse_shadow_write( struct ieee80211_hw *hw, u8 type,
-			       u16 offset, u32 value );
-extern bool efuse_shadow_update( struct ieee80211_hw *hw );
-extern bool efuse_shadow_update_chk( struct ieee80211_hw *hw );
-extern void rtl_efuse_shadow_map_update( struct ieee80211_hw *hw );
-extern void efuse_force_write_vendor_Id( struct ieee80211_hw *hw );
-extern void efuse_re_pg_section( struct ieee80211_hw *hw, u8 section_idx );
+void read_efuse_byte( struct ieee80211_hw *hw, u16 _offset, u8 *pbuf );
+void efuse_initialize( struct ieee80211_hw *hw );
+u8 efuse_read_1byte( struct ieee80211_hw *hw, u16 address );
+void efuse_write_1byte( struct ieee80211_hw *hw, u16 address, u8 value );
+void read_efuse( struct ieee80211_hw *hw, u16 _offset, u16 _size_byte, u8 *pbuf );
+void efuse_shadow_read( struct ieee80211_hw *hw, u8 type, u16 offset,
+		       u32 *value );
+void efuse_shadow_write( struct ieee80211_hw *hw, u8 type, u16 offset,
+			u32 value );
+bool efuse_shadow_update( struct ieee80211_hw *hw );
+bool efuse_shadow_update_chk( struct ieee80211_hw *hw );
+void rtl_efuse_shadow_map_update( struct ieee80211_hw *hw );
+void efuse_force_write_vendor_Id( struct ieee80211_hw *hw );
+void efuse_re_pg_section( struct ieee80211_hw *hw, u8 section_idx );
+
 #endif

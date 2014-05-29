@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright( c ) 2009-2010  Realtek Corporation.
+ * Copyright( c ) 2009-2012  Realtek Corporation.
  *
  * Tmis program is free software; you can redistribute it and/or modify it
  * under the terms of version 2 of the GNU General Public License as
@@ -24,14 +24,6 @@
  * Hsinchu 300, Taiwan.
  *
  * Larry Finger <Larry.Finger@lwfinger.net>
- *
- *
- * Bug Fixes and enhancements for Linux Kernels >= 3.2
- * by Benjamin Porter <BenjaminPorter86@gmail.com>
- *
- * Project homepage: https://github.com/FreedomBen/rtl8188ce-linux-driver
- *
- *
  *****************************************************************************/
 
 #ifndef __RTL_DEBUG_H__
@@ -41,43 +33,43 @@
 			Debug level
 --------------------------------------------------------------*/
 /*
- * Fatal bug.
- * For example, Tx/Rx/IO locked up,
- * memory access violation,
- * resource allocation failed,
- * unexpected HW behavior, HW BUG
- * and so on.
+ *Fatal bug.
+ *For example, Tx/Rx/IO locked up,
+ *memory access violation,
+ *resource allocation failed,
+ *unexpected HW behavior, HW BUG
+ *and so on.
  */
 #define DBG_EMERG			0
 
 /*
- * Abnormal, rare, or unexpected cases.
- * For example, Packet/IO Ctl canceled,
- * device suprisely unremoved and so on.
+ *Abnormal, rare, or unexpeted cases.
+ *For example, Packet/IO Ctl canceled,
+ *device suprisely unremoved and so on.
  */
 #define	DBG_WARNING			2
 
 /*
- * Normal case driver developer should
- * open, we can see link status like
- * assoc/AddBA/DHCP/adapter start and
- * so on basic and useful infromations.
+ *Normal case driver developer should
+ *open, we can see link status like
+ *assoc/AddBA/DHCP/adapter start and
+ *so on basic and useful infromations.
  */
 #define DBG_DMESG			3
 
 /*
- * Normal case with useful information
- * about current SW or HW state.
- * For example, Tx/Rx descriptor to fill,
- * Tx/Rx descriptor completed status,
- * SW protocol state change, dynamic
- * mechanism state change and so on.
+ *Normal case with useful information
+ *about current SW or HW state.
+ *For example, Tx/Rx descriptor to fill,
+ *Tx/Rx descriptor completed status,
+ *SW protocol state change, dynamic
+ *mechanism state change and so on.
  */
 #define DBG_LOUD			4
 
 /*
- * Normal case with detail execution
- * flow or information.
+ *Normal case with detail execution
+ *flow or information.
  */
 #define	DBG_TRACE			5
 
@@ -86,47 +78,48 @@
 --------------------------------------------------------------*/
 #define COMP_ERR			BIT( 0 )
 #define COMP_FW				BIT( 1 )
-#define COMP_INIT			BIT( 2 )	/* For init/deinit */
-#define COMP_RECV			BIT( 3 )	/* For Rx. */
-#define COMP_SEND			BIT( 4 )	/* For Tx. */
-#define COMP_MLME			BIT( 5 )	/* For MLME. */
-#define COMP_SCAN			BIT( 6 )	/* For Scan. */
-#define COMP_INTR			BIT( 7 )	/* For interrupt Related. */
-#define COMP_LED			BIT( 8 )	/* For LED. */
-#define COMP_SEC			BIT( 9 )	/* For sec. */
-#define COMP_BEACON			BIT( 10 )	/* For beacon. */
-#define COMP_RATE			BIT( 11 )	/* For rate. */
-#define COMP_RXDESC			BIT( 12 )	/* For rx desc. */
-#define COMP_DIG			BIT( 13 )	/* For DIG */
-#define COMP_TXAGC			BIT( 14 )	/* For Tx power */
-#define COMP_HIPWR			BIT( 15 )	/* For High Power Mechanism */
-#define COMP_POWER			BIT( 16 )	/* For lps/ips/aspm. */
-#define COMP_POWER_TRACKING     	BIT( 17 )	/* For TX POWER TRACKING */
-#define COMP_BB_POWERSAVING     	BIT( 18 )
-#define COMP_SWAS			BIT( 19 )	/* For SW Antenna Switch */
-#define COMP_RF				BIT( 20 )	/* For RF. */
-#define COMP_TURBO			BIT( 21 )	/* For EDCA TURBO. */
+#define COMP_INIT			BIT( 2 )	/*For init/deinit */
+#define COMP_RECV			BIT( 3 )	/*For Rx. */
+#define COMP_SEND			BIT( 4 )	/*For Tx. */
+#define COMP_MLME			BIT( 5 )	/*For MLME. */
+#define COMP_SCAN			BIT( 6 )	/*For Scan. */
+#define COMP_INTR			BIT( 7 )	/*For interrupt Related. */
+#define COMP_LED			BIT( 8 )	/*For LED. */
+#define COMP_SEC			BIT( 9 )	/*For sec. */
+#define COMP_BEACON			BIT( 10 )	/*For beacon. */
+#define COMP_RATE			BIT( 11 )	/*For rate. */
+#define COMP_RXDESC			BIT( 12 )	/*For rx desc. */
+#define COMP_DIG			BIT( 13 )	/*For DIG */
+#define COMP_TXAGC			BIT( 14 )	/*For Tx power */
+#define COMP_HIPWR			BIT( 15 )	/*For High Power Mechanism */
+#define COMP_POWER			BIT( 16 )	/*For lps/ips/aspm. */
+#define COMP_POWER_TRACKING	BIT( 17 )	/*For TX POWER TRACKING */
+#define COMP_BB_POWERSAVING	BIT( 18 )
+#define COMP_SWAS			BIT( 19 )	/*For SW Antenna Switch */
+#define COMP_RF				BIT( 20 )	/*For RF. */
+#define COMP_TURBO			BIT( 21 )	/*For EDCA TURBO. */
 #define COMP_RATR			BIT( 22 )
 #define COMP_CMD			BIT( 23 )
 #define COMP_EFUSE			BIT( 24 )
 #define COMP_QOS			BIT( 25 )
-#define COMP_MAC80211		        BIT( 26 )
+#define COMP_MAC80211		BIT( 26 )
 #define COMP_REGD			BIT( 27 )
 #define COMP_CHAN			BIT( 28 )
-#define COMP_EASY_CONCURRENT 		BIT( 29 )
+#define COMP_USB			BIT( 29 )
+#define COMP_EASY_CONCURRENT	COMP_USB /* reuse of this bit is OK */
 #define COMP_BT_COEXIST			BIT( 30 )
 
 /*--------------------------------------------------------------
 		Define the rt_print components
 --------------------------------------------------------------*/
-/* Define EEPROM and EFUSE  check module bit */
+/* Define EEPROM and EFUSE  check module bit*/
 #define EEPROM_W			BIT( 0 )
 #define EFUSE_PG			BIT( 1 )
-#define EFUSE_READ_ALL		        BIT( 2 )
+#define EFUSE_READ_ALL			BIT( 2 )
 
-/* Define init check for module bit */
+/* Define init check for module bit*/
 #define	INIT_EEPROM			BIT( 0 )
-#define	INIT_TxPower		        BIT( 1 )
+#define	INIT_TXPOWER			BIT( 1 )
 #define	INIT_IQK			BIT( 2 )
 #define	INIT_RF				BIT( 3 )
 
@@ -142,12 +135,14 @@
 #define	PHY_TXPWR			BIT( 8 )
 #define	PHY_PWRDIFF			BIT( 9 )
 
-/* Define Dynamic Mechanism check module bit --> FDM */ 
+/* Define Dynamic Mechanism check module bit --> FDM */
 #define WA_IOT				BIT( 0 )
 #define DM_PWDB				BIT( 1 )
 #define DM_MONITOR			BIT( 2 )
 #define DM_DIG				BIT( 3 )
-#define DM_EDCA_TURBO		        BIT( 4 )
+#define DM_EDCA_TURBO			BIT( 4 )
+
+#define DM_PWDB				BIT( 1 )
 
 enum dbgp_flag_e {
 	FQOS = 0,
@@ -172,58 +167,78 @@ enum dbgp_flag_e {
 	DBGP_TYPE_MAX
 };
 
-#define RT_ASSERT( _exp,fmt )				\
-	do { \
-		if( !( _exp ) )	{			\
-			printk( KERN_DEBUG "%s:%s(): ", KBUILD_MODNAME, \
-			__func__ );	\
-			printk fmt;			\
-		} \
-	} while( 0 );
+#ifdef CONFIG_RTLWIFI_DEBUG
 
-#define RT_TRACE( comp, level, fmt )\
-	do { \
-		if( unlikely( ( ( comp ) & rtlpriv->dbg.global_debugcomponents ) && \
-			( ( level ) <= rtlpriv->dbg.global_debuglevel ) ) ) {\
-			printk( KERN_DEBUG "%s-%d:%s():<%lx-%x> ", KBUILD_MODNAME, \
-			rtlpriv->rtlhal.interfaceindex, __func__, \
-			in_interrupt(), in_atomic() );	\
-			printk fmt; 			\
-		}\
-	} while( 0 );
+#define RT_ASSERT( _exp, fmt, ... )					\
+do {									\
+	if ( !( _exp ) ) {							\
+		printk( KERN_DEBUG KBUILD_MODNAME ":%s(): " fmt,		\
+		       __func__, ##__VA_ARGS__ );			\
+	}								\
+} while ( 0 )
 
-#define RTPRINT( rtlpriv, dbgtype, dbgflag, printstr )	\
-	do {						\
-		if ( unlikely( rtlpriv->dbg.dbgp_type[dbgtype] & dbgflag ) ) { \
-			printk( KERN_DEBUG "%s: ", KBUILD_MODNAME );	\
-			printk printstr;		\
-		}					\
-	} while( 0 );
+#define RT_TRACE( rtlpriv, comp, level, fmt, ... )			\
+do {									\
+	if ( unlikely( ( ( comp ) & rtlpriv->dbg.global_debugcomponents ) &&	\
+		     ( ( level ) <= rtlpriv->dbg.global_debuglevel ) ) ) {	\
+		printk( KERN_DEBUG KBUILD_MODNAME ":%s():<%lx-%x> " fmt,	\
+		       __func__, in_interrupt(), in_atomic(),		\
+		       ##__VA_ARGS__ );					\
+	}								\
+} while ( 0 )
 
-#define RT_PRINT_DATA( rtlpriv, _comp, _level, _titlestring, _hexdata, \
-		_hexdatalen ) \
-	do {\
-		if( unlikely( ( ( _comp ) & rtlpriv->dbg.global_debugcomponents ) && \
-			( _level <= rtlpriv->dbg.global_debuglevel ) ) )	{ 	\
-			int __i;						\
-			u8*	ptr = ( u8* )_hexdata;				\
-			printk( KERN_DEBUG "%s: ", KBUILD_MODNAME );	\
-			printk( KERN_DEBUG "In process \"%s\" (pid %i):", current->comm, 	\
-					current->pid ); \
-			printk( _titlestring );		\
-			for( __i=0; __i<( int )_hexdatalen; __i++ ) {		\
-				printk( "%02X%s", ptr[__i], ( ( ( __i + 1 ) % 4 ) 	\
-							== 0 )?"  ":" " );	\
-				if ( ( ( __i + 1 ) % 16 ) == 0 )	\
-					printk( "\n" );	\
-			}				\
-			printk( KERN_DEBUG "\n" );			\
-		} \
-	} while( 0 );
+#define RTPRINT( rtlpriv, dbgtype, dbgflag, fmt, ... )			\
+do {									\
+	if ( unlikely( rtlpriv->dbg.dbgp_type[dbgtype] & dbgflag ) ) {	\
+		printk( KERN_DEBUG KBUILD_MODNAME ": " fmt,		\
+		       ##__VA_ARGS__ );					\
+	}								\
+} while ( 0 )
+
+#define RT_PRINT_DATA( rtlpriv, _comp, _level, _titlestring, _hexdata,	\
+		      _hexdatalen )					\
+do {									\
+	if ( unlikely( ( ( _comp ) & rtlpriv->dbg.global_debugcomponents ) &&	\
+		     ( _level <= rtlpriv->dbg.global_debuglevel ) ) ) {	\
+		printk( KERN_DEBUG "%s: In process \"%s\" (pid %i): %s\n", \
+		       KBUILD_MODNAME, current->comm, current->pid,	\
+		       _titlestring );					\
+		print_hex_dump_bytes( "", DUMP_PREFIX_NONE,		\
+				     _hexdata, _hexdatalen );		\
+	}								\
+} while ( 0 )
+
+#else
+
+struct rtl_priv;
+
+__printf( 2, 3 )
+static inline void RT_ASSERT( int exp, const char *fmt, ... )
+{
+}
+
+__printf( 4, 5 )
+static inline void RT_TRACE( struct rtl_priv *rtlpriv,
+			    int comp, int level,
+			    const char *fmt, ... )
+{
+}
+
+__printf( 4, 5 )
+static inline void RTPRINT( struct rtl_priv *rtlpriv,
+			   int dbgtype, int dbgflag,
+			   const char *fmt, ... )
+{
+}
+
+static inline void RT_PRINT_DATA( struct rtl_priv *rtlpriv,
+				 int comp, int level,
+				 const char *titlestring,
+				 const void *hexdata, size_t hexdatalen )
+{
+}
+
+#endif
 
 void rtl_dbgp_flag_init( struct ieee80211_hw *hw );
-void rtl_proc_add_one( struct ieee80211_hw *hw );
-void rtl_proc_remove_one( struct ieee80211_hw *hw );
-void rtl_proc_add_topdir( void );
-void rtl_proc_remove_topdir( void );
 #endif

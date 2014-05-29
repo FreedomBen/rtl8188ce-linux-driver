@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright( c ) 2009-2010  Realtek Corporation.
+ * Copyright( c ) 2009-2012  Realtek Corporation.
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of version 2 of the GNU General Public License as
@@ -24,13 +24,6 @@
  * Hsinchu 300, Taiwan.
  *
  * Larry Finger <Larry.Finger@lwfinger.net>
- *
- *
- * Bug Fixes and enhancements for Linux Kernels >= 3.2
- * by Benjamin Porter <BenjaminPorter86@gmail.com>
- *
- * Project homepage: https://github.com/FreedomBen/rtl8188ce-linux-driver
- *
  *
  *****************************************************************************/
 
@@ -63,6 +56,6 @@ enum country_code_type_t {
 
 int rtl_regd_init( struct ieee80211_hw *hw,
 		  void ( *reg_notifier ) ( struct wiphy *wiphy,
-				       struct regulatory_request *request ) );
+					struct regulatory_request *request ) );
 void rtl_reg_notifier( struct wiphy *wiphy, struct regulatory_request *request );
 #endif

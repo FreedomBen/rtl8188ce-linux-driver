@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright( c ) 2009-2010  Realtek Corporation.
+ * Copyright( c ) 2009-2012  Realtek Corporation.
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of version 2 of the GNU General Public License as
@@ -23,12 +23,7 @@
  * Realtek Corporation, No. 2, Innovation Road II, Hsinchu Science Park,
  * Hsinchu 300, Taiwan.
  *
- *
- * Bug Fixes and enhancements for Linux Kernels >= 3.2
- * by Benjamin Porter <BenjaminPorter86@gmail.com>
- *
- * Project homepage: https://github.com/FreedomBen/rtl8188ce-linux-driver
- *
+ * Larry Finger <Larry.Finger@lwfinger.net>
  *
  *****************************************************************************/
 #ifndef __REALTEK_PCI92SE_LED_H__
@@ -38,6 +33,5 @@ void rtl92se_init_sw_leds( struct ieee80211_hw *hw );
 void rtl92se_sw_led_on( struct ieee80211_hw *hw,	struct rtl_led *pled );
 void rtl92se_sw_led_off( struct ieee80211_hw *hw, struct rtl_led *pled );
 void rtl92se_led_control( struct ieee80211_hw *hw, enum led_ctl_mode ledaction );
-
 
 #endif

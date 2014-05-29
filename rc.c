@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright( c ) 2009-2010  Realtek Corporation.
+ * Copyright( c ) 2009-2012  Realtek Corporation.
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of version 2 of the GNU General Public License as
@@ -25,13 +25,6 @@
  *
  * Larry Finger <Larry.Finger@lwfinger.net>
  *
- *
- * Bug Fixes and enhancements for Linux Kernels >= 3.2
- * by Benjamin Porter <BenjaminPorter86@gmail.com>
- *
- * Project homepage: https://github.com/FreedomBen/rtl8188ce-linux-driver
- *
- *
  *****************************************************************************/
 
 #include "wifi.h"
@@ -42,8 +35,7 @@
  *Finds the highest rate index we can use
  *if skb is special data like DHCP/EAPOL, we set should
  *it to lowest rate CCK_1M, otherwise we set rate to
- *highest rate based on wireless mode used for iwconfig
- *show Tx rate.
+ *CCK11M or OFDM_54M based on wireless mode.
  */
 static u8 _rtl_rc_get_highest_rix( struct rtl_priv *rtlpriv,
 				  struct ieee80211_sta *sta,
@@ -63,8 +55,8 @@ static u8 _rtl_rc_get_highest_rix( struct rtl_priv *rtlpriv,
 	 *      1M we will not use FW rate but user rate.
 	 */
 	if ( rtlmac->opmode == NL80211_IFTYPE_AP ||
-		rtlmac->opmode == NL80211_IFTYPE_ADHOC ||
-		rtlmac->opmode == NL80211_IFTYPE_MESH_POINT ) {
+	    rtlmac->opmode == NL80211_IFTYPE_ADHOC ||
+	    rtlmac->opmode == NL80211_IFTYPE_MESH_POINT ) {
 		if ( sta ) {
 			sta_entry = ( struct rtl_sta_info * ) sta->drv_priv;
 			wireless_mode = sta_entry->wireless_mode;
@@ -124,8 +116,8 @@ static void _rtl_rc_rate_set_series( struct rtl_priv *rtlpriv,
 		if ( txrc->short_preamble )
 			rate->flags |= IEEE80211_TX_RC_USE_SHORT_PREAMBLE;
 		if ( mac->opmode == NL80211_IFTYPE_AP ||
-			mac->opmode == NL80211_IFTYPE_ADHOC ) {
-			if ( sta && ( sta->ht_cap.cap & IEEE80211_HT_CAP_SUP_WIDTH_20_40 ) )
+		    mac->opmode == NL80211_IFTYPE_ADHOC ) {
+			if ( sta && ( sta->bandwidth >= IEEE80211_STA_RX_BW_40 ) )
 				rate->flags |= IEEE80211_TX_RC_40_MHZ_WIDTH;
 		} else {
 			if ( mac->bw_40 )
@@ -208,21 +200,16 @@ static void rtl_tx_status( void *ppriv,
 	if ( sta ) {
 		/* Check if aggregation has to be enabled for this tid */
 		sta_entry = ( struct rtl_sta_info * ) sta->drv_priv;
-		if ( ( sta->ht_cap.ht_supported == true ) &&
+		if ( ( sta->ht_cap.ht_supported ) &&
 				!( skb->protocol == cpu_to_be16( ETH_P_PAE ) ) ) {
 			if ( ieee80211_is_data_qos( fc ) ) {
 				u8 tid = rtl_get_tid( skb );
-				if ( _rtl_tx_aggr_check( rtlpriv, sta_entry, tid ) ) {
-					sta_entry->tids[tid].agg.agg_state = RTL_AGG_PROGRESS;
-					/*<delete in kernel start>*/
-#if ( LINUX_VERSION_CODE >= KERNEL_VERSION( 2,6,38 ) )
-					/*<delete in kernel end>*/
-					ieee80211_start_tx_ba_session( sta, tid, 5000 );
-					/*<delete in kernel start>*/
-#else
-					ieee80211_start_tx_ba_session( sta, tid );
-#endif
-					/*<delete in kernel end>*/
+				if ( _rtl_tx_aggr_check( rtlpriv, sta_entry,
+				    tid ) ) {
+					sta_entry->tids[tid].agg.agg_state =
+							 RTL_AGG_PROGRESS;
+					ieee80211_start_tx_ba_session( sta,
+								 tid, 5000 );
 				}
 			}
 		}
@@ -231,25 +218,11 @@ static void rtl_tx_status( void *ppriv,
 
 static void rtl_rate_init( void *ppriv,
 			  struct ieee80211_supported_band *sband,
+			  struct cfg80211_chan_def *chandef,
 			  struct ieee80211_sta *sta, void *priv_sta )
 {
 }
-#if ( LINUX_VERSION_CODE < KERNEL_VERSION( 3,5,0 ) )
-static void rtl_rate_update( void *ppriv,
-			    struct ieee80211_supported_band *sband,
-			    struct ieee80211_sta *sta, void *priv_sta,
-			    u32 changed,
-			    enum nl80211_channel_type oper_chan_type )
-{
-}
-#else
-static void rtl_rate_update( void *ppriv,
-			    struct ieee80211_supported_band *sband,
-			    struct ieee80211_sta *sta, void *priv_sta,
-			    u32 changed )
-{
-}
-#endif
+
 static void *rtl_rate_alloc( struct ieee80211_hw *hw,
 		struct dentry *debugfsdir )
 {
@@ -270,8 +243,8 @@ static void *rtl_rate_alloc_sta( void *ppriv,
 
 	rate_priv = kzalloc( sizeof( struct rtl_rate_priv ), gfp );
 	if ( !rate_priv ) {
-		RT_TRACE( COMP_ERR, DBG_EMERG,
-			 ( "Unable to allocate private rc structure\n" ) );
+		RT_TRACE( rtlpriv, COMP_ERR, DBG_EMERG,
+			 "Unable to allocate private rc structure\n" );
 		return NULL;
 	}
 
@@ -295,7 +268,6 @@ static struct rate_control_ops rtl_rate_ops = {
 	.alloc_sta = rtl_rate_alloc_sta,
 	.free_sta = rtl_rate_free_sta,
 	.rate_init = rtl_rate_init,
-	.rate_update = rtl_rate_update,
 	.tx_status = rtl_tx_status,
 	.get_rate = rtl_get_rate,
 };

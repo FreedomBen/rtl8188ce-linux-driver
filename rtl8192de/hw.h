@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright( c ) 2009-2010  Realtek Corporation.
+ * Copyright( c ) 2009-2012  Realtek Corporation.
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of version 2 of the GNU General Public License as
@@ -23,12 +23,7 @@
  * Realtek Corporation, No. 2, Innovation Road II, Hsinchu Science Park,
  * Hsinchu 300, Taiwan.
  *
- *
- * Bug Fixes and enhancements for Linux Kernels >= 3.2
- * by Benjamin Porter <BenjaminPorter86@gmail.com>
- *
- * Project homepage: https://github.com/FreedomBen/rtl8188ce-linux-driver
- *
+ * Larry Finger <Larry.Finger@lwfinger.net>
  *
  *****************************************************************************/
 
@@ -38,7 +33,7 @@
 void rtl92de_get_hw_reg( struct ieee80211_hw *hw, u8 variable, u8 *val );
 void rtl92de_read_eeprom_info( struct ieee80211_hw *hw );
 void rtl92de_interrupt_recognized( struct ieee80211_hw *hw,
-		u32 *p_inta, u32 *p_intb );
+				  u32 *p_inta, u32 *p_intb );
 int rtl92de_hw_init( struct ieee80211_hw *hw );
 void rtl92de_card_disable( struct ieee80211_hw *hw );
 void rtl92de_enable_interrupt( struct ieee80211_hw *hw );
@@ -49,24 +44,22 @@ void rtl92de_set_qos( struct ieee80211_hw *hw, int aci );
 void rtl92de_set_beacon_related_registers( struct ieee80211_hw *hw );
 void rtl92de_set_beacon_interval( struct ieee80211_hw *hw );
 void rtl92de_update_interrupt_mask( struct ieee80211_hw *hw,
-		u32 add_msr, u32 rm_msr );
+				   u32 add_msr, u32 rm_msr );
 void rtl92de_set_hw_reg( struct ieee80211_hw *hw, u8 variable, u8 *val );
 void rtl92de_update_hal_rate_tbl( struct ieee80211_hw *hw,
-		struct ieee80211_sta *sta, u8 rssi_level );
+				 struct ieee80211_sta *sta, u8 rssi_level );
 void rtl92de_update_channel_access_setting( struct ieee80211_hw *hw );
 bool rtl92de_gpio_radio_on_off_checking( struct ieee80211_hw *hw, u8 *valid );
 void rtl92de_enable_hw_security_config( struct ieee80211_hw *hw );
 void rtl92de_set_key( struct ieee80211_hw *hw, u32 key_index,
-		u8 *p_macaddr, bool is_group, u8 enc_algo,
-		bool is_wepkey, bool clear_all );
+		     u8 *p_macaddr, bool is_group, u8 enc_algo,
+		     bool is_wepkey, bool clear_all );
 
-extern void rtl92de_write_dword_dbi( struct ieee80211_hw *hw, u16 offset,
-		u32 value, u8 direct );
-extern u32 rtl92de_read_dword_dbi( struct ieee80211_hw *hw, u16 offset,
-		u8 direct );
+void rtl92de_write_dword_dbi( struct ieee80211_hw *hw, u16 offset, u32 value,
+			     u8 direct );
+u32 rtl92de_read_dword_dbi( struct ieee80211_hw *hw, u16 offset, u8 direct );
 void rtl92de_suspend( struct ieee80211_hw *hw );
 void rtl92de_resume( struct ieee80211_hw *hw );
 void rtl92d_linked_set_reg( struct ieee80211_hw *hw );
-void rtl92de_allow_all_destaddr( struct ieee80211_hw *hw,
-	bool allow_all_da, bool write_into_reg );
+
 #endif
