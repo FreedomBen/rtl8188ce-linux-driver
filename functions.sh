@@ -176,3 +176,25 @@ usingSystemd ()
     which systemctl > /dev/null 2>&1
 }
 
+
+readonly rtlwifi_orig="/lib/modules/$(uname -r)/kernel/drivers/net/wireless/rtlwifi"
+readonly rtlwifi_backup_dir="$HOME/.rtlwifi-backup"
+readonly rltwifi_backup_outfile="$rtlwifi_backup_dir/rtlwifi.tar.gz"
+
+backupCurrent ()
+{
+    if [ -d "$rtlwifi_orig" ]; then
+        mkdir -p "$rtlwifi_backup_dir"
+
+        tar -czf "$rtlwifi_backup_outfile" "$rtlwifi_orig"
+        touch 
+    else
+        echo "Could not backup rtlwifi because it could not be found!  Expected at $rtlwifi_orig" >&2
+    fi
+}
+
+restoreFromBackup ()
+{
+
+}
+
