@@ -179,22 +179,76 @@ usingSystemd ()
 
 readonly rtlwifi_orig="/lib/modules/$(uname -r)/kernel/drivers/net/wireless/rtlwifi"
 readonly rtlwifi_backup_dir="$HOME/.rtlwifi-backup"
-readonly rltwifi_backup_outfile="$rtlwifi_backup_dir/rtlwifi.tar.gz"
+readonly rtlwifi_backup_outfile="$rtlwifi_backup_dir/$(uname -r).tar.gz"
+
+askbackup ()
+{
+    if [ -f "$rtlwifi_backup_outfile" ]; then
+        echo "You already have a backup of a driver from this kernel version.\n\nYou can back it up again, however if you have installed this driver already, then backing it up again will overwrite the original backup (which contains the stock drivers) with one that contains these drivers, which is most likely NOT what you want.  I recommend you only proceed with backing up the current drivers if you are sure of what you're doing."
+
+        read -p "Make a backup of the existing stock driver before installing? (Y/N): " RESP
+
+        if [ "$RESP" = "Y" -o "$RESP" = "y" ]; then
+            rm -r "$rtlwifi_backup_outfile"
+            backupCurrent -f
+        else
+            return
+        fi
+    else
+        backupCurrent
+    fi
+}
 
 backupCurrent ()
 {
-    if [ -d "$rtlwifi_orig" ]; then
-        mkdir -p "$rtlwifi_backup_dir"
-
-        tar -czf "$rtlwifi_backup_outfile" "$rtlwifi_orig"
-        touch 
+    # don't overwrite an already existing backup without a -f, because we may be backuping up ourselves from a previous install
+    if [ -f "$rtlwifi_backup_outfile" ] && [ "$1" != "-f" ]; then
+        echo "Not overwritting existing backup without -f flag" >&2
     else
-        echo "Could not backup rtlwifi because it could not be found!  Expected at $rtlwifi_orig" >&2
+        if [ -d "$rtlwifi_orig" ]; then
+            mkdir -p "$rtlwifi_backup_dir"
+            tar -czf "$rtlwifi_backup_outfile" -C "$rtlwifi_orig" . > /dev/null 2>&1
+        else
+            echo "Could not backup rtlwifi because it could not be found!  Expected at $rtlwifi_orig" >&2
+        fi
+    fi
+}
+
+askrestore ()
+{
+    if [ ! -f "$rtlwifi_backup_outfile" ]; then
+        echo "Sorry, no backup matching this kernel version found at $rtlwifi_backup_outfile" >&2
+    else
+        echo "You have a backup copy of the old driver for this kernel version."
+        read -p "Do you want to restore it? (this will wipe out what is there now) (Y/N): " RESP
+
+        if [ "$RESP" = "Y" -o "$RESP" = "y" ]; then
+            restoreFromBackup
+        else
+            return
+        fi
     fi
 }
 
 restoreFromBackup ()
 {
-
+    # Only restore same kernel ver to avoid breaking systems
+    if [ -f "$rtlwifi_backup_outfile" ]; then
+        # double check that we are the same kernel version. We don't want to screw this up and become the next bumblebee ;-)
+        if [ $(basename "$rtlwifi_backup_outfile" | sed -e 's/.tar.gz//g') = "$(uname -r)" ]; then
+            sudo rm -rf "$rtlwifi_orig"
+            sudo mkdir -p "$rtlwifi_orig"
+            dir="$(pwd)"
+            cd "$rtlwifi_orig"
+            sudo cp "$rtlwifi_backup_outfile" ./
+            sudo tar -xzf "$rtlwifi_backup_outfile" > /dev/null 2>&1
+            sudo rm -r "$(uname -r).tar.gz"
+            cd "$dir"
+        else
+            echo "Sanity check failed. Please report this bug" >&2
+        fi
+    else
+        echo "Sorry, no backup matching this kernel version found at $rtlwifi_backup_outfile" >&2
+    fi
 }
 
