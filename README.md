@@ -150,8 +150,20 @@ Ex: "git checkout ubuntu-13.04"
     lsmod | grep ^rtl                     // to list the modules
     sudo modprobe -r $(lsmod | grep ^rtl) // To unload them
 
-5\. Install:
+4.5\. (Optional) Backup stock drivers
 
+You may wish to make a backup of your stock drivers in case you need to restore them.  This is done for you automatically by the install script but the truly paranoid may wish to do it themselves as well.  
+
+    cp -r /lib/modules/$(uname -r)/kernel/drivers/net/wireless/rtlwifi ~/
+
+Or tarball it up:
+
+    tar -czf "~/rtlwifi.tar.gz" -C "/lib/modules/$(uname -r)/kernel/drivers/net/wireless/rtlwifi" .
+
+**Important**: When restoring this backup manually, make absolutely sure you are putting it back in to the exact same kernel version.  Failure to do this properly may result in an unbootable system.  I suggest you let the script do your backups automatically and use this as a last, last resort
+
+5\. Install:
+    
     sudo make install
 
 6\. Modprobe in the new driver (if you're not using an RTL8188CE or RTL8192CE, adjust accordingly):
@@ -258,3 +270,21 @@ You can run this command to automatically clone this repo and kick off the insta
 
     git clone https://github.com/FreedomBen/rtl8188ce-linux-driver.git && cd rtl8188ce-linux-driver && ./install.sh
 
+6\. I think this driver broke something.  How do I get back to the stock driver?
+
+You have basically two choices.  Either will get the job done.  When you run `sudo make uninstall`, the make script will try to restore your backup from when you installed.  The system works like this:
+
+    * When you run `sudo make install`, the existing drivers are backup up to ~/.rtlwifi-backups as a precaution (this is new as of 29-May-2014, so if you installed before then, you have no backups.  Sorry)
+    * When you run `sudo make uninstall`, this location is checked for a backup that matches your current kernel version.  If one cannot be found, then you are stuck with route 2.  If one is found, the script will offer to restore it for you. 
+
+Choice #1 - Use the backup the install script made for you:
+
+    This will happen if you run `sudo make uninstall`.  Alternatively you can run the script `restore_backup.sh`.  Note that this will look in the home directory of whatever user you are when you run it, so if it doesn't see a backup, try it again with sudo so that it will check root's home directory
+
+Choice #2 - Reinstall your distro's kernel package:
+
+This obviously varies by distro.  For Ubuntu it is easy;
+
+    sudo apt-get install --reinstall linux-image-$(uname -r)
+
+I'll add other distros as I find them out
