@@ -43,6 +43,12 @@ all:
 	@cp $(SYMBOL_FILE) rtl8192cu/
 	@make -C rtl8192cu/
 install: all
+
+	if [ -e backup_existing.sh ] ; \
+	then \
+	    ./backup_existing.sh ; \
+	fi;
+
 	find /lib/modules/$(shell uname -r) -name "r8192se_*.ko" -exec rm {} \;
 	find /lib/modules/$(shell uname -r) -name "r8192ce_*.ko" -exec rm {} \;
 	find /lib/modules/$(shell uname -r) -name "r8723e_*.ko" -exec rm {} \;
@@ -86,6 +92,12 @@ uninstall:
 	@#delete the firmware img
 	@rm -fr /lib/firmware/rtlwifi/
 	@rm -fr /lib/firmware/`uname -r`/rtlwifi/
+
+	if [ -e restore_backup.sh ] ; \
+	then \
+	    ./restore_backup.sh ; \
+	fi;
+
 
 clean:
 	rm -fr *.mod.c *.mod *.o .*.cmd *.ko *~
