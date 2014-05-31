@@ -16,9 +16,10 @@ git rebase                          && \
 git merge origin/ubuntu-13.10       && \
 git push                       
 
+# We don't want to merge up ubuntu-14.04 anymore due to code changes
 git checkout -f fedora-20           && \
 git rebase                          && \
-git merge origin/ubuntu-14.04       && \
+git merge origin/ubuntu-13.10       && \
 git push                            && \
                                        \
 git checkout -f arch                && \
