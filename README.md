@@ -32,6 +32,7 @@ Well supported Ubuntu (and Ubuntu based) releases:
         Linux Mint 13 Maya
         Linux Mint 15 Olivia
         Linux Mint 16 Petra
+        Linux Mint 17 Qiana
 
 Well supported Fedora (and Fedora based) releases:
 
