@@ -284,8 +284,7 @@ Choice #1 - Use the backup that the install script made for you:
 
 Choice #2 - Reinstall your distro's kernel package:
 
-This obviously varies by distro.  For Ubuntu it is easy;
+This obviously varies by distro.  For Ubuntu, try:
 
-    sudo apt-get install --reinstall linux-image-$(uname -r)
+    sudo apt-get install --reinstall linux-image-extra-$(uname -r)
 
-I'll add other distros as I find them out
