@@ -192,7 +192,8 @@ askbackup ()
             rm -r "$rtlwifi_backup_outfile"
             backupCurrent -f
         else
-            return
+            # We're not exiting with error since the user declined the backup
+            return 0
         fi
     else
         backupCurrent
