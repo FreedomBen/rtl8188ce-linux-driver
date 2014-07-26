@@ -181,9 +181,9 @@ Or tarball it up:
 NOTE: Unlike the stock driver, `rtl8192c_common` is only required with kernel >= 3.14
 
 
-8\. Make persistent by adding this to the end of "/etc/modules" (for Ubuntu), or "/etc/rc.modules" (for Fedora) (if Fedora make sure /etc/rc.modules is exectuable. If you don't have an RTL8188CE or RTL8192CE, then substitute the correct kernel module in place of `rtl8192ce.ko`:
+8\. Make persistent by adding this to the end of "/etc/modules" (for Ubuntu), or "/etc/rc.modules" (for Fedora) (if Fedora make sure /etc/rc.modules is exectuable. If you don't have an RTL8188CE or RTL8192CE, then substitute the correct kernel module in place of `rtl8192ce`:
 
-    rtl8192ce.ko
+    rtl8192ce
 
 NOTE:  By "make persistent", I mean making the loading of the RLT8192CE kernel modules happen automatically at boot time so you don't have to modprobe them in yourself.  If `udev` is seeing your Realtek card (which is usually the case), then it will load the kernel modules for you without this, but putting this in hurts nothing.
 
