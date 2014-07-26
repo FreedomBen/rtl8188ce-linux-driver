@@ -148,8 +148,8 @@ Ex: "git checkout ubuntu-13.04"
 
 4\. Unload the existing rtl kernel modules.
 
-    lsmod | grep ^rtl                     // to list the modules
-    sudo modprobe -r $(lsmod | grep ^rtl) // To unload them
+    lsmod | grep ^rtl | awk '{print $1}'                             // to list the modules
+    sudo modprobe -r $(lsmod | grep ^rtl | awk '{print $1}' | xargs) // To unload them
 
 4.5\. (Optional) Backup stock drivers
 
