@@ -1092,7 +1092,7 @@ static void _rtl8723ae_phy_sw_rf_seting( struct ieee80211_hw *hw, u8 channel )
 		    HT_CHANNEL_WIDTH_20 )
 			rtl_set_rfreg( hw, RF90_PATH_A, RF_RX_G1, MASKDWORD,
 				      0x00255 );
-		else{
+		else {
 			u32 backupRF0x1A = ( u32 )rtl_get_rfreg( hw, RF90_PATH_A,
 					   RF_RX_G1, RFREG_OFFSET_MASK );
 			rtl_set_rfreg( hw, RF90_PATH_A, RF_RX_G1, MASKDWORD,

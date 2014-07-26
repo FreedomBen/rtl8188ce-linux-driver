@@ -48,7 +48,7 @@ bool rtl_ps_enable_nic( struct ieee80211_hw *hw )
 
 	/*<2> Enable Adapter */
 	if ( rtlpriv->cfg->ops->hw_init( hw ) )
-		return false;
+		return 1;
 	RT_CLEAR_PS_LEVEL( ppsc, RT_RF_OFF_LEVL_HALT_NIC );
 
 	/*<3> Enable Interrupt */
