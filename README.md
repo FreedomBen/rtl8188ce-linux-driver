@@ -137,8 +137,8 @@ Ex: "git checkout ubuntu-13.04"
     Ubuntu 13.04 | Kernel 3.8.x  | ubuntu-13.04
     Ubuntu 13.10 | Kernel 3.11.x | ubuntu-13.10
     Ubuntu 14.04 | Kernel 3.13.x | ubuntu-14.04 
-    Fedora 19/20 | Kernel 3.14.x | fedora-20
-    Arch         | Kernel 3.14.x | arch
+    Fedora 19/20 | Kernel 3.15.x | fedora-20
+    Arch         | Kernel 3.15.x | arch
 
     * Note, if the Ubuntu/Fedora release version and your kernel version conflict, go with the branch corresponding to your *kernel version* as that is what really matters!
 
@@ -182,7 +182,7 @@ Or tarball it up:
 NOTE: Unlike the stock driver, `rtl8192c_common` is only required with kernel >= 3.14
 
 
-8\. Make persistent by adding this to the end of "/etc/modules" (for Ubuntu), or "/etc/rc.modules" (for Fedora) (if Fedora make sure /etc/rc.modules is exectuable. If you don't have an RTL8188CE or RTL8192CE, then substitute the correct kernel module in place of `rtl8192ce`:
+8\. Make persistent by adding this to the end of "/etc/modules" (for Ubuntu), or "/etc/rc.modules" (for Fedora) (if Fedora make sure /etc/rc.modules is exectuable), or "/etc/modules-load.d/rtlwifi.conf" (for Arch). If you don't have an RTL8188CE or RTL8192CE, then substitute the correct kernel module in place of `rtl8192ce`:
 
     rtl8192ce
 
