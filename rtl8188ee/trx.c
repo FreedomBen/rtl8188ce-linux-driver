@@ -293,7 +293,7 @@ static void _rtl88ee_translate_rx_signal_stuff( struct ieee80211_hw *hw,
 	u8 *psaddr;
 	__le16 fc;
 	u16 type, ufc;
-	bool match_bssid, packet_toself, packet_beacon, addr;
+	bool match_bssid, packet_toself, packet_beacon = false, addr;
 
 	tmp_buf = skb->data + pstatus->rx_drvinfo_size + pstatus->rx_bufshift;
 
@@ -452,7 +452,7 @@ bool rtl88ee_rx_query_desc( struct ieee80211_hw *hw,
 			/* During testing, hdr was NULL */
 			return false;
 		}
-		if ( ( ieee80211_is_robust_mgmt_frame( hdr ) ) &&
+		if ( ( _ieee80211_is_robust_mgmt_frame( hdr ) ) &&
 		    ( ieee80211_has_protected( hdr->frame_control ) ) )
 			rx_status->flag &= ~RX_FLAG_DECRYPTED;
 		else
