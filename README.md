@@ -4,6 +4,12 @@ rtl8188ce-linux-driver
 
 This slightly modified version of the driver fixes some issues with RealTek cards on Linux.  It also fixes a bug with ignoring CRDA restrictions
 
+*Why use this driver?*
+
+1.  It has been modified to allow you to transmit at up to 33 dBm instead of the default 20 dBm.  This is a substantial increase in your capability because every 3 dB is equivalent to double the power.  IOTW, you can get pump out more than 4x the Tx power as before.  This is subject to CRDA restrictions however (though you can set that to whatever you want, just make sure you're staying legal)
+2.  It has a few default settings that generally increase stability
+3.  Some helpful fixes are backported from newer kernels so that they can be enjoyed without upgrading the entire kernel (very useful for staying on your distros current kernel while benefitting from fixes relating to this driver)
+
 
 Well supported RealTek cards:
 
