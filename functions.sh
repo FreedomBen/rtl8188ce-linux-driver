@@ -87,6 +87,8 @@ makeModuleLoadPersistent ()
         file="/etc/rc.modules"
     elif runningUbuntu; then
         file="/etc/modules"
+    elif runningArch; then
+        file="/etc/modules-load.d/rtlwifi.conf"
     else
         echo "Cannot make persistent; unknown module file" >&2
         return 1
@@ -102,7 +104,7 @@ makeModuleLoadPersistent ()
     fi
 
     if (( $not_present )); then
-        echo "rtl8192ce.ko" >> "$file"
+        echo "rtl8192ce" >> "$file"
     fi
 }
 
