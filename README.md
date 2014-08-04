@@ -25,6 +25,7 @@ Well supported kernel releases:
         3.12.x
         3.13.x
         3.14.x
+        3.15.x
 
 Well supported Ubuntu (and Ubuntu based) releases:
 
@@ -143,8 +144,8 @@ Ex: "git checkout ubuntu-13.04"
     Ubuntu 13.04 | Kernel 3.8.x  | ubuntu-13.04
     Ubuntu 13.10 | Kernel 3.11.x | ubuntu-13.10
     Ubuntu 14.04 | Kernel 3.13.x | ubuntu-14.04 
-    Fedora 19/20 | Kernel 3.14.x | fedora-20
-    Arch         | Kernel 3.14.x | arch
+    Fedora 19/20 | Kernel 3.15.x | fedora-20
+    Arch         | Kernel 3.15.x | arch
 
     * Note, if the Ubuntu/Fedora release version and your kernel version conflict, go with the branch corresponding to your *kernel version* as that is what really matters!
 
@@ -155,8 +156,8 @@ Ex: "git checkout ubuntu-13.04"
 
 4\. Unload the existing rtl kernel modules.
 
-    lsmod | grep ^rtl                     // to list the modules
-    sudo modprobe -r $(lsmod | grep ^rtl) // To unload them
+    lsmod | grep ^rtl | awk '{print $1}'                             // to list the modules
+    sudo modprobe -r $(lsmod | grep ^rtl | awk '{print $1}' | xargs) // To unload them
 
 4.5\. (Optional) Backup stock drivers
 
@@ -168,7 +169,7 @@ Or tarball it up:
 
     tar -czf "~/rtlwifi.tar.gz" -C "/lib/modules/$(uname -r)/kernel/drivers/net/wireless/rtlwifi" .
 
-**Important**: When restoring this backup manually, make absolutely sure you are putting it back in to the exact same kernel version.  Failure to do this properly may result in an unbootable system.  I suggest you let the script do your backups automatically and use this as a last, last resort
+**Important**: When restoring this backup manually, make absolutely sure you are putting it back in to the exact same kernel version.  Failure to do this properly may result in an unbootable system.  I suggest you let the script do your backups automatically and use this as a last resort.
 
 5\. Install:
     
@@ -188,9 +189,9 @@ Or tarball it up:
 NOTE: Unlike the stock driver, `rtl8192c_common` is only required with kernel >= 3.14
 
 
-8\. Make persistent by adding this to the end of "/etc/modules" (for Ubuntu), or "/etc/rc.modules" (for Fedora) (if Fedora make sure /etc/rc.modules is exectuable. If you don't have an RTL8188CE or RTL8192CE, then substitute the correct kernel module in place of `rtl8192ce.ko`:
+8\. Make persistent by adding this to the end of "/etc/modules" (for Ubuntu), or "/etc/rc.modules" (for Fedora) (if Fedora make sure /etc/rc.modules is exectuable), or "/etc/modules-load.d/rtlwifi.conf" (for Arch). If you don't have an RTL8188CE or RTL8192CE, then substitute the correct kernel module in place of `rtl8192ce`:
 
-    rtl8192ce.ko
+    rtl8192ce
 
 NOTE:  By "make persistent", I mean making the loading of the RLT8192CE kernel modules happen automatically at boot time so you don't have to modprobe them in yourself.  If `udev` is seeing your Realtek card (which is usually the case), then it will load the kernel modules for you without this, but putting this in hurts nothing.
 
@@ -282,12 +283,12 @@ You can run this command to automatically clone this repo and kick off the insta
 
 You have basically two choices.  Either will get the job done.  When you run `sudo make uninstall`, the make script will try to restore your backup from when you installed.  The system works like this:
 
-    * When you run `sudo make install`, the existing drivers are backup up to ~/.rtlwifi-backups as a precaution (this is new as of 29-May-2014, so if you installed before then, you have no backups.  Sorry)
-    * When you run `sudo make uninstall`, this location is checked for a backup that matches your current kernel version.  If one cannot be found, then you are stuck with route 2.  If one is found, the script will offer to restore it for you. 
+* When you run `sudo make install`, the existing drivers are backup up to ~/.rtlwifi-backups as a precaution (this is new as of 29-May-2014, so if you installed before then, you have no backups.  Sorry)
+* When you run `sudo make uninstall`, this location is checked for a backup that matches your current kernel version.  If one cannot be found, then you are stuck with choice #2.  If a suitable backup is found, the script will offer to restore it for you. 
 
-Choice #1 - Use the backup the install script made for you:
+Choice #1 - Use the backup that the install script made for you:
 
-    This will happen if you run `sudo make uninstall`.  Alternatively you can run the script `restore_backup.sh`.  Note that this will look in the home directory of whatever user you are when you run it, so if it doesn't see a backup, try it again with sudo so that it will check root's home directory
+    You will prompted to approve this automatically if you run `sudo make uninstall` in this driver's directory.  Alternatively you can run the script `restore_backup.sh`.  Note that this will look in the home directory of whatever user you are when you run it, so if it doesn't see a backup, try it again with sudo so that it will check root's home directory
 
 Choice #2 - Reinstall your distro's kernel package:
 
