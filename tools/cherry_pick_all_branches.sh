@@ -5,6 +5,7 @@ declare -a branches=('ubuntu-12.04' 'ubuntu-13.04' 'ubuntu-13.10' 'ubuntu-14.04'
 
 if [ -z "$1" ]; then
     echo "Error: No SHAs to cherry-pick"
+    exit 1
 fi
 
 
