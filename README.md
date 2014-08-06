@@ -79,6 +79,33 @@ If you want to run the install script, simply run:
     ./install.sh
 
 
+Semi-Automatic Installation (DKMS):
+-----------------------------------
+
+You can alternatively use DKMS, so that when a new patch-release of the kernel is released by your distro, you don't have to manually recompile the driver. However, there are a few drawbacks with this method:
+
+1. You need to know what kernel version you are on.
+
+2. You need to change the branch when you change the minor version of the kernel (eg. 3.13.x to 3.15.x).
+
+To use DKMS:
+
+1. Follow steps 0-2 in the "Manual Installation" section below.
+
+2. Run the following command to register the sources with DKMS (the `1.0.0` can be any numbers): (note the period at the end!)
+
+    sudo dkms add rtlwifi/1.0.0 .
+
+3. Run the following command to build and install the modules:
+
+    sudo dkms install rtlwifi/1.0.0
+
+4. DKMS should automatically switch you onto the new modules. To verify this, run `./am_i_using_this_driver.sh`.
+
+To uninstall and remove the modules from DKMS, run the following command:
+
+    sudo dkms remove rtlwifi/1.0.0 --all
+
 Manual Installation:
 --------------------
 
@@ -237,7 +264,7 @@ To check the current Tx power, run:
 The current Tx power will be listed as `Tx-Power=xx dBm`
 
 
-4\. If you're getting power drops*:
+4\. If you're getting power drops\*:
 
 You may have better luck fixing your data rate.  The best rate will vary depending on your Tx power, Rx power, and distance from the router.  You may want to set the rate to be fixed around your internet connection speed unless you're doing other stuff on your LAN.  Basgoosen found his sweetspot to be 24M.  You can set the fixed rate as follows (substitute your wireless interface for \<wlan\>, so for example wlan0):
 
@@ -257,15 +284,13 @@ To make this persistent, create a file in `/etc/network/if-up.d` containing the 
         sudo iwconfig <wlan> bit 24M
     fi
 
-*Thanks to basgoosen for this suggestion
+\*Thanks to basgoosen for this suggestion
 
 5\. My kernel package was updated by my distro and now I'm stuck back on the stock driver!
 
 Yeah unfornately this does currently happen anytime your kernel package is updated by your distro.  The solution is to rebuild and reinstall this driver.  On the plus side that gives you a chance to pull down the latest changes so that you're up to date with the latest.
 
 Please don't save a copy of the drivers compiled under a different version of the kernel to copy back in after the kernel update.  While a clever solution, this could cause undefined and potentially disastrous results if the ABI changes (which it does frequently).  The drivers need to be rebuilt using the new kernel headers to ensure they are compiled correctly.  It may work fine for a few upgrades, but eventually it will probably leave your system unbootable.
-
-In the long term I plan to get this working with DKMS so this driver will be automatically recompiled every time the kernel changes.
 
 You can run this command to automatically clone this repo and kick off the installer (git must be installed already):
 
