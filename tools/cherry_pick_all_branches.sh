@@ -28,7 +28,7 @@ for br in ${branches[@]}; do
             git cherry-pick $sha
 
             if [ "$?" != 0 ]; then
-                echo "${red}Error picking $sha onto $br${restore}"
+                echo -e "${red}Error picking $sha onto $br${restore}"
                 continue
             fi
         fi
