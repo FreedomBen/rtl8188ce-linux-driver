@@ -21,7 +21,7 @@ for br in ${branches[@]}; do
 
     for sha in "$@"; do
         if $(git log | grep "$sha" >/dev/null); then
-            echo "Skipping commit $sha because it already exists on this branch"
+            echo -e "${yellow}Skipping commit $sha because it already exists on this branch${restore}"
         else
             echo -e "${blue}Cherrypicking $sha onto $br${restore}"
             git cherry-pick $sha
