@@ -1,6 +1,6 @@
 #!/bin/bash
 
-declare -a branches=('ubuntu-12.04' 'ubuntu-13.04' 'ubuntu-13.10' 'ubuntu-14.04' 'fedora-20' 'arch' 'master')
+declare -a branches=('ubuntu-12.04' 'ubuntu-13.04' 'ubuntu-13.10' 'ubuntu-14.04' 'fedora-20' 'arch' 'master' 'generic-3.14.x' 'fedora-19')
 
 restore='\033[0m'
 blue='\033[0;34m'
