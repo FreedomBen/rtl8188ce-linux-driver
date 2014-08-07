@@ -82,13 +82,21 @@ Automatic Installation:
 
 There is an install script called install.sh which attempts to automate the manual steps.  If the script fails to build and install the driver, you should follow the steps for manual installation.
     
-If you want to run the install script, simply run:
+After cloning this repo, if you want to run the install script, simply run:
 
     ./install.sh
+
+If you already have `git` installed, you can run this one-liner to clone the repo and kick of the automatic install script:
+
+    git clone https://github.com/FreedomBen/rtl8188ce-linux-driver.git && cd rtl8188ce-linux-driver && ./install.sh
+
+You may wish to register the modules with DKMS for automatic rebuild when your kernel changes.  For that, see the steps for Semi-Automatic Installation (DKMS).
 
 
 Semi-Automatic Installation (DKMS):
 -----------------------------------
+
+*Thanks to saiarcot895 for the initial effort getting this working*
 
 You can alternatively use DKMS, so that when a new patch-release of the kernel is released by your distro, you don't have to manually recompile the driver. However, there are a few drawbacks with this method:
 
