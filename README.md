@@ -181,7 +181,8 @@ Ex: "git checkout ubuntu-13.04"
     Ubuntu 13.04 | Kernel 3.8.x  | ubuntu-13.04
     Ubuntu 13.10 | Kernel 3.11.x | ubuntu-13.10
     Ubuntu 14.04 | Kernel 3.13.x | ubuntu-14.04 
-    Fedora 19/20 | Kernel 3.15.x | fedora-20
+    Fedora 19    | Kernel 3.14.x | fedora-19
+    Fedora 20    | Kernel 3.15.x | fedora-20
     Arch         | Kernel 3.15.x | arch
 
     * Note, if the Ubuntu/Fedora release version and your kernel version conflict, go with the branch corresponding to your *kernel version* as that is what really matters!

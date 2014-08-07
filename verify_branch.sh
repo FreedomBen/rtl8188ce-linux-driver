@@ -41,7 +41,11 @@ if inGitRepo; then
             doSwitch "arch"
         fi
     elif $(uname -r | grep "3.14" > /dev/null); then
-        doSwitch "generic-3.14.x"
+        if runningFedora; then
+            doSwitch "fedora-19"
+        else
+            doSwitch "generic-3.14.x"
+        fi
     elif $(uname -r | grep "3.13" > /dev/null); then
         doSwitch "ubuntu-14.04"
     elif $(uname -r | grep "3.12" > /dev/null); then
