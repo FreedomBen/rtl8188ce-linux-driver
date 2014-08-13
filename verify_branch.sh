@@ -43,7 +43,11 @@ if inGitRepo; then
             doSwitch "generic-3.14.x"
         fi
     elif $(uname -r | grep "3.13" > /dev/null); then
-        doSwitch "ubuntu-14.04"
+        if runningUbuntu; then
+            doSwitch "ubuntu-14.04"
+        else
+            doSwitch "generic-3.13.x"
+        fi
     elif $(uname -r | grep "3.12" > /dev/null); then
         doSwitch "fedora-20"
     elif $(uname -r | grep "3.11" > /dev/null); then
@@ -66,13 +70,13 @@ if inGitRepo; then
     fi
 else
     base="$(basename $(pwd))"
-    if ( $(uname -r | grep "3.15" > /dev/null) && ! $(echo "$base" | grep "arch"          > /dev/null) ) ||                                                        \
-       ( $(uname -r | grep "3.14" > /dev/null) && ! $(echo "$base" | grep "fedora-20"     > /dev/null) ) ||                                                        \
-       ( $(uname -r | grep "3.13" > /dev/null) && ! $(echo "$base" | grep "ubuntu-14.04"  > /dev/null) ) ||                                                        \
-       ( $(uname -r | grep "3.12" > /dev/null) && ! $(echo "$base" | grep "fedora-20"     > /dev/null) ) ||                                                        \
-       ( $(uname -r | grep "3.11" > /dev/null) && ! $(echo "$base" | grep "fedora-20"     > /dev/null) ) && ! $(echo "$base" | grep "ubuntu-13.10" > /dev/null) || \
-       ( $(uname -r | grep "3.8"  > /dev/null) && ! $(echo "$base" | grep "ubuntu-13.04"  > /dev/null) ) ||                                                        \
-       ( $(uname -r | grep "3.2"  > /dev/null) && ! $(echo "$base" | grep "ubuntu-12.04"  > /dev/null) )
+    if ( $(uname -r | grep "3.15" > /dev/null) && ! $(echo "$base" | grep "arch"           > /dev/null) ) && ! $(echo "$base" | grep "fedora-20"      > /dev/null) || \
+       ( $(uname -r | grep "3.14" > /dev/null) && ! $(echo "$base" | grep "generic-3.14.x" > /dev/null) ) ||                                                          \
+       ( $(uname -r | grep "3.13" > /dev/null) && ! $(echo "$base" | grep "ubuntu-14.04"   > /dev/null) ) && ! $(echo "$base" | grep "generic-3.13.x" > /dev/null) || \
+       ( $(uname -r | grep "3.12" > /dev/null) && ! $(echo "$base" | grep "fedora-20"      > /dev/null) ) ||                                                          \
+       ( $(uname -r | grep "3.11" > /dev/null) && ! $(echo "$base" | grep "fedora-20"      > /dev/null) ) && ! $(echo "$base" | grep "ubuntu-13.10"   > /dev/null) || \
+       ( $(uname -r | grep "3.8"  > /dev/null) && ! $(echo "$base" | grep "ubuntu-13.04"   > /dev/null) ) ||                                                          \
+       ( $(uname -r | grep "3.2"  > /dev/null) && ! $(echo "$base" | grep "ubuntu-12.04"   > /dev/null) )
     then
         echo "No (current branch $base)"
         echo -e "\nYou don't appear to be in a Git checkout.\nThis means branch information is not available.\nYou can still proceed to build, but you might be using unstable code."
