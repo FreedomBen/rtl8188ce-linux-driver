@@ -206,10 +206,6 @@ struct rtl_pci {
 
 	u16 shortretry_limit;
 	u16 longretry_limit;
-
-	/* MSI support */
-	bool msi_support;
-	bool using_msi;
 };
 
 struct mp_adapter {

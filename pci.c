@@ -1075,7 +1075,7 @@ static void _rtl_pci_init_struct( struct ieee80211_hw *hw,
 	mac->current_ampdu_factor = 3;
 
 	/*QOS*/
-	rtlpci->acm_method = EACMWAY2_SW;
+	rtlpci->acm_method = eAcmWay2_SW;
 
 	/*task */
 	tasklet_init( &rtlpriv->works.irq_tasklet,
@@ -1850,65 +1850,6 @@ static bool _rtl_pci_find_adapter( struct pci_dev *pdev,
 	return true;
 }
 
-static int rtl_pci_intr_mode_msi( struct ieee80211_hw *hw )
-{
-	struct rtl_priv *rtlpriv = rtl_priv( hw );
-	struct rtl_pci_priv *pcipriv = rtl_pcipriv( hw );
-	struct rtl_pci *rtlpci = rtl_pcidev( pcipriv );
-	int ret;
-
-	ret = pci_enable_msi( rtlpci->pdev );
-	if ( ret < 0 )
-		return ret;
-
-	ret = request_irq( rtlpci->pdev->irq, &_rtl_pci_interrupt,
-			  IRQF_SHARED, KBUILD_MODNAME, hw );
-	if ( ret < 0 ) {
-		pci_disable_msi( rtlpci->pdev );
-		return ret;
-	}
-
-	rtlpci->using_msi = true;
-
-	RT_TRACE( rtlpriv, COMP_INIT|COMP_INTR, DBG_DMESG,
-		 "MSI Interrupt Mode!\n" );
-	return 0;
-}
-
-static int rtl_pci_intr_mode_legacy( struct ieee80211_hw *hw )
-{
-	struct rtl_priv *rtlpriv = rtl_priv( hw );
-	struct rtl_pci_priv *pcipriv = rtl_pcipriv( hw );
-	struct rtl_pci *rtlpci = rtl_pcidev( pcipriv );
-	int ret;
-
-	ret = request_irq( rtlpci->pdev->irq, &_rtl_pci_interrupt,
-			  IRQF_SHARED, KBUILD_MODNAME, hw );
-	if ( ret < 0 )
-		return ret;
-
-	rtlpci->using_msi = false;
-	RT_TRACE( rtlpriv, COMP_INIT|COMP_INTR, DBG_DMESG,
-		 "Pin-based Interrupt Mode!\n" );
-	return 0;
-}
-
-static int rtl_pci_intr_mode_decide( struct ieee80211_hw *hw )
-{
-	struct rtl_pci_priv *pcipriv = rtl_pcipriv( hw );
-	struct rtl_pci *rtlpci = rtl_pcidev( pcipriv );
-	int ret;
-
-	if ( rtlpci->msi_support ) {
-		ret = rtl_pci_intr_mode_msi( hw );
-		if ( ret < 0 )
-			ret = rtl_pci_intr_mode_legacy( hw );
-	} else {
-		ret = rtl_pci_intr_mode_legacy( hw );
-	}
-	return ret;
-}
-
 int rtl_pci_probe( struct pci_dev *pdev,
 			    const struct pci_device_id *id )
 {
@@ -2051,7 +1992,8 @@ int rtl_pci_probe( struct pci_dev *pdev,
 	}
 
 	rtlpci = rtl_pcidev( pcipriv );
-	err = rtl_pci_intr_mode_decide( hw );
+	err = request_irq( rtlpci->pdev->irq, &_rtl_pci_interrupt,
+			  IRQF_SHARED, KBUILD_MODNAME, hw );
 	if ( err ) {
 		RT_TRACE( rtlpriv, COMP_INIT, DBG_DMESG,
 			 "%s: failed to register IRQ handler\n",
@@ -2118,9 +2060,6 @@ void rtl_pci_disconnect( struct pci_dev *pdev )
 		free_irq( rtlpci->pdev->irq, hw );
 		rtlpci->irq_alloc = 0;
 	}
-
-	if ( rtlpci->using_msi )
-		pci_disable_msi( rtlpci->pdev );
 
 	list_del( &rtlpriv->list );
 	if ( rtlpriv->io.pci_mem_start != 0 ) {

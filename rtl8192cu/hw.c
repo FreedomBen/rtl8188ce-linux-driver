@@ -401,7 +401,7 @@ static void _rtl92cu_read_adapter_info( struct ieee80211_hw *hw )
 			if ( rtlefuse->eeprom_did == 0x8176 ) {
 				if ( ( rtlefuse->eeprom_svid == 0x103C &&
 				     rtlefuse->eeprom_smid == 0x1629 ) )
-					rtlhal->oem_id = RT_CID_819X_HP;
+					rtlhal->oem_id = RT_CID_819x_HP;
 				else
 					rtlhal->oem_id = RT_CID_DEFAULT;
 			} else {
@@ -412,7 +412,7 @@ static void _rtl92cu_read_adapter_info( struct ieee80211_hw *hw )
 			rtlhal->oem_id = RT_CID_TOSHIBA;
 			break;
 		case EEPROM_CID_QMI:
-			rtlhal->oem_id = RT_CID_819X_QMI;
+			rtlhal->oem_id = RT_CID_819x_QMI;
 			break;
 		case EEPROM_CID_WHQL:
 		default:
@@ -430,14 +430,14 @@ static void _rtl92cu_hal_customized_behavior( struct ieee80211_hw *hw )
 	struct rtl_hal *rtlhal = rtl_hal( rtl_priv( hw ) );
 
 	switch ( rtlhal->oem_id ) {
-	case RT_CID_819X_HP:
+	case RT_CID_819x_HP:
 		usb_priv->ledctl.led_opendrain = true;
 		break;
-	case RT_CID_819X_LENOVO:
+	case RT_CID_819x_Lenovo:
 	case RT_CID_DEFAULT:
 	case RT_CID_TOSHIBA:
 	case RT_CID_CCX:
-	case RT_CID_819X_ACER:
+	case RT_CID_819x_Acer:
 	case RT_CID_WHQL:
 	default:
 		break;
@@ -992,30 +992,19 @@ int rtl92cu_hw_init( struct ieee80211_hw *hw )
 	struct rtl_ps_ctl *ppsc = rtl_psc( rtl_priv( hw ) );
 	int err = 0;
 	static bool iqk_initialized;
-	unsigned long flags;
-
-	/* As this function can take a very long time ( up to 350 ms )
-	 * and can be called with irqs disabled, reenable the irqs
-	 * to let the other devices continue being serviced.
-	 *
-	 * It is safe doing so since our own interrupts will only be enabled
-	 * in a subsequent step.
-	 */
-	local_save_flags( flags );
-	local_irq_enable();
 
 	rtlhal->hw_type = HARDWARE_TYPE_RTL8192CU;
 	err = _rtl92cu_init_mac( hw );
 	if ( err ) {
 		RT_TRACE( rtlpriv, COMP_ERR, DBG_EMERG, "init mac failed!\n" );
-		goto exit;
+		return err;
 	}
 	err = rtl92c_download_fw( hw );
 	if ( err ) {
 		RT_TRACE( rtlpriv, COMP_ERR, DBG_WARNING,
 			 "Failed to download FW. Init HW without FW now..\n" );
 		err = 1;
-		goto exit;
+		return err;
 	}
 	rtlhal->last_hmeboxnum = 0; /* h2c */
 	_rtl92cu_phy_param_tab_init( hw );
@@ -1052,8 +1041,6 @@ int rtl92cu_hw_init( struct ieee80211_hw *hw )
 	_InitPABias( hw );
 	_update_mac_setting( hw );
 	rtl92c_dm_init( hw );
-exit:
-	local_irq_restore( flags );
 	return err;
 }
 
@@ -1815,7 +1802,7 @@ void rtl92cu_set_hw_reg( struct ieee80211_hw *hw, u8 variable, u8 *val )
 					  e_aci );
 				break;
 			}
-			if ( rtlusb->acm_method != EACMWAY2_SW )
+			if ( rtlusb->acm_method != eAcmWay2_SW )
 				rtlpriv->cfg->ops->set_hw_reg( hw,
 					 HW_VAR_ACM_CTRL, &e_aci );
 			break;
