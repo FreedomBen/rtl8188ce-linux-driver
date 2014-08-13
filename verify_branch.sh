@@ -11,7 +11,7 @@ fi
 doSwitch () 
 {
     BRANCH="$1"
-    CUR_BRANCH="$(git status --branch | head -1 | sed 's/# On branch //g')"
+    CUR_BRANCH="$(git status --branch | head -1 | sed 's/#//g' | sed 's/On branch //g')"
     if $(git status | grep "$BRANCH" > /dev/null); then
         echo "Yes"
     else
