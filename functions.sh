@@ -40,17 +40,27 @@ inGitRepo ()
 
 runningFedora () 
 { 
-    uname -r | grep --color=auto "fc" > /dev/null
+    lsb_release -d | grep --color=auto "Fedora" > /dev/null
 }
 
-# also returns true for Linux Mint
 runningUbuntu () 
 { 
-    uname -a | grep --color=auto "Ubuntu" > /dev/null
+    lsb_release -d | grep --color=auto "Ubuntu" > /dev/null
 }
+
 runningArch ()
 {
     uname -a | grep --color=auto "ARCH" > /dev/null
+}
+
+runningMint ()
+{
+    lsb_release -d | grep --color=auto "Mint" > /dev/null
+}
+
+runningUbuntuKernel ()
+{
+    uname -a | grep --color=auto "Ubuntu" > /dev/null
 }
 
 installBuildDependencies ()
