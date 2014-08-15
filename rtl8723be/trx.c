@@ -19,6 +19,13 @@
  * Realtek Corporation, No. 2, Innovation Road II, Hsinchu Science Park,
  * Hsinchu 300, Taiwan.
  *
+ *
+ * Bug Fixes and enhancements for Linux Kernels >= 3.2
+ * by Benjamin Porter <BenjaminPorter86@gmail.com>
+ *
+ * Project homepage: https://github.com/FreedomBen/rtl8188ce-linux-driver
+ *
+ *
  * Larry Finger <Larry.Finger@lwfinger.net>
  *
  *****************************************************************************/
@@ -33,7 +40,6 @@
 #include "trx.h"
 #include "led.h"
 #include "dm.h"
-#include "phy.h"
 
 static u8 _rtl8723be_map_hwqueue_to_fwqueue( struct sk_buff *skb, u8 hw_queue )
 {
