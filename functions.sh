@@ -58,6 +58,7 @@ runningMint ()
     lsb_release -d | grep --color=auto "Mint" > /dev/null
 }
 
+# Derivatives like Mint and Elementary usually run the Ubuntu kernel so this can be an easy way to detect an Ubuntu derivative
 runningUbuntuKernel ()
 {
     uname -a | grep --color=auto "Ubuntu" > /dev/null
@@ -76,14 +77,14 @@ installBuildDependencies ()
         sudo yum -y groupinstall "C Development Tools and Libraries"
         sudo yum -y install git
         return $?
-    elif runningUbuntu; then
-        sudo apt-get -y install gcc build-essential linux-headers-generic linux-headers-$(uname -r)
-        sudo apt-get -y install git
-        return $?
     elif runningArch; then
         sudo pacman -S git
         sudo pacman -S linux-headers
         sudo pacman -S base-devel
+        return $?
+    elif runningUbuntu || runningUbuntuKernel; then
+        sudo apt-get -y install gcc build-essential linux-headers-generic linux-headers-$(uname -r)
+        sudo apt-get -y install git
         return $?
     else
         echo "Unknown distro. Please ensure all build dependencies are installed before proceeding (or the compile will fail).  Roughly you need gcc build essentials, linux headers, and git." >&2
@@ -95,7 +96,7 @@ makeModuleLoadPersistent ()
 {
     if runningFedora; then
         file="/etc/rc.modules"
-    elif runningUbuntu; then
+    elif runningUbuntu || runningUbuntuKernel; then
         file="/etc/modules"
     elif runningArch; then
         file="/etc/modules-load.d/rtlwifi.conf"
