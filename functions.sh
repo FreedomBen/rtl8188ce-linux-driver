@@ -81,9 +81,9 @@ installBuildDependencies ()
         sudo apt-get -y install git
         return $?
     elif runningArch; then
-        sudo pacman -S git
-        sudo pacman -S linux-headers
-        sudo pacman -S base-devel
+        sudo pacman -S --noconfirm --needed git
+        sudo pacman -S --noconfirm --needed linux-headers
+        sudo pacman -S --noconfirm --needed base-devel
         return $?
     else
         echo "Unknown distro. Please ensure all build dependencies are installed before proceeding (or the compile will fail).  Roughly you need gcc build essentials, linux headers, and git." >&2
