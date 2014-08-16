@@ -78,9 +78,9 @@ installBuildDependencies ()
         sudo yum -y install git
         return $?
     elif runningArch; then
-        sudo pacman -S git
-        sudo pacman -S linux-headers
-        sudo pacman -S base-devel
+        sudo pacman -S --noconfirm --needed git
+        sudo pacman -S --noconfirm --needed linux-headers
+        sudo pacman -S --noconfirm --needed base-devel
         return $?
     elif runningUbuntu || runningUbuntuKernel; then
         sudo apt-get -y install gcc build-essential linux-headers-generic linux-headers-$(uname -r)
