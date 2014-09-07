@@ -239,15 +239,15 @@ There is more information about CRDA available at: http://ttys1.wordpress.com/20
 Troubleshooting:
 ----------------
 
-*0\. To check whether you are running this driver or not, run the script:*
+**0\. To check whether you are running this driver or not, run the script:**
 
     ./am_i_using_this_driver.sh
 
-*1\. If you have loaded the kernel modules (with `modprobe`) and you are using this driver (check with the script in step 0), and you still have no connection, try restarting `wpa_supplicant`.  If you use `systemd`:*
+**1\. If you have loaded the kernel modules (with `modprobe`) and you are using this driver (check with the script in step 0), and you still have no connection, try restarting `wpa_supplicant`.  If you use `systemd`:**
 
     sudo systemctl restart wpa_supplicant
 
-*2\. If you get the following error:*
+**2\. If you get the following error:**
     
     FATAL: Error inserting rtl8192ce                 (/lib/modules/3.8.0-34-generic/kernel/drivers/net/wireless/rtlwifi/rtl8192ce/rtl8192ce.ko): Invalid argument
 
@@ -257,7 +257,7 @@ After running:
     
 You may have invalid configuration options in /etc/modprobe.d/rtl8192ce.conf.  You can either remove the file or remove the debug option as it is no long supported.   
 
-*3\. If you're connection seems unstable:*
+**3\. If you're connection seems unstable:**
 
 This driver has been modified to allow up to 33 dBm Tx power (instead of the stock driver limit of 20).  This allows you to crank up the Tx power, which *vastly* improves performance for me. 
 
@@ -282,7 +282,7 @@ To check the current Tx power, run:
 The current Tx power will be listed as `Tx-Power=xx dBm`
 
 
-*4\. If you're getting power drops\*:*
+**4\. If you're getting power drops\*:**
 
 You may have better luck fixing your data rate.  The best rate will vary depending on your Tx power, Rx power, and distance from the router.  You may want to set the rate to be fixed around your internet connection speed unless you're doing other stuff on your LAN.  Basgoosen found his sweetspot to be 24M.  You can set the fixed rate as follows (substitute your wireless interface for \<wlan\>, so for example wlan0):
 
@@ -304,7 +304,7 @@ To make this persistent, create a file in `/etc/network/if-up.d` containing the 
 
 \*Thanks to basgoosen for this suggestion
 
-*5\. My kernel package was updated by my distro and now I'm stuck back on the stock driver!*
+**5\. My kernel package was updated by my distro and now I'm stuck back on the stock driver!**
 
 Yeah unfornately this does currently happen anytime your kernel package is updated by your distro.  The solution is to rebuild and reinstall this driver.  On the plus side that gives you a chance to pull down the latest changes so that you're up to date with the latest.
 
@@ -314,14 +314,14 @@ You can run this command to automatically clone this repo and kick off the insta
 
     git clone https://github.com/FreedomBen/rtl8188ce-linux-driver.git && cd rtl8188ce-linux-driver && ./install.sh
 
-*6\. I think this driver broke something.  How do I get back to the stock driver?*
+**6\. I think this driver broke something.  How do I get back to the stock driver?**
 
 You have basically two choices.  Either will get the job done.  When you run `sudo make uninstall`, the make script will try to restore your backup from when you installed.  The system works like this:
 
 * When you run `sudo make install`, the existing drivers are backup up to ~/.rtlwifi-backups as a precaution (this is new as of 29-May-2014, so if you installed before then, you have no backups.  Sorry)
 * When you run `sudo make uninstall`, this location is checked for a backup that matches your current kernel version.  If one cannot be found, then you are stuck with choice #2.  If a suitable backup is found, the script will offer to restore it for you. 
 
-Choice #1 - Use the backup that the install script made for you:
+Choice #1 - Use the backup that the install script made for you:\*
 
     `sudo make uninstall`
 
@@ -329,7 +329,7 @@ or
 
     `./restore_backup.sh`
 
-\* Note that this will look in the home directory of whichever user you are when you run it, so if it doesn't see a backup, try it again with sudo so that it will check root's home directory, or as a regular user so it will check that user's directory.
+*\* Note that this will look in the home directory of whichever user you are when you run it, so if it doesn't see a backup, try it again with sudo so that it will check root's home directory, or as a regular user so it will check that user's directory.*
 
 Choice #2 - Reinstall your distro's kernel package:
 
