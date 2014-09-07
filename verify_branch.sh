@@ -49,7 +49,9 @@ if inGitRepo; then
             doSwitch "generic-3.14.x"
         fi
     elif $(uname -r | grep "3.13" > /dev/null); then
-        if runningUbuntu; then
+        if runningMint; then
+            doSwitch "mint-17"
+        elif runningUbuntuKernel; then
             doSwitch "ubuntu-14.04"
         else
             doSwitch "generic-3.13.x"
