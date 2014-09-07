@@ -337,3 +337,4 @@ This obviously varies by distro.  For Ubuntu, try:
 
     sudo apt-get install --reinstall linux-image-extra-$(uname -r)
 
+Please consider reporting the failure (or even better, send a pull request), so I can try to fix it.
