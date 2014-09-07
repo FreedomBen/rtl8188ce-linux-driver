@@ -45,7 +45,7 @@ for br in ${branches[@]}; do
 
     updated by the update script $0"
     else
-        echo -e "${blue}There are no updates to commit${br}${restore}"
+        echo -e "${blue}There are no updates to commit on ${br}${restore}"
     fi
     
     if [ "$?" != 0 ]; then
