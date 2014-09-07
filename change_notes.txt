@@ -1,0 +1,80 @@
+commit f4fbb9c8773c6094150cde3905372b4141485098
+Author: Benjamin Porter <FreedomBen@users.noreply.github.com>
+Date:   Sat Sep 14 15:09:46 2013 -0600
+
+    Path regd to fix CRLA issues
+    
+    When set to Bolivia country area, could not adjust tx power of card
+    above 20dBm.  This allows a maximum now of 33dBm.  Make sure your
+    country area is set properly, or you could be breaking the law!
+
+diff --git a/regd.c b/regd.c
+index 487fda4..52139b2 100755
+--- a/regd.c
++++ b/regd.c
+@@ -51,18 +51,18 @@ static struct country_code_to_enum_rd allCountries[] = {
+  *scan on all world regulatory domains
+  */
+ #define RTL819x_2GHZ_CH01_11   \
+-       REG_RULE(2412-10, 2462+10, 40, 0, 20, 0)
++       REG_RULE(2412-10, 2462+10, 40, 0, 33, 0)
+ 
+ /*
+  *We enable active scan on these a case
+  *by case basis by regulatory domain
+  */
+ #define RTL819x_2GHZ_CH12_13   \
+-       REG_RULE(2467-10, 2472+10, 40, 0, 20,\
++       REG_RULE(2467-10, 2472+10, 40, 0, 33,\
+        NL80211_RRF_PASSIVE_SCAN)
+ 
+ #define RTL819x_2GHZ_CH14      \
+-       REG_RULE(2484-10, 2484+10, 40, 0, 20, \
++       REG_RULE(2484-10, 2484+10, 40, 0, 33, \
+        NL80211_RRF_PASSIVE_SCAN | \
+        NL80211_RRF_NO_OFDM)
+ 
+
+
+
+commit 81cf12be503a986626f26f493da783fc32faf577
+Author: Benjamin Porter <FreedomBen@users.noreply.github.com>
+Date:   Sat Mar 1 11:50:27 2014 -0700
+
+    RTL8188CE/RTL8192CE Set IPS and FWLPS to false by default
+
+diff --git a/rtl8192ce/sw.c b/rtl8192ce/sw.c
+index c72442d..1779ccc 100644
+--- a/rtl8192ce/sw.c
++++ b/rtl8192ce/sw.c
+@@ -245,9 +245,9 @@ struct rtl_hal_ops rtl8192ce_hal_ops = {
+ 
+ struct rtl_mod_params rtl92ce_mod_params = {
+ 	.sw_crypto = false,
+-	.b_inactiveps = true,
++	.b_inactiveps = false,
+ 	.b_swctrl_lps = false,
+-	.b_fwctrl_lps = true,
++	.b_fwctrl_lps = false,
+ };
+ 
+ struct rtl_hal_cfg rtl92ce_hal_cfg = {
+@@ -356,6 +356,7 @@ MODULE_DEVICE_TABLE( pci, rtl92ce_pci_ids );
+ MODULE_AUTHOR( "lizhaoming	<chaoming_li@realsil.com.cn>" );
+ MODULE_AUTHOR( "Realtek WlanFAE	<wlanfae@realtek.com>" );
+ MODULE_AUTHOR( "Larry Finger	<Larry.Finger@lwfinger.net>" );
++MODULE_AUTHOR( "Benjamin Porter	<BenjaminPorter86@gmail.com>" );
+ MODULE_LICENSE( "GPL" );
+ MODULE_DESCRIPTION( "Realtek 8192C/8188C 802.11n PCI wireless" );
+ MODULE_FIRMWARE( "rtlwifi/rtl8192cfw.bin" );
+@@ -365,8 +366,8 @@ module_param_named( ips, rtl92ce_mod_params.b_inactiveps, bool, 0444 );
+ module_param_named( swlps, rtl92ce_mod_params.b_swctrl_lps, bool, 0444 );
+ module_param_named( fwlps, rtl92ce_mod_params.b_fwctrl_lps, bool, 0444 );
+ MODULE_PARM_DESC( swenc, "using hardware crypto (default 0 [hardware])\n" );
+-MODULE_PARM_DESC( ips, "using no link power save (default 1 is open)\n" );
+-MODULE_PARM_DESC( fwlps, "using linked fw control power save (default 1 is open)\n" );
++MODULE_PARM_DESC( ips, "using no link power save (default 0 is off)\n" );
++MODULE_PARM_DESC( fwlps, "using no linked fw control power save (default 0 is off)\n" );
+ 
+ #if ( LINUX_VERSION_CODE >= KERNEL_VERSION( 2,6,29 ) )
+ static const SIMPLE_DEV_PM_OPS( rtlwifi_pm_ops, rtl_pci_suspend, rtl_pci_resume );
