@@ -56,3 +56,5 @@ for br in ${branches[@]}; do
     git push                       
 done
 
+[ -d "$DIR_NAME" ] && rm -rf "$DIR_NAME"
+
