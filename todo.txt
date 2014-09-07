@@ -1,0 +1,2 @@
+1. Unit test to try modprobing all built drivers and checking for missing symbols
+2. Detect card type and check for that in am_i_using_this_driver.sh
