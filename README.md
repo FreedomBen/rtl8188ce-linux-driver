@@ -166,8 +166,6 @@ Clone the repo (Basically it makes a copy of the current source code)
     sudo pacman -S linux-headers
     sudo pacman -S base-devel
 
-NOTE: If your kernel is updated when installing dependencies you will have to reboot to properly build and install the driver.
-
 2\. (Skip unless your first build attempt fails) -> Make sure you are on the correct branch for your kernel version.  The branches are named after Ubuntu releases to which they commonly apply, but the most important factor is not the version of Ubuntu, it is the kernel version.  There is a script called `verify_branch` that will help you find the right branch based on your kernel version.  When you run "make", the script `verify_branch` will be automatically called for you.  It will recommend to you the best branch for your kernel version.  If you tried the recommended branch and your build failed, you may need to try a different one.  If so, decline the offer to automatically switch branches for you.
 
 If you need to, you can switch to the correct branch with:
