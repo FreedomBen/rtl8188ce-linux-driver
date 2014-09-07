@@ -121,12 +121,12 @@ makeModuleLoadPersistent ()
 
 usbDetectsRealtekCard ()
 {
-    lsusb | egrep -i "realtek.*wifi" > /dev/null
+    lsusb | egrep -i "realtek.*wi[rf][ei]" > /dev/null
 }
 
 pciDetectsRealtekCard ()
 {
-    lspci | egrep -i "realtek.*wifi" > /dev/null
+    lspci | egrep -i "realtek.*wi[rf][ei]" > /dev/null
 }
 
 pciDetectsRtl8192ce ()

@@ -5,6 +5,13 @@ rtl8188ce-linux-driver
 This modified version of the RealTek WiFi driver fixes some issues with RealTek cards on Linux.
 
 
+**Why use this driver?**
+
+1.  It has been modified to allow you to transmit at up to 33 dBm instead of the stock driver hard limit of 20 dBm, regardless of your CRDA regulatory domain.  This is a substantial increase in capability because every 3 dB increase is equivalent to a doubling of the power.  IOTW, you can pump out 4x more Tx power than before.  This is subject to CRDA restrictions however (though you can set that to whatever you want, just make sure you're staying legal)
+2.  It has a few default settings that generally increase stability
+3.  Some helpful fixes are backported from newer kernels so that they can be enjoyed without upgrading the entire kernel (very useful for staying on your distros current kernel while benefitting from fixes relating to this driver)
+
+
 Well supported RealTek cards:
 
         RTL8188CE
@@ -76,13 +83,21 @@ Automatic Installation:
 
 There is an install script called install.sh which attempts to automate the manual steps.  If the script fails to build and install the driver, you should follow the steps for manual installation.
     
-If you want to run the install script, simply run:
+After cloning this repo, if you want to run the install script, simply run:
 
     ./install.sh
+
+If you already have `git` installed, you can run this one-liner to clone the repo and kick of the automatic install script:
+
+    git clone https://github.com/FreedomBen/rtl8188ce-linux-driver.git && cd rtl8188ce-linux-driver && ./install.sh
+
+You may wish to register the modules with DKMS for automatic rebuild when your kernel changes.  For that, see the steps for Semi-Automatic Installation (DKMS).
 
 
 Semi-Automatic Installation (DKMS):
 -----------------------------------
+
+*Thanks to saiarcot895 for the initial effort getting this working*
 
 You can alternatively use DKMS, so that when a new patch-release of the kernel is released by your distro, you don't have to manually recompile the driver. However, there are a few drawbacks with this method:
 
@@ -178,8 +193,8 @@ Ex: "git checkout ubuntu-13.04"
 
 4\. Unload the existing rtl kernel modules.
 
-    lsmod | grep ^rtl                     // to list the modules
-    sudo modprobe -r $(lsmod | grep ^rtl) // To unload them
+    lsmod | grep ^rtl | awk '{print $1}'                             // to list the modules
+    sudo modprobe -r $(lsmod | grep ^rtl | awk '{print $1}' | xargs) // To unload them
 
 4.5\. (Optional) Backup stock drivers
 
@@ -191,7 +206,7 @@ Or tarball it up:
 
     tar -czf "~/rtlwifi.tar.gz" -C "/lib/modules/$(uname -r)/kernel/drivers/net/wireless/rtlwifi" .
 
-**Important**: When restoring this backup manually, make absolutely sure you are putting it back in to the exact same kernel version.  Failure to do this properly may result in an unbootable system.  I suggest you let the script do your backups automatically and use this as a last, last resort
+**Important**: When restoring this backup manually, make absolutely sure you are putting it back in to the exact same kernel version.  Failure to do this properly may result in an unbootable system.  I suggest you let the script do your backups automatically and use this as a last resort.
 
 5\. Install:
     
@@ -211,9 +226,9 @@ Or tarball it up:
 NOTE: Unlike the stock driver, `rtl8192c_common` is only required with kernel >= 3.14
 
 
-8\. Make persistent by adding this to the end of "/etc/modules" (for Ubuntu), or "/etc/rc.modules" (for Fedora) (if Fedora make sure /etc/rc.modules is exectuable. If you don't have an RTL8188CE or RTL8192CE, then substitute the correct kernel module in place of `rtl8192ce.ko`:
+8\. Make persistent by adding this to the end of "/etc/modules" (for Ubuntu), or "/etc/rc.modules" (for Fedora) (if Fedora make sure /etc/rc.modules is exectuable), or "/etc/modules-load.d/rtlwifi.conf" (for Arch). If you don't have an RTL8188CE or RTL8192CE, then substitute the correct kernel module in place of `rtl8192ce`:
 
-    rtl8192ce.ko
+    rtl8192ce
 
 NOTE:  By "make persistent", I mean making the loading of the RLT8192CE kernel modules happen automatically at boot time so you don't have to modprobe them in yourself.  If `udev` is seeing your Realtek card (which is usually the case), then it will load the kernel modules for you without this, but putting this in hurts nothing.
 
@@ -303,8 +318,8 @@ You can run this command to automatically clone this repo and kick off the insta
 
 You have basically two choices.  Either will get the job done.  When you run `sudo make uninstall`, the make script will try to restore your backup from when you installed.  The system works like this:
 
-    * When you run `sudo make install`, the existing drivers are backup up to ~/.rtlwifi-backups as a precaution (this is new as of 29-May-2014, so if you installed before then, you have no backups.  Sorry)
-    * When you run `sudo make uninstall`, this location is checked for a backup that matches your current kernel version.  If one cannot be found, then you are stuck with route 2.  If one is found, the script will offer to restore it for you. 
+* When you run `sudo make install`, the existing drivers are backup up to ~/.rtlwifi-backups as a precaution (this is new as of 29-May-2014, so if you installed before then, you have no backups.  Sorry)
+* When you run `sudo make uninstall`, this location is checked for a backup that matches your current kernel version.  If one cannot be found, then you are stuck with choice #2.  If a suitable backup is found, the script will offer to restore it for you. 
 
 Choice #1 - Use the backup that the install script made for you:\*
 
