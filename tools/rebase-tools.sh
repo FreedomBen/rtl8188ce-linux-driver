@@ -34,7 +34,7 @@ for br in ${branches[@]}; do
     git rebase          || continue
 
     echo -e "${blue}Copying files onto ${br}${restore}"
-    cp -r "$DIR_NAME/*" ./
+    cp -r $DIR_NAME/* ./
 
     if hasChanges; then
         echo -e "${yellow}There are updates to commit, committing...${br}${restore}"
