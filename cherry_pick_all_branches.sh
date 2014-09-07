@@ -17,8 +17,8 @@ git pull
 
 for br in ${branches[@]}; do
     # Don't cherry-pick a commit that is already on the branch
-    git checkout -f $br || echo -e "${red}Error checking out $br!${restore}" && continue
-    git rebase          || echo -e "${red}Error rebasing $br!${restore}" && continue
+    git checkout -f $br || continue
+    git rebase          || continue
 
     for sha in "$@"; do
         if $(git log | grep "$sha" >/dev/null); then
