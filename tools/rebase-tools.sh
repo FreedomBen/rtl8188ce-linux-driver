@@ -1,6 +1,6 @@
 #!/bin/bash
 
-files='*.sh README tools/*'
+files='*.sh README tools/'
 declare -a branches=('generic-3.13.x' 'mint-17' 'generic-3.16.x' 'ubuntu-12.04' 'ubuntu-13.04' 'ubuntu-13.10' 'ubuntu-14.04' 'fedora-20' 'arch' 'master' 'generic-3.14.x' 'fedora-19' 'generic-3.16.x')
 
 restore='\033[0m'
@@ -26,7 +26,8 @@ git pull
 # Copy to temp dir the files we care about
 DIR_NAME="/tmp/temp-for-rtl8188ce-driver-rebase"
 mkdir -p "$DIR_NAME"
-cp $files "$DIR_NAME"
+echo -e ${blue}Copying files: $files${restore}
+cp -r $files "$DIR_NAME"
 
 for br in ${branches[@]}; do
     git checkout -f $br || continue
