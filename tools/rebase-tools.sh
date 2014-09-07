@@ -39,7 +39,7 @@ for br in ${branches[@]}; do
     if hasChanges; then
         echo -e "${yellow}There are updates to commit, committing...${br}${restore}"
         git add .
-        git commit -m "Updates tools to latest from master
+        git commit -m "Update tools to latest from master
 
     updated by the update script $0"
     else
