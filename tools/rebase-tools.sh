@@ -26,7 +26,7 @@ git pull
 # Copy to temp dir the files we care about
 DIR_NAME="/tmp/temp-for-rtl8188ce-driver-rebase"
 mkdir -p "$DIR_NAME"
-cp "$files" "$DIR_NAME"
+cp $files "$DIR_NAME"
 
 for br in ${branches[@]}; do
     git checkout -f $br || continue
