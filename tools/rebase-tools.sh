@@ -26,6 +26,7 @@ git pull
 
 # Copy to temp dir the files we care about
 DIR_NAME="/tmp/temp-for-rtl8188ce-driver-rebase"
+[ -d "$DIR_NAME" ] && rm -rf "$DIR_NAME"
 mkdir -p "$DIR_NAME"
 echo -e ${blue}Copying files: $files${restore}
 cp -r $files "$DIR_NAME"
