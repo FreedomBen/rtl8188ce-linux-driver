@@ -1,6 +1,6 @@
 #!/bin/bash
 
-declare -a branches=('generic-3.13.x' 'mint-17' 'generic-3.16.x' 'ubuntu-12.04' 'ubuntu-13.04' 'ubuntu-13.10' 'ubuntu-14.04' 'fedora-20' 'arch' 'master' 'generic-3.14.x' 'fedora-19' 'generic-3.16.x')
+declare -a branches=('generic-3.13.x' 'mint-17' 'generic-3.16.x' 'ubuntu-12.04' 'ubuntu-13.04' 'ubuntu-13.10' 'ubuntu-14.04' 'fedora-20' 'arch' 'generic-3.14.x' 'fedora-19' 'master')
 
 restore='\033[0m'
 red='\033[0;31m'
@@ -17,8 +17,8 @@ git pull
 
 for br in ${branches[@]}; do
     # Don't cherry-pick a commit that is already on the branch
-    git checkout -f $br || echo -e "${red}Error checking out $br!${restore}" && continue
-    git rebase          || echo -e "${red}Error rebasing $br!${restore}" && continue
+    git checkout -f $br || (echo -e "${red}Error checking out $br!${restore}" && continue)
+    git rebase          || (echo -e "${red}Error rebasing $br!${restore}" && continue)
 
     for sha in "$@"; do
         if $(git log | grep "$sha" >/dev/null); then
