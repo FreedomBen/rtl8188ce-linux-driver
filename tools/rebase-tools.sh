@@ -1,6 +1,6 @@
 #!/bin/bash
 
-files='*.sh README'
+files='*.sh README tools/*'
 declare -a branches=('generic-3.13.x' 'mint-17' 'generic-3.16.x' 'ubuntu-12.04' 'ubuntu-13.04' 'ubuntu-13.10' 'ubuntu-14.04' 'fedora-20' 'arch' 'master' 'generic-3.14.x' 'fedora-19' 'generic-3.16.x')
 
 restore='\033[0m'
