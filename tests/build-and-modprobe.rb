@@ -47,7 +47,12 @@ modstotest.each do |mod|
     end
 
     # Now modprobe and make sure it worked
-    command = "lsmod | grep '^rtl' | awk '{print $1}' | xargs modprobe -r "
+    if system("lsmod | grep '^rtl' >/dev/null")
+        command = "lsmod | grep '^rtl' | awk '{print $1}' | xargs modprobe -r "
+    else
+        command = "true"
+    end
+
     unless system(command)
         failure(mod, "Could not remove existing kernel modules so test could not be run")
         next
