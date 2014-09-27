@@ -83,7 +83,10 @@ installBuildDependencies ()
         sudo pacman -S --noconfirm --needed base-devel
         return $?
     elif runningUbuntu || runningUbuntuKernel; then
-        sudo apt-get -y install gcc build-essential linux-headers-generic linux-headers-$(uname -r)
+        LHG=''; LHUR=''
+        $(sudo dpkg -s linux-headers-generic >/dev/null 2>&1) && LHG="linux-headers-generic"
+        $(sudo dpkg -s linux-headers-$(uname -r) >/dev/null 2>&1) && LHUR="linux-headers-$(uname -r)"
+        sudo apt-get -y install gcc build-essential $LHG $LHUR
         sudo apt-get -y install git
         return $?
     else
