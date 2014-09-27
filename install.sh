@@ -8,7 +8,8 @@ else
 fi
 
 if ! $(pciDetectsRealtekCard || usbDetectsRealtekCard); then
-    read -p "[*] I wasn't able to find a Realtek card on your machine.  Do you want to proceed anyway?" PROCEED
+    echo -en "{yellow}[*] I wasn't able to find a Realtek card on your machine.  Do you want to proceed anyway? (Y/N): ${restore}"
+    read PROCEED
 
     if ! [ "$PROCEED" = "Y" -o "$PROCEED" = "y" ]; then
         exit 1
