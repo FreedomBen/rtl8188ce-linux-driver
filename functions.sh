@@ -205,11 +205,11 @@ askbackup ()
         read -p "Make a backup of the existing stock driver before installing? (Y/[N]): " RESP
 
         if [ "$RESP" = "Y" -o "$RESP" = "y" ]; then
-            echo "${blue}Making backup...${restore}"
+            echo -e "${blue}Making backup...${restore}"
             rm -r "$rtlwifi_backup_outfile"
             backupCurrent -f
         else
-            echo "${blue}Not making backup...${restore}"
+            echo -e "${blue}Not making backup...${restore}"
             # We're not exiting with error since the user declined the backup
             return 0
         fi
