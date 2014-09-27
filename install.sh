@@ -49,7 +49,7 @@ if pciDetectsRtl8188ce || pciDetectsRtl8192ce; then
     if pciDetectsRtl8188ce; then
         CARD="RTL8188CE"
     elif pciDetectsRtl8192ce; then
-        CARD="RTL8188CE"
+        CARD="RTL8192CE"
     fi
 
     echo -e "${blue}[*] I see you have an $CARD card${restore}"
