@@ -202,12 +202,14 @@ askbackup ()
     if [ -f "$rtlwifi_backup_outfile" ]; then
         echo "You already have a backup of a driver from this kernel version (located at ${rtlwifi_backup_outfile}.\n\nYou can back it up again, however if you have installed this driver already, then backing it up again will overwrite the original backup (which contains the stock drivers) with one that contains these drivers, which is most likely NOT what you want.  I recommend you only proceed with backing up the current drivers if you are sure of what you're doing."
 
-        read -p "Make a backup of the existing stock driver before installing? (Y/N): " RESP
+        read -p "Make a backup of the existing stock driver before installing? (Y/[N]): " RESP
 
         if [ "$RESP" = "Y" -o "$RESP" = "y" ]; then
+            echo "${blue}Making backup...${restore}"
             rm -r "$rtlwifi_backup_outfile"
             backupCurrent -f
         else
+            echo "${blue}Not making backup...${restore}"
             # We're not exiting with error since the user declined the backup
             return 0
         fi
