@@ -40,22 +40,38 @@ inGitRepo ()
 
 runningFedora () 
 { 
-    lsb_release -d | grep --color=auto "Fedora" > /dev/null
+    if $(which lsb_release >/dev/null 2>&1); then
+        lsb_release -d | grep --color=auto "Fedora" > /dev/null
+    else
+        uname -r | grep --color=auto "fc" > /dev/null
+    fi
 }
 
 runningUbuntu () 
 { 
-    lsb_release -d | grep --color=auto "Ubuntu" > /dev/null
+    if $(which lsb_release >/dev/null 2>&1); then
+        lsb_release -d | grep --color=auto "Ubuntu" > /dev/null
+    else
+        uname -a | grep --color=auto "Ubuntu" > /dev/null
+    fi
 }
 
 runningArch ()
 {
-    uname -a | grep --color=auto "ARCH" > /dev/null
+    if $(which lsb_release >/dev/null 2>&1); then
+        lsb_release -d | grep --color=auto "Arch" > /dev/null
+    else
+        uname -a | grep --color=auto "ARCH" > /dev/null
+    fi
 }
 
 runningMint ()
 {
-    lsb_release -d | grep --color=auto "Mint" > /dev/null
+    if $(which lsb_release >/dev/null 2>&1); then
+        lsb_release -d | grep --color=auto "Mint" > /dev/null
+    else
+        uname -a | grep --color=auto "Ubuntu" > /dev/null
+    fi
 }
 
 # Derivatives like Mint and Elementary usually run the Ubuntu kernel so this can be an easy way to detect an Ubuntu derivative
