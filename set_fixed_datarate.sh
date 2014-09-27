@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 RATE=24M
 INTF=''
