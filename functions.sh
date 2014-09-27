@@ -108,16 +108,16 @@ makeModuleLoadPersistent ()
         return 1
     fi
 
-    not_present=1
+    not_present="1"
     if [ -f "$file" ]; then
         while read line; do
             if $(echo "$line" | grep "rtl8192ce" > /dev/null); then
-                not_present=0
+                not_present="0"
             fi
         done < "$file"
     fi
 
-    if (( $not_present )); then
+    if [ "$not_present" = "1" ]; then
         echo "rtl8192ce" >> "$file"
     fi
 }
