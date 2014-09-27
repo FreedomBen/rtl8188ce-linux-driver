@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 if [ ! -f "functions.sh" ]; then
     echo -e "${red}[*] Error: Required file functions.sh not present${restore}" >&2
