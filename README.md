@@ -27,6 +27,7 @@ Well supported kernel releases:
         3.14.x
         3.15.x
         3.16.x
+        3.17.x
 
 Well supported Ubuntu (and Ubuntu based) releases:
 
@@ -34,6 +35,7 @@ Well supported Ubuntu (and Ubuntu based) releases:
         Ubuntu 13.04
         Ubuntu 13.10
         Ubuntu 14.04
+        Ubuntu 14.10
 
         Elementary OS Luna
         Elementary OS Isis
