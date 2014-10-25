@@ -131,7 +131,6 @@ bool rtlbe_hal_pwrseqcmdparsing( struct rtl_priv *rtlpriv, u8 cut_version,
 					 "rtlbe_hal_pwrseqcmdparsing(): "
 					 "PWR_CMD_END\n" );
 				return true;
-				break;
 			default:
 				RT_ASSERT( false,
 					  "rtlbe_hal_pwrseqcmdparsing(): "
