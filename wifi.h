@@ -1719,8 +1719,6 @@ struct rtl_tcb_desc {
 	bool btx_enable_sw_calc_duration;
 };
 
-struct rtl92c_firmware_header;
-
 struct rtl_hal_ops {
 	int ( *init_sw_vars ) ( struct ieee80211_hw *hw );
 	void ( *deinit_sw_vars ) ( struct ieee80211_hw *hw );
@@ -1818,7 +1816,6 @@ struct rtl_hal_ops {
 	void ( *fill_h2c_cmd ) ( struct ieee80211_hw *hw, u8 element_id,
 			      u32 cmd_len, u8 *p_cmdbuffer );
 	bool ( *get_btc_status ) ( void );
-	bool ( *is_fw_header ) ( struct rtl92c_firmware_header *hdr );
 };
 
 struct rtl_intf_ops {
@@ -1861,10 +1858,6 @@ struct rtl_mod_params {
 
 	/* default: 1 = using linked fw power save */
 	bool fwctrl_lps;
-
-	/* default: 0 = not using MSI interrupts mode */
-	/* submodules should set their own defalut value */
-	bool msi_support;
 };
 
 struct rtl_hal_usbint_cfg {
