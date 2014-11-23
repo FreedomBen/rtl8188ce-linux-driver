@@ -45,7 +45,9 @@
 #include "def.h"
 #include "phy.h"
 #include "dm.h"
+#include "../rtl8723com/dm_common.h"
 #include "fw.h"
+#include "../rtl8723com/fw_common.h"
 #include "led.h"
 #include "hw.h"
 #include "pwrseqcmd.h"
@@ -311,7 +313,7 @@ void rtl8723ae_set_hw_reg( struct ieee80211_hw *hw, u8 variable, u8 *val )
 		break; }
 	case HW_VAR_AC_PARAM:{
 		u8 e_aci = *( ( u8 * ) val );
-		rtl8723ae_dm_init_edca_turbo( hw );
+		rtl8723_dm_init_edca_turbo( hw );
 
 		if ( rtlpci->acm_method != EACMWAY2_SW )
 			rtlpriv->cfg->ops->set_hw_reg( hw,
@@ -1172,7 +1174,7 @@ void rtl8723ae_set_qos( struct ieee80211_hw *hw, int aci )
 {
 	struct rtl_priv *rtlpriv = rtl_priv( hw );
 
-	rtl8723ae_dm_init_edca_turbo( hw );
+	rtl8723_dm_init_edca_turbo( hw );
 	switch ( aci ) {
 	case AC1_BK:
 		rtl_write_dword( rtlpriv, REG_EDCA_BK_PARAM, 0xa44f );
