@@ -42,6 +42,9 @@
 #include "def.h"
 #include "phy.h"
 #include "dm.h"
+#include "../rtl8192c/dm_common.h"
+#include "../rtl8192c/fw_common.h"
+#include "../rtl8192c/phy_common.h"
 #include "hw.h"
 #include "rf.h"
 #include "sw.h"
@@ -172,7 +175,7 @@ int rtl92c_init_sw_vars( struct ieee80211_hw *hw )
 	if ( IS_VENDOR_UMC_A_CUT( rtlhal->version ) &&
 	    !IS_92C_SERIAL( rtlhal->version ) )
 		rtlpriv->cfg->fw_name = "rtlwifi/rtl8192cfwU.bin";
-	else if ( IS_81xxC_VENDOR_UMC_B_CUT( rtlhal->version ) )
+	else if ( IS_81XXC_VENDOR_UMC_B_CUT( rtlhal->version ) )
 		rtlpriv->cfg->fw_name = "rtlwifi/rtl8192cfwU_B.bin";
 
 	rtlpriv->max_fw_size = 0x4000;
@@ -248,13 +251,14 @@ static struct rtl_hal_ops rtl8192ce_hal_ops = {
 	.phy_lc_calibrate = _rtl92ce_phy_lc_calibrate,
 	.phy_set_bw_mode_callback = rtl92ce_phy_set_bw_mode_callback,
 	.dm_dynamic_txpower = rtl92ce_dm_dynamic_txpower,
+	.get_btc_status = rtl_btc_status_false,
 };
 
 static struct rtl_mod_params rtl92ce_mod_params = {
 	.sw_crypto = false,
 	.inactiveps = true,
 	.swctrl_lps = false,
-	.fwctrl_lps = false,
+	.fwctrl_lps = true,
 	.debug = DBG_EMERG,
 };
 
