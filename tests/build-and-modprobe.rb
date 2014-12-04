@@ -69,6 +69,12 @@ modstotest.each do |mod|
         failure(mod, "Modprobe appeared to succeed but module did not show up in lsmod")
         next
     end
+
+    # Look for "Benjamin Porter" in the output of modinfo to make sure we can detect the new driver
+    unless system("modinfo #{mod} | grep 'Benjamin Porter' >/dev/null")
+        failure(mod, "New module will not be detected because Benamin Porter did not show up in modinfo")
+        next
+    end
 end
 
 # Now print out results
