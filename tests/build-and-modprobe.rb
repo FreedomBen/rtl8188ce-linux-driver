@@ -98,6 +98,7 @@ end
 
 # Now print out results
 puts "Results:".yellow
+modstotest.insert(0, "backup")
 modstotest.each do |mod|
     result = $results[mod]
     puts "#{mod} - Status:  " + (result.empty? ? "Pass".green : "Fail".red)
