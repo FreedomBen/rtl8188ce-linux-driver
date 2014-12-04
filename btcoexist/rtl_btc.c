@@ -199,6 +199,7 @@ u8 rtl_get_hwpg_bt_type( struct rtl_priv *rtlpriv )
 }
 
 MODULE_AUTHOR( "Page He	<page_he@realsil.com.cn>" );
+MODULE_AUTHOR( "Benjamin Porter   <BenjaminPorter86@gmail.com>" );
 MODULE_AUTHOR( "Realtek WlanFAE	<wlanfae@realtek.com>" );
 MODULE_AUTHOR( "Larry Finger	<Larry.FInger@lwfinger.net>" );
 MODULE_LICENSE( "GPL" );
