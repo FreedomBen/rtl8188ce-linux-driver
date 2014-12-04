@@ -379,6 +379,7 @@ static const struct pci_device_id rtl88ee_pci_ids[] = {
 MODULE_DEVICE_TABLE( pci, rtl88ee_pci_ids );
 
 MODULE_AUTHOR( "zhiyuan_yang	<zhiyuan_yang@realsil.com.cn>" );
+MODULE_AUTHOR( "Benjamin Porter   <BenjaminPorter86@gmail.com>" );
 MODULE_AUTHOR( "Realtek WlanFAE	<wlanfae@realtek.com>" );
 MODULE_AUTHOR( "Larry Finger	<Larry.Finger@lwfinger.net>" );
 MODULE_LICENSE( "GPL" );
