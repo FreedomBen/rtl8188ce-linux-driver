@@ -5,7 +5,7 @@
 
 require 'colorize'
 
-modstotest = %w{ rtl8192ce rtl8192cu rtl8188ee rtl8192de rtl8192se rtl8723ae rtl8723be rtl8723com }
+modstotest = %w{ rtl8188ee rtl8192ce rtl8192cu rtl8192de rtl8192ee rtl8192se rtl8723ae rtl8723be rtl8723com rtl8821ae }
 
 def die(message)
     puts "[ERROR]: ".light_red + message.red
