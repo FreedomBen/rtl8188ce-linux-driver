@@ -30,6 +30,13 @@
  * Project homepage: https://github.com/FreedomBen/rtl8188ce-linux-driver
  *
  *
+ *
+ * Bug Fixes and enhancements for Linux Kernels >= 3.2
+ * by Benjamin Porter <BenjaminPorter86@gmail.com>
+ *
+ * Project homepage: https://github.com/FreedomBen/rtl8188ce-linux-driver
+ *
+ *
  * Larry Finger <Larry.Finger@lwfinger.net>
  *
  *****************************************************************************/
