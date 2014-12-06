@@ -10,7 +10,7 @@ fi
 FILE="/etc/modprobe.d/modprobe.conf"
 COMMENT="# disable power save and enable sw encryption (added by FreedomBen's driver)"
 OPTION1="options rtl8192ce ips="
-OPTION1_VAL="1"
+OPTION1_VAL="0"
 OPTION2="options rtl8192ce fwlps="
 OPTION2_VAL="0"
 OPTION3="options rtl8192ce swenc="
