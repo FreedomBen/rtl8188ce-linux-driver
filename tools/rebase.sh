@@ -31,15 +31,15 @@ tag ()
             echo "v3.18"
             return
         elif $(echo "$1" | grep "3\.17\." >/dev/null 2>&1); then
-            echo "v3.17.6"
+            echo "$(git tag | grep "v3\.17" | sort -n | ~/extract.rb)"
             return
         fi
     elif $(is_ubuntu $1); then
         if $(echo "$1" | grep "14.04" >/dev/null 2>&1); then
-            echo "Ubuntu-3.13.0-9.29"
+            echo "$(git tag | grep Ubuntu-3.13 | sort -n | ~/extract.rb)"
             return
         elif $(echo "$1" | grep "14.10" >/dev/null 2>&1); then
-            echo "Ubuntu-3.16.0-9.14"
+            echo "$(git tag | grep Ubuntu-3.16 | sort -n | ~/extract.rb)"
             return
         fi
     fi
@@ -74,6 +74,7 @@ fi
 cd "$(repo_dir $remote)"
 git checkout --force master
 git pull --rebase || die "Problem running git pull"
+echo "Tag in use is $(tag $1)"
 git checkout --force "$(tag $1)" || die "Problem checking out $(tag $1)"
 temp="$(pwd)"
 cd "$starting_dir"
