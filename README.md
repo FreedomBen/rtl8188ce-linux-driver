@@ -32,20 +32,20 @@ Well supported kernel releases:
 
 Well supported Ubuntu (and Ubuntu based) releases:
 
-        Ubuntu 12.04
+        Ubuntu 12.04 (LTS)
         Ubuntu 13.04
         Ubuntu 13.10
-        Ubuntu 14.04
+        Ubuntu 14.04 (LTS)
         Ubuntu 14.10
 
         Elementary OS Luna
         Elementary OS Isis
 
-        Linux Mint 13   Maya
+        Linux Mint 13   Maya (LTS)
         Linux Mint 15   Olivia
         Linux Mint 16   Petra
-        Linux Mint 17   Qiana
-        Linux Mint 17.1 Rebecca
+        Linux Mint 17   Qiana (LTS)
+        Linux Mint 17.1 Rebecca (LTS)
 
 Well supported Fedora (and Fedora based) releases:
 
@@ -53,9 +53,9 @@ Well supported Fedora (and Fedora based) releases:
         Fedora 20
         Fedora 21
 
-        Red Hat Enterprise Linux 7
+        Red Hat Enterprise Linux 7 (LTS)
 
-        CentOS 7
+        CentOS 7 (LTS)
 
 Arch is also supported, but tends to break each time the kernel is bumped up a minor version (like 3.13.x to 3.14.x).  I try to fix the breakage quickly but this is not how I support my family ;-)
 
