@@ -28,6 +28,7 @@ Well supported kernel releases:
         3.15.x
         3.16.x
         3.17.x
+        3.18.x
 
 Well supported Ubuntu (and Ubuntu based) releases:
 
@@ -40,15 +41,17 @@ Well supported Ubuntu (and Ubuntu based) releases:
         Elementary OS Luna
         Elementary OS Isis
 
-        Linux Mint 13 Maya
-        Linux Mint 15 Olivia
-        Linux Mint 16 Petra
-        Linux Mint 17 Qiana
+        Linux Mint 13   Maya
+        Linux Mint 15   Olivia
+        Linux Mint 16   Petra
+        Linux Mint 17   Qiana
+        Linux Mint 17.1 Rebecca
 
 Well supported Fedora (and Fedora based) releases:
 
         Fedora 19
         Fedora 20
+        Fedora 21
 
         Red Hat Enterprise Linux 7
 
