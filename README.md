@@ -27,30 +27,35 @@ Well supported kernel releases:
         3.14.x
         3.15.x
         3.16.x
+        3.17.x
+        3.18.x
 
 Well supported Ubuntu (and Ubuntu based) releases:
 
-        Ubuntu 12.04
+        Ubuntu 12.04 (LTS)
         Ubuntu 13.04
         Ubuntu 13.10
-        Ubuntu 14.04
+        Ubuntu 14.04 (LTS)
+        Ubuntu 14.10
 
         Elementary OS Luna
         Elementary OS Isis
 
-        Linux Mint 13 Maya
-        Linux Mint 15 Olivia
-        Linux Mint 16 Petra
-        Linux Mint 17 Qiana
+        Linux Mint 13   Maya (LTS)
+        Linux Mint 15   Olivia
+        Linux Mint 16   Petra
+        Linux Mint 17   Qiana (LTS)
+        Linux Mint 17.1 Rebecca (LTS)
 
 Well supported Fedora (and Fedora based) releases:
 
         Fedora 19
         Fedora 20
+        Fedora 21
 
-        Red Hat Enterprise Linux 7
+        Red Hat Enterprise Linux 7 (LTS)
 
-        CentOS 7
+        CentOS 7 (LTS)
 
 Arch is also supported, but tends to break each time the kernel is bumped up a minor version (like 3.13.x to 3.14.x).  I try to fix the breakage quickly but this is not how I support my family ;-)
 
@@ -179,12 +184,21 @@ Ex: "git checkout ubuntu-13.04"
     Ubuntu 12.04 | Kernel 3.2.x  | ubuntu-12.04
     Ubuntu 13.04 | Kernel 3.8.x  | ubuntu-13.04
     Ubuntu 13.10 | Kernel 3.11.x | ubuntu-13.10
-    Ubuntu 14.04 | Kernel 3.13.x | ubuntu-14.04 
+    Ubuntu 14.04 | Kernel 3.13.x | ubuntu-14.04
+    Ubuntu 14.10 | Kernel 3.16.x | ubuntu-14.10
     Fedora 19    | Kernel 3.14.x | fedora-19
     Fedora 20    | Kernel 3.15.x | fedora-20
-    Arch         | Kernel 3.15.x | arch
+    Mint 17      | Kernel 3.13.x | mint-17
+    --------------------------------------------
+    Any 3.13.x   | Kernel 3.13.x | generic-3.13.x
+    Any 3.14.x   | Kernel 3.14.x | generic-3.14.x
+    Any 3.16.x   | Kernel 3.16.x | generic-3.16.x
+    Any 3.17.x   | Kernel 3.17.x | generic-3.17.x
+    Any 3.18.x   | Kernel 3.18.x | generic-3.18.x
 
-    * Note, if the Ubuntu/Fedora release version and your kernel version conflict, go with the branch corresponding to your *kernel version* as that is what really matters!
+    * Note, if the Ubuntu/Fedora release version and your kernel version conflict,
+      go with the branch corresponding to your *kernel version* as
+      that is what really matters!
 
 
 3\. Compile:
