@@ -28,7 +28,7 @@ tag ()
 {
     if $(is_generic $1); then
         if $(echo "$1" | grep "3\.18\." >/dev/null 2>&1); then
-            echo "v3.18"
+            echo "$(git tag | grep "v3\.18" | sort -n | ~/extract.rb)"
             return
         elif $(echo "$1" | grep "3\.17\." >/dev/null 2>&1); then
             echo "$(git tag | grep "v3\.17" | sort -n | ~/extract.rb)"
