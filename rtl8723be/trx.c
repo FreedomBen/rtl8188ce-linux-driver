@@ -19,13 +19,6 @@
  * Realtek Corporation, No. 2, Innovation Road II, Hsinchu Science Park,
  * Hsinchu 300, Taiwan.
  *
- *
- * Bug Fixes and enhancements for Linux Kernels >= 3.2
- * by Benjamin Porter <BenjaminPorter86@gmail.com>
- *
- * Project homepage: https://github.com/FreedomBen/rtl8188ce-linux-driver
- *
- *
  * Larry Finger <Larry.Finger@lwfinger.net>
  *
  *****************************************************************************/
@@ -609,7 +602,7 @@ bool rtl8723be_rx_query_desc( struct ieee80211_hw *hw,
 			return false;
 		}
 
-		if ( ( _ieee80211_is_robust_mgmt_frame( hdr ) ) &&
+		if ( ( ieee80211_is_robust_mgmt_frame( hdr ) ) &&
 		    ( ieee80211_has_protected( hdr->frame_control ) ) )
 			rx_status->flag &= ~RX_FLAG_DECRYPTED;
 		else
