@@ -74,6 +74,11 @@ runningMint ()
     fi
 }
 
+runningMint171 ()
+{
+    lsb_release -d | grep --color=auto "Rebecca" > /dev/null
+}
+
 # Derivatives like Mint and Elementary usually run the Ubuntu kernel so this can be an easy way to detect an Ubuntu derivative
 runningUbuntuKernel ()
 {
