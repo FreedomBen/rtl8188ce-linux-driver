@@ -857,11 +857,11 @@ static bool _rtl88ee_init_mac( struct ieee80211_hw *hw )
 
 	rtl_write_byte( rtlpriv, REG_RSV_CTRL, 0x00 );
 	/* HW Power on sequence */
-	if ( !rtl_hal_pwrseqcmdparsing( rtlpriv, PWR_CUT_ALL_MSK,
+	if ( !rtl88_hal_pwrseqcmdparsing( rtlpriv, PWR_CUT_ALL_MSK,
 				      PWR_FAB_ALL_MSK, PWR_INTF_PCI_MSK,
 				      RTL8188EE_NIC_ENABLE_FLOW ) ) {
 		RT_TRACE( rtlpriv, COMP_INIT, DBG_LOUD,
-			 "init MAC Fail as rtl_hal_pwrseqcmdparsing\n" );
+			 "init MAC Fail as rtl88_hal_pwrseqcmdparsing\n" );
 		return false;
 	}
 
@@ -1429,7 +1429,7 @@ static void _rtl88ee_poweroff_adapter( struct ieee80211_hw *hw )
 	}
 	rtl_write_byte( rtlpriv, REG_PCIE_CTRL_REG+1, 0xFF );
 
-	rtl_hal_pwrseqcmdparsing( rtlpriv, PWR_CUT_ALL_MSK, PWR_FAB_ALL_MSK,
+	rtl88_hal_pwrseqcmdparsing( rtlpriv, PWR_CUT_ALL_MSK, PWR_FAB_ALL_MSK,
 				 PWR_INTF_PCI_MSK,
 				 RTL8188EE_NIC_LPS_ENTER_FLOW );
 
@@ -1445,7 +1445,7 @@ static void _rtl88ee_poweroff_adapter( struct ieee80211_hw *hw )
 	u1b_tmp = rtl_read_byte( rtlpriv, REG_32K_CTRL );
 	rtl_write_byte( rtlpriv, REG_32K_CTRL, ( u1b_tmp & ( ~BIT( 0 ) ) ) );
 
-	rtl_hal_pwrseqcmdparsing( rtlpriv, PWR_CUT_ALL_MSK, PWR_FAB_ALL_MSK,
+	rtl88_hal_pwrseqcmdparsing( rtlpriv, PWR_CUT_ALL_MSK, PWR_FAB_ALL_MSK,
 				 PWR_INTF_PCI_MSK, RTL8188EE_NIC_DISABLE_FLOW );
 
 	u1b_tmp = rtl_read_byte( rtlpriv, REG_RSV_CTRL+1 );
