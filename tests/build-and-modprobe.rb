@@ -1,6 +1,6 @@
 #!/usr/bin/ruby
 
-# %x{} returns a string of the output
+# %x{} (or ``) returns a string of the output
 # system() returns a true/false/nil
 
 require 'colorize'
