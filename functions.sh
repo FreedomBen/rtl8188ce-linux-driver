@@ -139,10 +139,10 @@ makeModuleLoadPersistent ()
     fi
 
     if [ "$not_present" = "1" ]; then
-        if [ "$(id -u)" != "0" ]; then
+        if [ "$(id -u)" = "0" ]; then
             echo "rtl8192ce" >> "$file"
         else
-            sudo -u root 'echo "rtl8192ce" >> "$file"'
+            sudo sh -c "echo 'rtl8192ce' >> $file"
         fi
     fi
 }
