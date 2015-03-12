@@ -27,19 +27,22 @@ is_ubuntu ()
 tag ()
 {
     if $(is_generic $1); then
-        if $(echo "$1" | grep "3\.18\." >/dev/null 2>&1); then
-            echo "$(git tag | grep "v3\.19" | sort -n | ./tools/extract.rb)"
+        if $(echo "$1" | grep "3\.19\." >/dev/null 2>&1); then
+            echo "$(git tag | grep "v3\.19" | sort -n | ~/extract.rb)"
+            return
+        elif $(echo "$1" | grep "3\.18\." >/dev/null 2>&1); then
+            echo "$(git tag | grep "v3\.18" | sort -n | ~/extract.rb)"
             return
         elif $(echo "$1" | grep "3\.17\." >/dev/null 2>&1); then
-            echo "$(git tag | grep "v3\.17" | sort -n | ./tools/extract.rb)"
+            echo "$(git tag | grep "v3\.17" | sort -n | ~/extract.rb)"
             return
         fi
     elif $(is_ubuntu $1); then
         if $(echo "$1" | grep "14.04" >/dev/null 2>&1); then
-            echo "$(git tag | grep Ubuntu-3.13 | sort -n | ./tools/extract.rb)"
+            echo "$(git tag | grep Ubuntu-3.13 | sort -n | ~/extract.rb)"
             return
         elif $(echo "$1" | grep "14.10" >/dev/null 2>&1); then
-            echo "$(git tag | grep Ubuntu-3.16 | sort -n | ./tools/extract.rb)"
+            echo "$(git tag | grep Ubuntu-3.16 | sort -n | ~/extract.rb)"
             return
         fi
     fi
@@ -54,6 +57,8 @@ repo_dir ()
 [ -f "regd.c" ] || die "Need to start script from root of dir"
 
 [ -n "$1" ] || die "Need branch to rebase specified"
+
+[ -f "tools/extract.rb" ] && cp tools/extract.rb $HOME/
 
 mkdir -p "$LOCATION"
 cd $LOCATION
