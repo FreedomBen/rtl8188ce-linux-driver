@@ -7,14 +7,22 @@ def is_breaking_char(char)
   ['-', '.'].include? char
 end
 
+def is_rc(tag)
+  tag =~ /rc/i
+end
+
 args = []
 
 ARGF.read.split.each do |i|
   args.push i
 end
 
-args.sort! do |a, b|
+def compare_tags(a, b)
   return 0 if a == b
+
+  # If one has an rc in it and the other doesn't, the rc is less than
+  return -1 if  is_rc(a) && !is_rc(b)
+  return  1 if !is_rc(a) &&  is_rc(b)
 
   # do a numeric compare on the first part of the string that is different
   # keep going on the number until reaching either a '-' or a '.'
@@ -34,5 +42,7 @@ args.sort! do |a, b|
 
   new_a.to_i <=> new_b.to_i
 end
+
+args.sort! { |a, b| compare_tags(a, b) }
 
 puts args.last
