@@ -5,6 +5,7 @@ LOCATION="$HOME/gitclone"
 GENERIC='git://git.kernel.org/pub/scm/linux/kernel/git/stable/linux-stable.git'
 UBUNTU1404='git://kernel.ubuntu.com/ubuntu/ubuntu-trusty.git'
 UBUNTU1410='git://kernel.ubuntu.com/ubuntu/ubuntu-utopic.git'
+UBUNTU1504='git://kernel.ubuntu.com/ubuntu/ubuntu-vivid.git'
 
 starting_dir="$(pwd)"
 
@@ -27,19 +28,25 @@ is_ubuntu ()
 tag ()
 {
     if $(is_generic $1); then
-        if $(echo "$1" | grep "3\.18\." >/dev/null 2>&1); then
-            echo "$(git tag | grep "v3\.19" | sort -n | ./tools/extract.rb)"
+        if $(echo "$1" | grep "3\.19\." >/dev/null 2>&1); then
+            echo "$(git tag | grep "v3\.19" | sort -n | ~/extract.rb)"
+            return
+        elif $(echo "$1" | grep "3\.18\." >/dev/null 2>&1); then
+            echo "$(git tag | grep "v3\.18" | sort -n | ~/extract.rb)"
             return
         elif $(echo "$1" | grep "3\.17\." >/dev/null 2>&1); then
-            echo "$(git tag | grep "v3\.17" | sort -n | ./tools/extract.rb)"
+            echo "$(git tag | grep "v3\.17" | sort -n | ~/extract.rb)"
             return
         fi
     elif $(is_ubuntu $1); then
         if $(echo "$1" | grep "14.04" >/dev/null 2>&1); then
-            echo "$(git tag | grep Ubuntu-3.13 | sort -n | ./tools/extract.rb)"
+            echo "$(git tag | grep Ubuntu-3.13 | sort -n | ~/extract.rb)"
             return
         elif $(echo "$1" | grep "14.10" >/dev/null 2>&1); then
-            echo "$(git tag | grep Ubuntu-3.16 | sort -n | ./tools/extract.rb)"
+            echo "$(git tag | grep Ubuntu-3.16 | sort -n | ~/extract.rb)"
+            return
+        elif $(echo "$1" | grep "15.04" >/dev/null 2>&1); then
+            echo "$(git tag | grep Ubuntu-3.19 | sort -n | ~/extract.rb)"
             return
         fi
     fi
@@ -55,6 +62,8 @@ repo_dir ()
 
 [ -n "$1" ] || die "Need branch to rebase specified"
 
+[ -f "tools/extract.rb" ] && cp tools/extract.rb $HOME/
+
 mkdir -p "$LOCATION"
 cd $LOCATION
 
@@ -62,6 +71,8 @@ if [ "$1" = "ubuntu-14.04" ]; then
     remote="$UBUNTU1404"
 elif [ "$1" = "ubuntu-14.10" ]; then
     remote="$UBUNTU1410"
+elif [ "$1" = "ubuntu-15.04" ]; then
+    remote="$UBUNTU1504"
 elif [[ $1 =~ generic ]]; then
     remote="$GENERIC"
 fi
