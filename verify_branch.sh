@@ -34,7 +34,15 @@ doSwitch ()
 echo "Verifying a sane branch for your kernel version..."
 
 if inGitRepo; then
-    if $(uname -r | grep "3.17" > /dev/null); then
+    if $(uname -r | grep "3.19" > /dev/null); then
+        if runningUbuntuKernel; then
+            doSwitch "ubuntu-15.04"
+        else
+          doSwitch "generic-3.19.x"
+        fi
+    elif $(uname -r | grep "3.18" > /dev/null); then
+        doSwitch "generic-3.18.x"
+    elif $(uname -r | grep "3.17" > /dev/null); then
         doSwitch "generic-3.17.x"
     elif $(uname -r | grep "3.16" > /dev/null); then
         if runningUbuntuKernel; then
@@ -55,7 +63,9 @@ if inGitRepo; then
             doSwitch "generic-3.14.x"
         fi
     elif $(uname -r | grep "3.13" > /dev/null); then
-        if runningMint; then
+        if runningMint171; then
+            doSwitch "mint-17.1"
+        elif runningMint; then
             doSwitch "mint-17"
         elif runningUbuntuKernel; then
             doSwitch "ubuntu-14.04"
@@ -80,11 +90,14 @@ if inGitRepo; then
     fi
 else
     base="$(basename $(pwd))"
-    if ( $(uname -r | grep "3.17" > /dev/null) && ! $(echo "$base" | grep "generic-3.17.x" > /dev/null) ) ||                                                          \
+    if ( $(uname -r | grep "3.19" > /dev/null) && ! $(echo "$base" | grep "generic-3.19.x" > /dev/null) ) && ! $(echo "$base" | grep "ubuntu-15.04"   > /dev/null) || \
+       ( $(uname -r | grep "3.18" > /dev/null) && ! $(echo "$base" | grep "generic-3.18.x" > /dev/null) ) ||                                                          \
+       ( $(uname -r | grep "3.17" > /dev/null) && ! $(echo "$base" | grep "generic-3.17.x" > /dev/null) ) ||                                                          \
        ( $(uname -r | grep "3.16" > /dev/null) && ! $(echo "$base" | grep "ubuntu-14.10"   > /dev/null) ) && ! $(echo "$base" | grep "generic-3.16.x" > /dev/null) || \
        ( $(uname -r | grep "3.15" > /dev/null) && ! $(echo "$base" | grep "arch"           > /dev/null) ) && ! $(echo "$base" | grep "fedora-20"      > /dev/null) || \
        ( $(uname -r | grep "3.14" > /dev/null) && ! $(echo "$base" | grep "generic-3.14.x" > /dev/null) ) ||                                                          \
        ( $(uname -r | grep "3.13" > /dev/null) && ! $(echo "$base" | grep "ubuntu-14.04"   > /dev/null) ) && ! $(echo "$base" | grep "generic-3.13.x" > /dev/null) || \
+       # Add a check for mint-17 and mint-17.1 branches
        ( $(uname -r | grep "3.12" > /dev/null) && ! $(echo "$base" | grep "fedora-20"      > /dev/null) ) ||                                                          \
        ( $(uname -r | grep "3.11" > /dev/null) && ! $(echo "$base" | grep "fedora-20"      > /dev/null) ) && ! $(echo "$base" | grep "ubuntu-13.10"   > /dev/null) || \
        ( $(uname -r | grep "3.8"  > /dev/null) && ! $(echo "$base" | grep "ubuntu-13.04"   > /dev/null) ) ||                                                          \

@@ -74,6 +74,11 @@ runningMint ()
     fi
 }
 
+runningMint171 ()
+{
+    lsb_release -d | grep --color=auto "Rebecca" > /dev/null
+}
+
 # Derivatives like Mint and Elementary usually run the Ubuntu kernel so this can be an easy way to detect an Ubuntu derivative
 runningUbuntuKernel ()
 {
@@ -134,10 +139,10 @@ makeModuleLoadPersistent ()
     fi
 
     if [ "$not_present" = "1" ]; then
-        if [ "$(id -u)" != "0" ]; then
+        if [ "$(id -u)" = "0" ]; then
             echo "rtl8192ce" >> "$file"
         else
-            sudo -u root 'echo "rtl8192ce" >> "$file"'
+            sudo sh -c "echo 'rtl8192ce' >> $file"
         fi
     fi
 }
@@ -212,6 +217,125 @@ usingSystemd ()
     which systemctl > /dev/null 2>&1
 }
 
+runningAnyRtl8188ee ()
+{
+    lsmod | grep "rtl8188ee" > /dev/null
+}
+
+runningOurRtl8188ee ()
+{
+    modinfo rtl8188ee | grep "Benjamin Porter" > /dev/null
+}
+
+runningStockRtl8188ee ()
+{
+    runningAnyRtl8188ee && ! runningOurRtl8188ee
+}
+
+runningAnyRtl8192cu ()
+{
+    lsmod | grep "rtl8192cu" > /dev/null
+}
+
+runningOurRtl8192cu ()
+{
+    modinfo rtl8192cu | grep "Benjamin Porter" > /dev/null
+}
+
+runningStockRtl8192cu ()
+{
+    runningAnyRtl8192cu && ! runningOurRtl8192cu
+}
+
+runningAnyRtl8192de ()
+{
+    lsmod | grep "rtl8192de" > /dev/null
+}
+
+runningOurRtl8192de ()
+{
+    modinfo rtl8192de | grep "Benjamin Porter" > /dev/null
+}
+
+runningStockRtl8192de ()
+{
+    runningAnyRtl8192de && ! runningOurRtl8192de
+}
+
+runningAnyRtl8192ee ()
+{
+    lsmod | grep "rtl8192ee" > /dev/null
+}
+
+runningOurRtl8192ee ()
+{
+    modinfo rtl8192ee | grep "Benjamin Porter" > /dev/null
+}
+
+runningStockRtl8192ee ()
+{
+    runningAnyRtl8192ee && ! runningOurRtl8192ee
+}
+
+runningAnyRtl8192se ()
+{
+    lsmod | grep "rtl8192se" > /dev/null
+}
+
+runningOurRtl8192se ()
+{
+    modinfo rtl8192se | grep "Benjamin Porter" > /dev/null
+}
+
+runningStockRtl8192se ()
+{
+    runningAnyRtl8192se && ! runningOurRtl8192se
+}
+
+runningAnyRtl8723ae ()
+{
+    lsmod | grep "rtl8723ae" > /dev/null
+}
+
+runningOurRtl8723ae ()
+{
+    modinfo rtl8723ae | grep "Benjamin Porter" > /dev/null
+}
+
+runningStockRtl8723ae ()
+{
+    runningAnyRtl8723ae && ! runningOurRtl8723ae
+}
+
+runningAnyRtl8723be ()
+{
+    lsmod | grep "rtl8723be" > /dev/null
+}
+
+runningOurRtl8723be ()
+{
+    modinfo rtl8723be | grep "Benjamin Porter" > /dev/null
+}
+
+runningStockRtl8723be ()
+{
+    runningAnyRtl8723be && ! runningOurRtl8723be
+}
+
+runningAnyRtl8821ae ()
+{
+    lsmod | grep "rtl8821ae" > /dev/null
+}
+
+runningOurRtl8821ae ()
+{
+    modinfo rtl8821ae | grep "Benjamin Porter" > /dev/null
+}
+
+runningStockRtl8821ae ()
+{
+    runningAnyRtl8821ae && ! runningOurRtl8821ae
+}
 
 readonly rtlwifi_orig="/lib/modules/$(uname -r)/kernel/drivers/net/wireless/rtlwifi"
 readonly rtlwifi_backup_dir="$HOME/.rtlwifi-backup"
