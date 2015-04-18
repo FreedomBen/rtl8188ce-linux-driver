@@ -21,6 +21,9 @@ def fixFile( fileName ):
         with open( fileName + '.temp', 'w' ) as out:
             added = False
             for line in inp:
+                if re.match('by Benjamin Porter', line) is not None:
+                    added = True
+            for line in inp:
                 if not added and "Larry Finger <Larry.Finger@lwfinger.net>" in line or "Hsinchu 300, Taiwan" in line:
                     out.write( line )
                     out.write( AdditionalCommentText )
