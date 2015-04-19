@@ -7,7 +7,7 @@ This modified version of the RealTek WiFi driver fixes some issues with RealTek 
 
 **Why use this driver?**
 
-1.  It has been modified to allow you to transmit at up to 33 dBm instead of the stock driver hard limit of 20 dBm, regardless of your CRDA regulatory domain.  This is a substantial increase in capability because every 3 dB increase is equivalent to a doubling of the power.  IOTW, you can pump out 4x more Tx power than before.  This is subject to CRDA restrictions however (though you can set that to whatever you want, just make sure you're staying legal)
+1.  It has been modified to allow you to transmit at up to 33 dBm instead of the stock driver hard limit of 20 dBm, regardless of your CRDA regulatory domain.  This is a substantial increase in capability because every 3 dB increase is equivalent to a doubling of the power.  IOW, you can pump out 4x more Tx power than before.  This is subject to CRDA restrictions however (though you can set that to whatever you want, just make sure you're staying legal)
 2.  It has a few default settings that generally increase stability
 3.  Some helpful fixes are backported from newer kernels so that they can be enjoyed without upgrading the entire kernel (very useful for staying on your distros current kernel while benefitting from fixes relating to this driver)
 
@@ -29,14 +29,17 @@ Well supported kernel releases:
         3.16.x
         3.17.x
         3.18.x
+        3.19.x
+        4.0.x
 
-Well supported Ubuntu (and Ubuntu based) releases:
+Well supported Ubuntu (and Ubuntu-based) releases:
 
         Ubuntu 12.04 (LTS)
         Ubuntu 13.04
         Ubuntu 13.10
         Ubuntu 14.04 (LTS)
         Ubuntu 14.10
+        Ubuntu 15.04
 
         Elementary OS Luna
         Elementary OS Isis
@@ -108,7 +111,7 @@ You can alternatively use DKMS, so that when a new patch-release of the kernel i
 
 1. You need to know what kernel version you are on.
 
-2. You need to change the branch when you change the minor version of the kernel (eg. 3.13.x to 3.15.x).
+2. You need to change the branch when you change the minor version of the kernel (e.g. 3.13.x to 3.15.x).
 
 To use DKMS:
 
@@ -134,7 +137,6 @@ Manual Installation:
 To check your kernel version:  
 
     uname -r
-
 
 These commands should be typed in an open terminal.  I recommend you start in your home directory by typing `cd`
 
@@ -195,6 +197,8 @@ Ex: "git checkout ubuntu-13.04"
     Any 3.16.x   | Kernel 3.16.x | generic-3.16.x
     Any 3.17.x   | Kernel 3.17.x | generic-3.17.x
     Any 3.18.x   | Kernel 3.18.x | generic-3.18.x
+    Any 3.19.x   | Kernel 3.19.x | generic-3.19.x
+    Any 4.0.x    | Kernel 4.0.x  | generic-4.0.x
 
     * Note, if the Ubuntu/Fedora release version and your kernel version conflict,
       go with the branch corresponding to your *kernel version* as
@@ -240,7 +244,7 @@ Or tarball it up:
 NOTE: Unlike the stock driver, `rtl8192c_common` is only required with kernel >= 3.14
 
 
-8\. Make persistent by adding this to the end of "/etc/modules" (for Ubuntu), or "/etc/rc.modules" (for Fedora) (if Fedora make sure /etc/rc.modules is exectuable), or "/etc/modules-load.d/rtlwifi.conf" (for Arch). If you don't have an RTL8188CE or RTL8192CE, then substitute the correct kernel module in place of `rtl8192ce`:
+8\. Make persistent by adding this to the end of "/etc/modules" (for Ubuntu), or "/etc/rc.modules" (for Fedora) (if Fedora make sure /etc/rc.modules is executable), or "/etc/modules-load.d/rtlwifi.conf" (for Arch). If you don't have an RTL8188CE or RTL8192CE, then substitute the correct kernel module in place of `rtl8192ce`:
 
     rtl8192ce
 
@@ -298,7 +302,7 @@ The current Tx power will be listed as `Tx-Power=xx dBm`
 
 **4\. If you're getting power drops\*:**
 
-You may have better luck fixing your data rate.  The best rate will vary depending on your Tx power, Rx power, and distance from the router.  You may want to set the rate to be fixed around your internet connection speed unless you're doing other stuff on your LAN.  Basgoosen found his sweetspot to be 24M.  You can set the fixed rate as follows (substitute your wireless interface for \<wlan\>, so for example wlan0):
+You may have better luck fixing your data rate.  The best rate will vary depending on your Tx power, Rx power, and distance from the router.  You may want to set the rate to be fixed around your internet connection speed unless you're doing other stuff on your LAN.  Basgoosen found his sweet spot to be 24M.  You can set the fixed rate as follows (substitute your wireless interface for \<wlan\>, so for example wlan0):
 
     sudo iwconfig <wlan> rate fixed
     sudo iwconfig <wlan> rate 24M
@@ -320,7 +324,7 @@ To make this persistent, create a file in `/etc/network/if-up.d` containing the 
 
 **5\. My kernel package was updated by my distro and now I'm stuck back on the stock driver!**
 
-Yeah unfornately this does currently happen anytime your kernel package is updated by your distro.  The solution is to rebuild and reinstall this driver.  On the plus side that gives you a chance to pull down the latest changes so that you're up to date with the latest.
+Yeah unfortunately this does currently happen anytime your kernel package is updated by your distro.  The solution is to rebuild and reinstall this driver.  On the plus side that gives you a chance to pull down the latest changes so that you're up to date with the latest.
 
 Please don't save a copy of the drivers compiled under a different version of the kernel to copy back in after the kernel update.  While a clever solution, this could cause undefined and potentially disastrous results if the ABI changes (which it does frequently).  The drivers need to be rebuilt using the new kernel headers to ensure they are compiled correctly.  It may work fine for a few upgrades, but eventually it will probably leave your system unbootable.
 
