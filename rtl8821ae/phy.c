@@ -807,7 +807,7 @@ static void _rtl8821ae_phy_set_txpower_by_rate_base( struct ieee80211_hw *hw,
 				 "Invalid RateSection %d in Band 2.4G,Rf Path %d, %dTx in PHY_SetTxPowerByRateBase()\n",
 				 rate_section, path, txnum );
 			break;
-		};
+		}
 	} else if ( band == BAND_ON_5G ) {
 		switch ( rate_section ) {
 		case OFDM:
@@ -830,7 +830,7 @@ static void _rtl8821ae_phy_set_txpower_by_rate_base( struct ieee80211_hw *hw,
 				"Invalid RateSection %d in Band 5G, Rf Path %d, %dTx in PHY_SetTxPowerByRateBase()\n",
 				rate_section, path, txnum );
 			break;
-		};
+		}
 	} else {
 		RT_TRACE( rtlpriv, COMP_INIT, DBG_LOUD,
 			"Invalid Band %d in PHY_SetTxPowerByRateBase()\n", band );
@@ -877,7 +877,7 @@ static u8 _rtl8821ae_phy_get_txpower_by_rate_base( struct ieee80211_hw *hw,
 				 "Invalid RateSection %d in Band 2.4G, Rf Path %d, %dTx in PHY_GetTxPowerByRateBase()\n",
 				 rate_section, path, txnum );
 			break;
-		};
+		}
 	} else if ( band == BAND_ON_5G ) {
 		switch ( rate_section ) {
 		case OFDM:
@@ -900,7 +900,7 @@ static u8 _rtl8821ae_phy_get_txpower_by_rate_base( struct ieee80211_hw *hw,
 				 "Invalid RateSection %d in Band 5G, Rf Path %d, %dTx in PHY_GetTxPowerByRateBase()\n",
 				 rate_section, path, txnum );
 			break;
-		};
+		}
 	} else {
 		RT_TRACE( rtlpriv, COMP_INIT, DBG_LOUD,
 			 "Invalid Band %d in PHY_GetTxPowerByRateBase()\n", band );
@@ -3753,7 +3753,7 @@ static void _rtl8821ae_iqk_tx_fill_iqc( struct ieee80211_hw *hw,
 		break;
 	default:
 		break;
-	};
+	}
 }
 
 static void _rtl8821ae_iqk_rx_fill_iqc( struct ieee80211_hw *hw,
@@ -3774,7 +3774,7 @@ static void _rtl8821ae_iqk_rx_fill_iqc( struct ieee80211_hw *hw,
 		break;
 	default:
 		break;
-	};
+	}
 }
 
 #define cal_num 10
