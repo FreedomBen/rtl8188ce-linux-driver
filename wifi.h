@@ -2168,6 +2168,7 @@ struct rtl_hal_ops {
 	void ( *add_wowlan_pattern )( struct ieee80211_hw *hw,
 				   struct rtl_wow_pattern *rtl_pattern,
 				   u8 index );
+	u16 ( *get_available_desc )( struct ieee80211_hw *hw, u8 q_idx );
 };
 
 struct rtl_intf_ops {
