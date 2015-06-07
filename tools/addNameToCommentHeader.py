@@ -20,12 +20,12 @@ def fixFile( fileName ):
     # save to temp file so we don't get jacked up until we're done
     with open( fileName, 'r' ) as inp:
         with open( fileName + '.temp', 'w' ) as out:
-            lines = inp.read()
             added = False
-            for line in lines:
+            for line in inp:
                 if re.match('by Benjamin Porter', line) is not None:
                     added = True
-            for line in lines:
+            inp.seek(0)
+            for line in inp:
                 if not added and "Larry Finger <Larry.Finger@lwfinger.net>" in line or "Hsinchu 300, Taiwan" in line:
                     out.write( line )
                     out.write( AdditionalCommentText )
