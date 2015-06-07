@@ -271,7 +271,7 @@ Troubleshooting:
 
 **2\. If you get the following error:**
     
-    FATAL: Error inserting rtl8192ce                 (/lib/modules/3.8.0-34-generic/kernel/drivers/net/wireless/rtlwifi/rtl8192ce/rtl8192ce.ko): Invalid argument
+    FATAL: Error inserting rtl8192ce (/lib/modules/3.8.0-34-generic/kernel/drivers/net/wireless/rtlwifi/rtl8192ce/rtl8192ce.ko): Invalid argument
 
 After running: 
 
@@ -330,7 +330,7 @@ To make this persistent, create a file in `/etc/network/if-up.d` containing the 
 
 Yeah unfortunately this does currently happen anytime your kernel package is updated by your distro.  The solution is to rebuild and reinstall this driver.  On the plus side that gives you a chance to pull down the latest changes so that you're up to date with the latest.
 
-Please don't save a copy of the drivers compiled under a different version of the kernel to copy back in after the kernel update.  While a clever solution, this could cause undefined and potentially disastrous results if the ABI changes (which it does frequently).  The drivers need to be rebuilt using the new kernel headers to ensure they are compiled correctly.  It may work fine for a few upgrades, but eventually it will probably leave your system unbootable.
+Please don't save a copy of the drivers compiled under a different version of the kernel to copy back in after the kernel update.  While a clever solution, this could cause undefined and potentially disastrous results if the ABI changes (which it does frequently).  The drivers need to be rebuilt using the new kernel headers to ensure they are compiled correctly.  It may work fine for a few upgrades, but eventually it will leave your system unbootable.
 
 You can run this command to automatically clone this repo and kick off the installer (git must be installed already):
 
@@ -338,20 +338,20 @@ You can run this command to automatically clone this repo and kick off the insta
 
 **6\. I think this driver broke something.  How do I get back to the stock driver?**
 
-You have basically two choices.  Either will get the job done.  When you run `sudo make uninstall`, the make script will try to restore your backup from when you installed.  The system works like this:
+You basically have two choices.  Either will get the job done.  When you run `sudo make uninstall`, the make script will try to restore your backup from when you installed.  The system works like this:
 
-* When you run `sudo make install`, the existing drivers are backup up to ~/.rtlwifi-backups as a precaution (this is new as of 29-May-2014, so if you installed before then, you have no backups.  Sorry)
+* When you run `sudo make install`, the existing drivers are backup up to `~/.rtlwifi-backups` as a precaution (this is new as of 29-May-2014, so if you installed before then, you have no backups.  Sorry)
 * When you run `sudo make uninstall`, this location is checked for a backup that matches your current kernel version.  If one cannot be found, then you are stuck with choice #2.  If a suitable backup is found, the script will offer to restore it for you. 
 
 Choice #1 - Use the backup that the install script made for you:\*
 
-    `sudo make uninstall`
+    sudo make uninstall
 
 or
 
-    `./restore_backup.sh`
+    ./restore_backup.sh
 
-*\* Note that this will look in the home directory of whichever user you are when you run it, so if it doesn't see a backup, try it again with sudo so that it will check root's home directory, or as a regular user so it will check that user's directory.*
+* Note that this will look in the home directory of whichever user you are when you run it, so if it doesn't see a backup, try it again with sudo so that it will check root's home directory, or as a regular user so it will check that user's directory.*
 
 Choice #2 - Reinstall your distro's kernel package:
 
