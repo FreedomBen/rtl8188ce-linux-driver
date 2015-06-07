@@ -31,6 +31,7 @@ Well supported kernel releases:
         3.18.x
         3.19.x
         4.0.x
+        4.1.x
 
 Well supported Ubuntu (and Ubuntu-based) releases:
 
@@ -55,6 +56,7 @@ Well supported Fedora (and Fedora based) releases:
         Fedora 19
         Fedora 20
         Fedora 21
+        Fedora 22
 
         Red Hat Enterprise Linux 7 (LTS)
 
@@ -188,6 +190,7 @@ Ex: "git checkout ubuntu-13.04"
     Ubuntu 13.10 | Kernel 3.11.x | ubuntu-13.10
     Ubuntu 14.04 | Kernel 3.13.x | ubuntu-14.04
     Ubuntu 14.10 | Kernel 3.16.x | ubuntu-14.10
+    Ubuntu 15.04 | Kernel 3.19.x | ubuntu-15.04
     Fedora 19    | Kernel 3.14.x | fedora-19
     Fedora 20    | Kernel 3.15.x | fedora-20
     Mint 17      | Kernel 3.13.x | mint-17
@@ -199,6 +202,7 @@ Ex: "git checkout ubuntu-13.04"
     Any 3.18.x   | Kernel 3.18.x | generic-3.18.x
     Any 3.19.x   | Kernel 3.19.x | generic-3.19.x
     Any 4.0.x    | Kernel 4.0.x  | generic-4.0.x
+    Any 4.1.x    | Kernel 4.1.x  | generic-4.1.x
 
     * Note, if the Ubuntu/Fedora release version and your kernel version conflict,
       go with the branch corresponding to your *kernel version* as
