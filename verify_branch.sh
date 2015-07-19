@@ -34,7 +34,9 @@ doSwitch ()
 echo "Verifying a sane branch for your kernel version..."
 
 if inGitRepo; then
-    if $(uname -r | grep "4.1" > /dev/null); then
+    if $(uname -r | grep "4.2" > /dev/null); then
+        doSwitch "generic-4.2.x"
+    elif $(uname -r | grep "4.1" > /dev/null); then
         doSwitch "generic-4.1.x"
     elif $(uname -r | grep "4.0" > /dev/null); then
         doSwitch "generic-4.0.x"
@@ -42,7 +44,7 @@ if inGitRepo; then
         if runningUbuntuKernel; then
             doSwitch "ubuntu-15.04"
         else
-          doSwitch "generic-3.19.x"
+            doSwitch "generic-3.19.x"
         fi
     elif $(uname -r | grep "3.18" > /dev/null); then
         doSwitch "generic-3.18.x"
@@ -94,7 +96,8 @@ if inGitRepo; then
     fi
 else
     base="$(basename $(pwd))"
-    if ( $(uname -r | grep "4.1"  > /dev/null) && ! $(echo "$base" | grep "generic-4.1.x"  > /dev/null) ) ||                                                          \
+    if ( $(uname -r | grep "4.2"  > /dev/null) && ! $(echo "$base" | grep "generic-4.2.x"  > /dev/null) ) ||                                                          \
+       ( $(uname -r | grep "4.1"  > /dev/null) && ! $(echo "$base" | grep "generic-4.1.x"  > /dev/null) ) ||                                                          \
        ( $(uname -r | grep "4.0"  > /dev/null) && ! $(echo "$base" | grep "generic-4.0.x"  > /dev/null) ) ||                                                          \
        ( $(uname -r | grep "3.19" > /dev/null) && ! $(echo "$base" | grep "generic-3.19.x" > /dev/null) ) && ! $(echo "$base" | grep "ubuntu-15.04"   > /dev/null) || \
        ( $(uname -r | grep "3.18" > /dev/null) && ! $(echo "$base" | grep "generic-3.18.x" > /dev/null) ) ||                                                          \
