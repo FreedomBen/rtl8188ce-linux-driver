@@ -277,7 +277,7 @@ After running:
 
     modprobe rtl8192ce 
     
-You may have invalid configuration options in /etc/modprobe.d/rtl8192ce.conf.  You can either remove the file or remove the debug option as it is no long supported.   
+You may have invalid configuration options in `/etc/modprobe.d/rtl8192ce.conf`.  You can either remove the file or remove any options that are not supported.
 
 **3\. If you're connection seems unstable:**
 
@@ -306,7 +306,7 @@ The current Tx power will be listed as `Tx-Power=xx dBm`
 
 **4\. If you're getting power drops\*:**
 
-You may have better luck fixing your data rate.  The best rate will vary depending on your Tx power, Rx power, and distance from the router.  You may want to set the rate to be fixed around your internet connection speed unless you're doing other stuff on your LAN.  Basgoosen found his sweet spot to be 24M.  You can set the fixed rate as follows (substitute your wireless interface for \<wlan\>, so for example wlan0):
+You may have better luck fixing your data rate.  The best rate will vary depending on your Tx power, Rx power, and distance from the router.  You may want to set the rate to be fixed at a speed similar to your internet connection speed unless you're doing other stuff on your LAN.  Basgoosen found his sweet spot to be 24M.  You can set the fixed rate as follows (substitute your wireless interface for \<wlan\>, so for example wlan0):
 
     sudo iwconfig <wlan> rate fixed
     sudo iwconfig <wlan> rate 24M
@@ -328,13 +328,15 @@ To make this persistent, create a file in `/etc/network/if-up.d` containing the 
 
 **5\. My kernel package was updated by my distro and now I'm stuck back on the stock driver!**
 
-Yeah unfortunately this does currently happen anytime your kernel package is updated by your distro.  The solution is to rebuild and reinstall this driver.  On the plus side that gives you a chance to pull down the latest changes so that you're up to date with the latest.
+Yeah unfortunately this does currently happen anytime your kernel package is updated by your distro.  The solution is to rebuild and reinstall this driver.  On the plus side that gives you a chance to pull down the latest changes so that you're up to date.
 
 Please don't save a copy of the drivers compiled under a different version of the kernel to copy back in after the kernel update.  While a clever solution, this could cause undefined and potentially disastrous results if the ABI changes (which it does frequently).  The drivers need to be rebuilt using the new kernel headers to ensure they are compiled correctly.  It may work fine for a few upgrades, but eventually it will leave your system unbootable.
 
 You can run this command to automatically clone this repo and kick off the installer (git must be installed already):
 
     git clone https://github.com/FreedomBen/rtl8188ce-linux-driver.git && cd rtl8188ce-linux-driver && ./install.sh
+
+You might also consider using DKMS if your kernel changes often.  There are instructions near the top of this README.
 
 **6\. I think this driver broke something.  How do I get back to the stock driver?**
 
