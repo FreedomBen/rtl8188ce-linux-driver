@@ -342,7 +342,7 @@ You might also consider using DKMS if your kernel changes often.  There are inst
 
 You basically have two choices.  Either will get the job done.  When you run `sudo make uninstall`, the make script will try to restore your backup from when you installed.  The system works like this:
 
-* When you run `sudo make install`, the existing drivers are backup up to `~/.rtlwifi-backups` as a precaution (this is new as of 29-May-2014, so if you installed before then, you have no backups.  Sorry)
+* When you run `sudo make install`, the existing drivers are backed up to `~/.rtlwifi-backups` as a precaution (this is new as of 29-May-2014, so if you installed before then, you have no backups.  Sorry)
 * When you run `sudo make uninstall`, this location is checked for a backup that matches your current kernel version.  If one cannot be found, then you are stuck with choice #2.  If a suitable backup is found, the script will offer to restore it for you. 
 
 Choice #1 - Use the backup that the install script made for you:\*
