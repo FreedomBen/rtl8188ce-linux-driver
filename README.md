@@ -157,11 +157,11 @@ Clone the repo (Basically it makes a copy of the current source code)
     git clone https://github.com/FreedomBen/rtl8188ce-linux-driver.git
 
 
-1\.  Install build dependencies (pay attention to the backticks!):
+1\.  Install build dependencies:
 
     Ubuntu:
 
-    apt-get install gcc build-essential linux-headers-generic linux-headers-`uname -r`
+    apt-get install gcc build-essential linux-headers-generic linux-headers-$(uname -r)
 
     Fedora:
 
@@ -248,13 +248,13 @@ Or tarball it up:
 NOTE: Unlike the stock driver, `rtl8192c_common` is only required with kernel >= 3.14
 
 
-8\. Make persistent by adding this to the end of "/etc/modules" (for Ubuntu), or "/etc/rc.modules" (for Fedora) (if Fedora make sure /etc/rc.modules is executable), or "/etc/modules-load.d/rtlwifi.conf" (for Arch). If you don't have an RTL8188CE or RTL8192CE, then substitute the correct kernel module in place of `rtl8192ce`:
+8\. Make persistent by adding this to the end of `/etc/modules` (for Ubuntu), or `/etc/rc.modules` (for Fedora) (if Fedora make sure `/etc/rc.modules` is executable), or `/etc/modules-load.d/rtlwifi.conf` (for Arch). If you don't have an RTL8188CE or RTL8192CE, then substitute the correct kernel module in place of `rtl8192ce`:
 
     rtl8192ce
 
 NOTE:  By "make persistent", I mean making the loading of the RLT8192CE kernel modules happen automatically at boot time so you don't have to modprobe them in yourself.  If `udev` is seeing your Realtek card (which is usually the case), then it will load the kernel modules for you without this, but putting this in hurts nothing.
 
-You may want to verify your CRDA domain.  For example if you were in Bolivia it would be: "iw reg set BO"
+You may want to verify your CRDA domain.  For example if you were in Bolivia it would be: `iw reg set BO`
 There is more information about CRDA available at: http://ttys1.wordpress.com/2012/04/12/fixing-regulatory-domain-crda-of-realtec-wireless-device-drivers/
 
 
