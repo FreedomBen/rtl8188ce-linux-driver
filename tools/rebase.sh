@@ -6,6 +6,7 @@ GENERIC='git://git.kernel.org/pub/scm/linux/kernel/git/stable/linux-stable.git'
 UBUNTU1404='git://kernel.ubuntu.com/ubuntu/ubuntu-trusty.git'
 UBUNTU1410='git://kernel.ubuntu.com/ubuntu/ubuntu-utopic.git'
 UBUNTU1504='git://kernel.ubuntu.com/ubuntu/ubuntu-vivid.git'
+UBUNTU1510='git://kernel.ubuntu.com/ubuntu/ubuntu-wily.git'
 
 starting_dir="$(pwd)"
 
@@ -57,6 +58,9 @@ tag ()
         elif $(echo "$1" | grep "15.04" >/dev/null 2>&1); then
             echo "$(git tag | grep Ubuntu-3.19 | sort -n | ~/extract.rb)"
             return
+        elif $(echo "$1" | grep "15.10" >/dev/null 2>&1); then
+            echo "$(git tag | grep Ubuntu-4.2 | sort -n | ~/extract.rb)"
+            return
         fi
     fi
     die "unknown tag for \"$1\""
@@ -81,6 +85,8 @@ if [ "$1" = "ubuntu-14.04" ]; then
 elif [ "$1" = "ubuntu-14.10" ]; then
     remote="$UBUNTU1410"
 elif [ "$1" = "ubuntu-15.04" ]; then
+    remote="$UBUNTU1510"
+elif [ "$1" = "ubuntu-15.10" ]; then
     remote="$UBUNTU1504"
 elif [[ $1 =~ generic ]]; then
     remote="$GENERIC"
