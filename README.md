@@ -31,6 +31,7 @@ Well supported kernel releases:
         3.19.x
         4.0.x
         4.1.x
+        4.2.x
 
 Well supported Ubuntu (and Ubuntu-based) releases:
 
@@ -40,6 +41,7 @@ Well supported Ubuntu (and Ubuntu-based) releases:
         Ubuntu 14.04 (LTS)
         Ubuntu 14.10
         Ubuntu 15.04
+        Ubuntu 15.10
 
         Elementary OS Luna
         Elementary OS Isis
@@ -190,6 +192,7 @@ Ex: "git checkout ubuntu-13.04"
     Ubuntu 14.04 | Kernel 3.13.x | ubuntu-14.04
     Ubuntu 14.10 | Kernel 3.16.x | ubuntu-14.10
     Ubuntu 15.04 | Kernel 3.19.x | ubuntu-15.04
+    Ubuntu 15.10 | Kernel 4.2.x  | ubuntu-15.10
     Mint 17      | Kernel 3.13.x | mint-17
     --------------------------------------------
     Any 3.13.x   | Kernel 3.13.x | generic-3.13.x
@@ -201,6 +204,7 @@ Ex: "git checkout ubuntu-13.04"
     Any 3.19.x   | Kernel 3.19.x | generic-3.19.x
     Any 4.0.x    | Kernel 4.0.x  | generic-4.0.x
     Any 4.1.x    | Kernel 4.1.x  | generic-4.1.x
+    Any 4.2.x    | Kernel 4.2.x  | generic-4.2.x
 
     * Note, if the Ubuntu/Mint release version and your kernel version conflict,
       go with the branch corresponding to your *kernel version* as
