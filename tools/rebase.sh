@@ -71,6 +71,18 @@ repo_dir ()
     echo $1 | sed -e 's/.*\///g' | sed -e 's/\.git//g'
 }
 
+if [ "$1" = "ubuntu-14.04" ]; then
+    remote="$UBUNTU1404"
+elif [ "$1" = "ubuntu-14.10" ]; then
+    remote="$UBUNTU1410"
+elif [ "$1" = "ubuntu-15.04" ]; then
+    remote="$UBUNTU1504"
+elif [ "$1" = "ubuntu-15.10" ]; then
+    remote="$UBUNTU1510"
+elif [[ $1 =~ generic ]]; then
+    remote="$GENERIC"
+fi
+
 [ -f "regd.c" ] || die "Need to start script from root of dir"
 
 [ -n "$1" ] || die "Need branch to rebase specified"
@@ -79,18 +91,6 @@ repo_dir ()
 
 mkdir -p "$LOCATION"
 cd $LOCATION
-
-if [ "$1" = "ubuntu-14.04" ]; then
-    remote="$UBUNTU1404"
-elif [ "$1" = "ubuntu-14.10" ]; then
-    remote="$UBUNTU1410"
-elif [ "$1" = "ubuntu-15.04" ]; then
-    remote="$UBUNTU1510"
-elif [ "$1" = "ubuntu-15.10" ]; then
-    remote="$UBUNTU1504"
-elif [[ $1 =~ generic ]]; then
-    remote="$GENERIC"
-fi
 
 [ -n "$remote" ] || die "Uunsupported branch \"$1\""
 
