@@ -22,7 +22,6 @@ Well supported kernel releases:
         3.2.x
         3.8.x
         3.11.x
-        3.12.x
         3.13.x
         3.14.x
         3.15.x
@@ -157,11 +156,11 @@ Clone the repo (Basically it makes a copy of the current source code)
     git clone https://github.com/FreedomBen/rtl8188ce-linux-driver.git
 
 
-1\.  Install build dependencies (pay attention to the backticks!):
+1\.  Install build dependencies:
 
     Ubuntu:
 
-    apt-get install gcc build-essential linux-headers-generic linux-headers-`uname -r`
+    apt-get install gcc build-essential linux-headers-generic linux-headers-$(uname -r)
 
     Fedora:
 
@@ -191,12 +190,11 @@ Ex: "git checkout ubuntu-13.04"
     Ubuntu 14.04 | Kernel 3.13.x | ubuntu-14.04
     Ubuntu 14.10 | Kernel 3.16.x | ubuntu-14.10
     Ubuntu 15.04 | Kernel 3.19.x | ubuntu-15.04
-    Fedora 19    | Kernel 3.14.x | fedora-19
-    Fedora 20    | Kernel 3.15.x | fedora-20
     Mint 17      | Kernel 3.13.x | mint-17
     --------------------------------------------
     Any 3.13.x   | Kernel 3.13.x | generic-3.13.x
     Any 3.14.x   | Kernel 3.14.x | generic-3.14.x
+    Any 3.15.x   | Kernel 3.14.x | generic-3.14.x
     Any 3.16.x   | Kernel 3.16.x | generic-3.16.x
     Any 3.17.x   | Kernel 3.17.x | generic-3.17.x
     Any 3.18.x   | Kernel 3.18.x | generic-3.18.x
@@ -204,10 +202,9 @@ Ex: "git checkout ubuntu-13.04"
     Any 4.0.x    | Kernel 4.0.x  | generic-4.0.x
     Any 4.1.x    | Kernel 4.1.x  | generic-4.1.x
 
-    * Note, if the Ubuntu/Fedora release version and your kernel version conflict,
+    * Note, if the Ubuntu/Mint release version and your kernel version conflict,
       go with the branch corresponding to your *kernel version* as
       that is what really matters!
-
 
 3\. Compile:
 
@@ -248,13 +245,13 @@ Or tarball it up:
 NOTE: Unlike the stock driver, `rtl8192c_common` is only required with kernel >= 3.14
 
 
-8\. Make persistent by adding this to the end of "/etc/modules" (for Ubuntu), or "/etc/rc.modules" (for Fedora) (if Fedora make sure /etc/rc.modules is executable), or "/etc/modules-load.d/rtlwifi.conf" (for Arch). If you don't have an RTL8188CE or RTL8192CE, then substitute the correct kernel module in place of `rtl8192ce`:
+8\. Make persistent by adding this to the end of `/etc/modules` (for Ubuntu), or `/etc/rc.modules` (for Fedora) (if Fedora make sure `/etc/rc.modules` is executable), or `/etc/modules-load.d/rtlwifi.conf` (for Arch). If you don't have an RTL8188CE or RTL8192CE, then substitute the correct kernel module in place of `rtl8192ce`:
 
     rtl8192ce
 
 NOTE:  By "make persistent", I mean making the loading of the RLT8192CE kernel modules happen automatically at boot time so you don't have to modprobe them in yourself.  If `udev` is seeing your Realtek card (which is usually the case), then it will load the kernel modules for you without this, but putting this in hurts nothing.
 
-You may want to verify your CRDA domain.  For example if you were in Bolivia it would be: "iw reg set BO"
+You may want to verify your CRDA domain.  For example if you were in Bolivia it would be: `iw reg set BO`
 There is more information about CRDA available at: http://ttys1.wordpress.com/2012/04/12/fixing-regulatory-domain-crda-of-realtec-wireless-device-drivers/
 
 
