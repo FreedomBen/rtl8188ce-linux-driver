@@ -112,7 +112,12 @@ temp="$(pwd)"
 cd "$starting_dir"
 git checkout --force "$1"
 cd "$temp"
-cp -r drivers/net/wireless/rtlwifi/* "${starting_dir}/"
+
+if [ -d "drivers/net/wireless/rtlwifi" ]; then
+    cp -r drivers/net/wireless/rtlwifi/* "${starting_dir}/"
+else
+    cp -r drivers/net/wireless/realtek/rtlwifi/* "${starting_dir}/"
+fi
 
 cd "$starting_dir"
 
