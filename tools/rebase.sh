@@ -29,7 +29,10 @@ is_ubuntu ()
 tag ()
 {
     if $(is_generic $1); then
-        if $(echo "$1" | grep "4\.3" >/dev/null 2>&1); then
+        if $(echo "$1" | grep "4\.4" >/dev/null 2>&1); then
+            echo "$(git tag | grep "v4\.4" | sort -n | ~/extract.rb)"
+            return
+        elif $(echo "$1" | grep "4\.3" >/dev/null 2>&1); then
             echo "$(git tag | grep "v4\.3" | sort -n | ~/extract.rb)"
             return
         elif $(echo "$1" | grep "4\.2" >/dev/null 2>&1); then
@@ -109,7 +112,12 @@ temp="$(pwd)"
 cd "$starting_dir"
 git checkout --force "$1"
 cd "$temp"
-cp -r drivers/net/wireless/rtlwifi/* "${starting_dir}/"
+
+if [ -d "drivers/net/wireless/rtlwifi" ]; then
+    cp -r drivers/net/wireless/rtlwifi/* "${starting_dir}/"
+else
+    cp -r drivers/net/wireless/realtek/rtlwifi/* "${starting_dir}/"
+fi
 
 cd "$starting_dir"
 
