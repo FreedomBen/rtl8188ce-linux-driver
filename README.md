@@ -33,6 +33,7 @@ Well supported kernel releases:
         4.1.x
         4.2.x
         4.3.x
+        4.4.x
 
 Well supported Ubuntu (and Ubuntu-based) releases:
 
@@ -88,7 +89,7 @@ Other RealTek cards, kernel releases, and Linux flavors/releases are supported, 
         android 2.2 (froyo-x86), etc.
         
 
-Please note that I have only tested the driver on Ubuntu and Fedora (the well supported releases).  If you are NOT using Ubuntu, pay close attention to your kernel version when selecting branches.  You also need to substitute your package manager whenever you see `apt-get install`, so Fedora would be `yum install xxx`.  Most package names are the same but there may be some difference.
+Please note that I have only tested the driver on Ubuntu and Fedora (the well supported releases).  If you are NOT using Ubuntu, pay close attention to your kernel version when selecting branches.  You also need to substitute your package manager whenever you see `apt-get install`, so Fedora would be `dnf install xxx`.  Most package names are the same but there may be some difference.
 
 
 Automatic Installation:
@@ -153,7 +154,7 @@ Install git if necessary:
     
     or
 
-    yum install git
+    dnf install git
 
 Clone the repo (Basically it makes a copy of the current source code)
 
@@ -168,9 +169,9 @@ Clone the repo (Basically it makes a copy of the current source code)
 
     Fedora:
 
-    yum install kernel-devel kernel-headers
-    yum groupinstall "Development Tools"
-    yum groupinstall "C Development Tools and Libraries"
+    dnf install kernel-devel kernel-headers
+    dnf groupinstall "Development Tools"
+    dnf groupinstall "C Development Tools and Libraries"
 
     Arch:
 
@@ -208,6 +209,7 @@ Ex: "git checkout ubuntu-13.04"
     Any 4.1.x    | Kernel 4.1.x  | generic-4.1.x
     Any 4.2.x    | Kernel 4.2.x  | generic-4.2.x
     Any 4.3.x    | Kernel 4.3.x  | generic-4.3.x
+    Any 4.4.x    | Kernel 4.4.x  | generic-4.4.x
 
     * Note, if the Ubuntu/Mint release version and your kernel version conflict,
       go with the branch corresponding to your *kernel version* as
@@ -357,7 +359,7 @@ or
 
     ./restore_backup.sh
 
-* Note that this will look in the home directory of whichever user you are when you run it, so if it doesn't see a backup, try it again with sudo so that it will check root's home directory, or as a regular user so it will check that user's directory.*
+* Note that this will look in the home directory of whichever user you are when you run it, so if it doesn't see a backup, try it again with `sudo` so that it will check root's home directory, or as a regular user so it will check that user's directory.*
 
 Choice #2 - Reinstall your distro's kernel package:
 
