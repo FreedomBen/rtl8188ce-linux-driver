@@ -1022,9 +1022,12 @@ static void send_beacon_frame( struct ieee80211_hw *hw,
 {
 	struct rtl_priv *rtlpriv = rtl_priv( hw );
 	struct sk_buff *skb = ieee80211_beacon_get( hw, vif );
+	struct rtl_tcb_desc tcb_desc;
 
-	if ( skb )
-		rtlpriv->intf_ops->adapter_tx( hw, NULL, skb, NULL );
+	if ( skb ) {
+		memset( &tcb_desc, 0, sizeof( struct rtl_tcb_desc ) );
+		rtlpriv->intf_ops->adapter_tx( hw, NULL, skb, &tcb_desc );
+	}
 }
 
 static void rtl_op_bss_info_changed( struct ieee80211_hw *hw,
@@ -1377,7 +1380,7 @@ static int rtl_op_ampdu_action( struct ieee80211_hw *hw,
 			       struct ieee80211_vif *vif,
 			       enum ieee80211_ampdu_mlme_action action,
 			       struct ieee80211_sta *sta, u16 tid, u16 *ssn,
-			       u8 buf_size )
+			       u8 buf_size, bool amsdu )
 {
 	struct rtl_priv *rtlpriv = rtl_priv( hw );
 
@@ -1837,8 +1840,7 @@ bool rtl_cmd_send_packet( struct ieee80211_hw *hw, struct sk_buff *skb )
 
 	spin_lock_irqsave( &rtlpriv->locks.irq_th_lock, flags );
 	pskb = __skb_dequeue( &ring->queue );
-	if ( pskb )
-		kfree_skb( pskb );
+	kfree_skb( pskb );
 
 	/*this is wrong, fill_tx_cmddesc needs update*/
 	pdesc = &ring->desc[0];
