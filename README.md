@@ -1,16 +1,13 @@
 rtl8188ce-linux-driver
 ======================
 
-
 This modified version of the RealTek WiFi driver fixes some issues with RealTek cards on Linux.
-
 
 **Why use this driver?**
 
 1.  It has been modified to allow you to transmit at up to 33 dBm instead of the stock driver hard limit of 20 dBm, regardless of your CRDA regulatory domain.  This is a substantial increase in capability because every 3 dB increase is equivalent to a doubling of the power.  IOW, you can pump out 4x more Tx power than before.  This is subject to CRDA restrictions however (though you can set that to whatever you want, just make sure you're staying legal)
 2.  It has a few default settings that generally increase stability
 3.  Some helpful fixes are backported from newer kernels so that they can be enjoyed without upgrading the entire kernel (very useful for staying on your distros current kernel while benefitting from fixes relating to this driver)
-
 
 Well supported RealTek cards:
 
@@ -34,6 +31,7 @@ Well supported kernel releases:
         4.2.x
         4.3.x
         4.4.x
+        4.5.x
 
 Well supported Ubuntu (and Ubuntu-based) releases:
 
@@ -210,6 +208,7 @@ Ex: "git checkout ubuntu-13.04"
     Any 4.2.x    | Kernel 4.2.x  | generic-4.2.x
     Any 4.3.x    | Kernel 4.3.x  | generic-4.3.x
     Any 4.4.x    | Kernel 4.4.x  | generic-4.4.x
+    Any 4.5.x    | Kernel 4.5.x  | generic-4.5.x
 
     * Note, if the Ubuntu/Mint release version and your kernel version conflict,
       go with the branch corresponding to your *kernel version* as
