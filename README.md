@@ -42,6 +42,7 @@ Well supported Ubuntu (and Ubuntu-based) releases:
         Ubuntu 14.10
         Ubuntu 15.04
         Ubuntu 15.10
+        Ubuntu 16.04 (LTS)
 
         Elementary OS Luna
         Elementary OS Isis
@@ -194,6 +195,7 @@ Ex: "git checkout ubuntu-13.04"
     Ubuntu 14.10 | Kernel 3.16.x | ubuntu-14.10
     Ubuntu 15.04 | Kernel 3.19.x | ubuntu-15.04
     Ubuntu 15.10 | Kernel 4.2.x  | ubuntu-15.10
+    Ubuntu 16.04 | Kernel 4.4.x  | ubuntu-16.04
     Mint 17      | Kernel 3.13.x | mint-17
     --------------------------------------------
     Any 3.13.x   | Kernel 3.13.x | generic-3.13.x
