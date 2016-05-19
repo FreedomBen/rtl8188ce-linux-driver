@@ -72,6 +72,8 @@ static int rtl92cu_init_sw_vars( struct ieee80211_hw *hw )
 	rtlpriv->dm.disable_framebursting = false;
 	rtlpriv->dm.thermalvalue = 0;
 	rtlpriv->dbg.global_debuglevel = rtlpriv->cfg->mod_params->debug;
+	rtlpriv->cfg->mod_params->sw_crypto =
+		rtlpriv->cfg->mod_params->sw_crypto;
 
 	/* for firmware buf */
 	rtlpriv->rtlhal.pfirmware = vzalloc( 0x4000 );
@@ -328,6 +330,7 @@ static struct usb_device_id rtl8192c_usb_ids[] = {
 	{RTL_USB_DEVICE( 0x07b8, 0x8188, rtl92cu_hal_cfg )}, /*Abocom - Abocom*/
 	{RTL_USB_DEVICE( 0x07b8, 0x8189, rtl92cu_hal_cfg )}, /*Funai - Abocom*/
 	{RTL_USB_DEVICE( 0x0846, 0x9041, rtl92cu_hal_cfg )}, /*NetGear WNA1000M*/
+	{RTL_USB_DEVICE( 0x0846, 0x9043, rtl92cu_hal_cfg )}, /*NG WNA1000Mv2*/
 	{RTL_USB_DEVICE( 0x0b05, 0x17ba, rtl92cu_hal_cfg )}, /*ASUS-Edimax*/
 	{RTL_USB_DEVICE( 0x0bda, 0x5088, rtl92cu_hal_cfg )}, /*Thinkware-CC&C*/
 	{RTL_USB_DEVICE( 0x0df6, 0x0052, rtl92cu_hal_cfg )}, /*Sitecom - Edimax*/
