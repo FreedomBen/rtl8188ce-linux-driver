@@ -375,7 +375,7 @@ bool rtl92ee_rx_query_desc( struct ieee80211_hw *hw,
 	status->decrypted = !GET_RX_DESC_SWDEC( pdesc );
 	status->rate = ( u8 )GET_RX_DESC_RXMCS( pdesc );
 	status->isampdu = ( bool )( GET_RX_DESC_PAGGR( pdesc ) == 1 );
-		status->timestamp_low = GET_RX_DESC_TSFL( pdesc );
+	status->timestamp_low = GET_RX_DESC_TSFL( pdesc );
 	status->is_cck = RTL92EE_RX_HAL_IS_CCK_RATE( status->rate );
 
 	status->macid = GET_RX_DESC_MACID( pdesc );
@@ -1112,13 +1112,13 @@ void rtl92ee_tx_polling( struct ieee80211_hw *hw, u8 hw_queue )
 }
 
 u32 rtl92ee_rx_command_packet( struct ieee80211_hw *hw,
-			      struct rtl_stats status,
+			      const struct rtl_stats *status,
 			      struct sk_buff *skb )
 {
 	u32 result = 0;
 	struct rtl_priv *rtlpriv = rtl_priv( hw );
 
-	switch ( status.packet_report_type ) {
+	switch ( status->packet_report_type ) {
 	case NORMAL_RX:
 		result = 0;
 		break;
@@ -1128,7 +1128,7 @@ u32 rtl92ee_rx_command_packet( struct ieee80211_hw *hw,
 		break;
 	default:
 		RT_TRACE( rtlpriv, COMP_RECV, DBG_TRACE,
-			 "Unknown packet type %d\n", status.packet_report_type );
+			 "Unknown packet type %d\n", status->packet_report_type );
 		break;
 	}
 

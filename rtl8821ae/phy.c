@@ -425,9 +425,9 @@ u32 phy_get_tx_swing_8812A( struct ieee80211_hw *hw, u8	band,
 			out = 0x16A; /* -3 dB */
 		}
 	} else {
-	    u32 swing = 0, swing_a = 0, swing_b = 0;
+		u32 swing = 0, swing_a = 0, swing_b = 0;
 
-	    if ( band == BAND_ON_2_4G ) {
+		if ( band == BAND_ON_2_4G ) {
 			if ( reg_swing_2g == auto_temp ) {
 				efuse_shadow_read( hw, 1, 0xC6, ( u32 * )&swing );
 				swing = ( swing == 0xFF ) ? 0x00 : swing;
@@ -521,7 +521,7 @@ u32 phy_get_tx_swing_8812A( struct ieee80211_hw *hw, u8	band,
 
 	RT_TRACE( rtlpriv, COMP_SCAN, DBG_LOUD,
 		 "<=== PHY_GetTxBBSwing_8812A, out = 0x%X\n", out );
-	 return out;
+	return out;
 }
 
 void rtl8821ae_phy_switch_wirelessband( struct ieee80211_hw *hw, u8 band )
@@ -966,7 +966,7 @@ static void _rtl8821ae_phy_store_txpower_by_rate_base( struct ieee80211_hw *hw )
 static void _phy_convert_txpower_dbm_to_relative_value( u32 *data, u8 start,
 						u8 end, u8 base_val )
 {
-	char i = 0;
+	int i;
 	u8 temp_value = 0;
 	u32 temp_data = 0;
 
@@ -1479,18 +1479,13 @@ static char _rtl8812ae_phy_get_chnl_idx_of_txpwr_lmt( struct ieee80211_hw *hw,
 {
 	struct rtl_priv *rtlpriv = rtl_priv( hw );
 	char channel_index = -1;
-	u8 channel_5g[CHANNEL_MAX_NUMBER_5G] = {
-		36, 38, 40, 42, 44, 46, 48, 50, 52, 54, 56, 58, 60, 62, 64,
-		100, 102, 104, 106, 108, 110, 112, 114, 116, 118, 120, 122,
-		124, 126, 128, 130, 132, 134, 136, 138, 140, 142, 144, 149,
-		151, 153, 155, 157, 159, 161, 163, 165, 167, 168, 169, 171,
-		173, 175, 177};
 	u8  i = 0;
+
 	if ( band == BAND_ON_2_4G )
 		channel_index = channel - 1;
 	else if ( band == BAND_ON_5G ) {
-		for ( i = 0; i < sizeof( channel_5g )/sizeof( u8 ); ++i ) {
-			if ( channel_5g[i] == channel )
+		for ( i = 0; i < sizeof( channel5g )/sizeof( u8 ); ++i ) {
+			if ( channel5g[i] == channel )
 				channel_index = i;
 		}
 	} else
@@ -2247,13 +2242,6 @@ void rtl8821ae_phy_get_txpower_level( struct ieee80211_hw *hw, long *powerlevel 
 
 static bool _rtl8821ae_phy_get_chnl_index( u8 channel, u8 *chnl_index )
 {
-	u8 channel_5g[CHANNEL_MAX_NUMBER_5G] = {
-		36, 38, 40, 42, 44, 46, 48, 50, 52, 54, 56, 58, 60, 62,
-		64, 100, 102, 104, 106, 108, 110, 112, 114, 116, 118,
-		120, 122, 124, 126, 128, 130, 132, 134, 136, 138, 140,
-		142, 144, 149, 151, 153, 155, 157, 159, 161, 163, 165,
-		167, 168, 169, 171, 173, 175, 177
-	};
 	u8 i = 0;
 	bool in_24g = true;
 
@@ -2264,7 +2252,7 @@ static bool _rtl8821ae_phy_get_chnl_index( u8 channel, u8 *chnl_index )
 		in_24g = false;
 
 		for ( i = 0; i < CHANNEL_MAX_NUMBER_5G; ++i ) {
-			if ( channel_5g[i] == channel ) {
+			if ( channel5g[i] == channel ) {
 				*chnl_index = i;
 				return in_24g;
 			}
@@ -2735,13 +2723,10 @@ static u8 _rtl8821ae_get_txpower_index( struct ieee80211_hw *hw, u8 path,
 			     rate <= DESC_RATEVHT2SS_MCS9 ) )
 				txpower += rtlefuse->txpwr_5g_bw40diff[path][TX_2S];
 		} else if ( bandwidth == HT_CHANNEL_WIDTH_80 ) {
-			u8 channel_5g_80m[CHANNEL_MAX_NUMBER_5G_80M] = {
-				42, 58, 106, 122, 138, 155, 171
-			};
 			u8 i;
 
-			for ( i = 0; i < sizeof( channel_5g_80m ) / sizeof( u8 ); ++i )
-				if ( channel_5g_80m[i] == channel )
+			for ( i = 0; i < sizeof( channel5g_80m ) / sizeof( u8 ); ++i )
+				if ( channel5g_80m[i] == channel )
 					index = i;
 
 			if ( ( DESC_RATEMCS0 <= rate && rate <= DESC_RATEMCS15 ) ||
