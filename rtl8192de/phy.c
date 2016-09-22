@@ -931,19 +931,11 @@ static void _rtl92d_ccxpower_index_check( struct ieee80211_hw *hw,
 
 static u8 _rtl92c_phy_get_rightchnlplace( u8 chnl )
 {
-	u8 channel_5g[59] = {
-		1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14,
-		36, 38, 40, 42, 44, 46, 48, 50, 52, 54, 56, 58,
-		60, 62, 64, 100, 102, 104, 106, 108, 110, 112,
-		114, 116, 118, 120, 122, 124, 126, 128,
-		130, 132, 134, 136, 138, 140, 149, 151,
-		153, 155, 157, 159, 161, 163, 165
-	};
 	u8 place = chnl;
 
 	if ( chnl > 14 ) {
-		for ( place = 14; place < sizeof( channel_5g ); place++ ) {
-			if ( channel_5g[place] == chnl ) {
+		for ( place = 14; place < sizeof( channel5g ); place++ ) {
+			if ( channel5g[place] == chnl ) {
 				place++;
 				break;
 			}
@@ -2478,16 +2470,9 @@ static bool _rtl92d_is_legal_5g_channel( struct ieee80211_hw *hw, u8 channel )
 {
 
 	int i;
-	u8 channel_5g[45] = {
-		36, 38, 40, 42, 44, 46, 48, 50, 52, 54, 56, 58,
-		60, 62, 64, 100, 102, 104, 106, 108, 110, 112,
-		114, 116, 118, 120, 122, 124, 126, 128, 130, 132,
-		134, 136, 138, 140, 149, 151, 153, 155, 157, 159,
-		161, 163, 165
-	};
 
-	for ( i = 0; i < sizeof( channel_5g ); i++ )
-		if ( channel == channel_5g[i] )
+	for ( i = 0; i < sizeof( channel5g ); i++ )
+		if ( channel == channel5g[i] )
 			return true;
 	return false;
 }
@@ -2717,7 +2702,7 @@ void rtl92d_phy_lc_calibrate( struct ieee80211_hw *hw )
 	RTPRINT( rtlpriv, FINIT, INIT_IQK,  "LCK:Finish!!!\n" );
 }
 
-void rtl92d_phy_ap_calibrate( struct ieee80211_hw *hw, char delta )
+void rtl92d_phy_ap_calibrate( struct ieee80211_hw *hw, s8 delta )
 {
 	return;
 }
@@ -3522,14 +3507,14 @@ void rtl92d_update_bbrf_configuration( struct ieee80211_hw *hw )
 	for ( rfpath = RF90_PATH_A; rfpath < rtlphy->num_total_rfpath;
 	     rfpath++ ) {
 		if ( rtlhal->current_bandtype == BAND_ON_2_4G ) {
-			/* MOD_AG for RF paht_A 0x18 BIT8,BIT16 */
+			/* MOD_AG for RF path_A 0x18 BIT8,BIT16 */
 			rtl_set_rfreg( hw, rfpath, RF_CHNLBW, BIT( 8 ) | BIT( 16 ) |
 				      BIT( 18 ), 0 );
 			/* RF0x0b[16:14] =3b'111 */
 			rtl_set_rfreg( hw, ( enum radio_path )rfpath, 0x0B,
 				      0x1c000, 0x07 );
 		} else {
-			/* MOD_AG for RF paht_A 0x18 BIT8,BIT16 */
+			/* MOD_AG for RF path_A 0x18 BIT8,BIT16 */
 			rtl_set_rfreg( hw, rfpath, RF_CHNLBW, BIT( 8 ) |
 				      BIT( 16 ) | BIT( 18 ),
 				      ( BIT( 16 ) | BIT( 8 ) ) >> 8 );

@@ -100,7 +100,6 @@ int rtl8723be_init_sw_vars( struct ieee80211_hw *hw )
 	struct rtl_mac *mac = rtl_mac( rtl_priv( hw ) );
 
 	rtl8723be_bt_reg_init( hw );
-	rtlpci->msi_support = rtlpriv->cfg->mod_params->msi_support;
 	rtlpriv->btcoexist.btc_ops = rtl_btc_get_ops_pointer();
 
 	rtlpriv->dm.dm_initialgain_enable = 1;
@@ -158,6 +157,10 @@ int rtl8723be_init_sw_vars( struct ieee80211_hw *hw )
 	rtlpriv->psc.swctrl_lps = rtlpriv->cfg->mod_params->swctrl_lps;
 	rtlpriv->psc.fwctrl_lps = rtlpriv->cfg->mod_params->fwctrl_lps;
 	rtlpci->msi_support = rtlpriv->cfg->mod_params->msi_support;
+	rtlpriv->cfg->mod_params->sw_crypto =
+		 rtlpriv->cfg->mod_params->sw_crypto;
+	rtlpriv->cfg->mod_params->disable_watchdog =
+		 rtlpriv->cfg->mod_params->disable_watchdog;
 	if ( rtlpriv->cfg->mod_params->disable_watchdog )
 		pr_info( "watchdog disabled\n" );
 	rtlpriv->psc.reg_fwctrl_lps = 3;
@@ -216,9 +219,9 @@ bool rtl8723be_get_btc_status( void )
 	return true;
 }
 
-static bool is_fw_header( struct rtl8723e_firmware_header *hdr )
+static bool is_fw_header( struct rtlwifi_firmware_header *hdr )
 {
-	return ( hdr->signature & 0xfff0 ) == 0x5300;
+	return ( le16_to_cpu( hdr->signature ) & 0xfff0 ) == 0x5300;
 }
 
 static struct rtl_hal_ops rtl8723be_hal_ops = {
@@ -274,6 +277,10 @@ static struct rtl_mod_params rtl8723be_mod_params = {
 	.inactiveps = true,
 	.swctrl_lps = false,
 	.fwctrl_lps = true,
+	.msi_support = false,
+	.disable_watchdog = false,
+	.debug = DBG_EMERG,
+	.ant_sel = 0,
 };
 
 static struct rtl_hal_cfg rtl8723be_hal_cfg = {
@@ -393,8 +400,10 @@ module_param_named( debug, rtl8723be_mod_params.debug, int, 0444 );
 module_param_named( ips, rtl8723be_mod_params.inactiveps, bool, 0444 );
 module_param_named( swlps, rtl8723be_mod_params.swctrl_lps, bool, 0444 );
 module_param_named( fwlps, rtl8723be_mod_params.fwctrl_lps, bool, 0444 );
+module_param_named( msi, rtl8723be_mod_params.msi_support, bool, 0444 );
 module_param_named( disable_watchdog, rtl8723be_mod_params.disable_watchdog,
 		   bool, 0444 );
+module_param_named( ant_sel, rtl8723be_mod_params.ant_sel, int, 0444 );
 MODULE_PARM_DESC( swenc, "Set to 1 for software crypto (default 0)\n" );
 MODULE_PARM_DESC( ips, "Set to 0 to not use link power save (default 1)\n" );
 MODULE_PARM_DESC( swlps, "Set to 1 to use SW control power save (default 0)\n" );
@@ -403,6 +412,7 @@ MODULE_PARM_DESC( msi, "Set to 1 to use MSI interrupts mode (default 0)\n" );
 MODULE_PARM_DESC( debug, "Set debug level (0-5) (default 0)" );
 MODULE_PARM_DESC( disable_watchdog,
 		 "Set to 1 to disable the watchdog (default 0)\n" );
+MODULE_PARM_DESC( ant_sel, "Set to 1 or 2 to force antenna number (default 0)\n" );
 
 static SIMPLE_DEV_PM_OPS( rtlwifi_pm_ops, rtl_pci_suspend, rtl_pci_resume );
 
