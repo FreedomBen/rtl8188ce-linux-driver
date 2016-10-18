@@ -129,6 +129,9 @@ To use DKMS:
 
 1. Follow steps 0-2 in the "Manual Installation" section below.
 
+1. Copy the repo `cp -rv . /usr/src/rtlwifi-1.0.0`
+
+
 2. Run the following command to register the sources with DKMS (the `1.0.0` can be any numbers): (note the period at the end!)
 
     sudo dkms add rtlwifi/1.0.0 .
