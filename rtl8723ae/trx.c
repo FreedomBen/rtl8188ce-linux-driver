@@ -396,7 +396,7 @@ void rtl8723e_tx_fill_desc( struct ieee80211_hw *hw,
 
 	if ( pci_dma_mapping_error( rtlpci->pdev, mapping ) ) {
 		RT_TRACE( rtlpriv, COMP_SEND, DBG_TRACE,
-			 "DMA mapping error" );
+			 "DMA mapping error\n" );
 		return;
 	}
 	if ( mac->opmode == NL80211_IFTYPE_STATION ) {
@@ -564,7 +564,7 @@ void rtl8723e_tx_fill_cmddesc( struct ieee80211_hw *hw,
 
 	if ( pci_dma_mapping_error( rtlpci->pdev, mapping ) ) {
 		RT_TRACE( rtlpriv, COMP_SEND, DBG_TRACE,
-			 "DMA mapping error" );
+			 "DMA mapping error\n" );
 		return;
 	}
 	CLEAR_PCI_TX_DESC_CONTENT( pdesc, TX_DESC_SIZE );
@@ -717,7 +717,7 @@ void rtl8723e_tx_polling( struct ieee80211_hw *hw, u8 hw_queue )
 }
 
 u32 rtl8723e_rx_command_packet( struct ieee80211_hw *hw,
-			       struct rtl_stats status,
+			       const struct rtl_stats *status,
 			       struct sk_buff *skb )
 {
 	return 0;

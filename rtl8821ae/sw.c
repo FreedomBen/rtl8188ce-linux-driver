@@ -100,9 +100,9 @@ int rtl8821ae_init_sw_vars( struct ieee80211_hw *hw )
 	struct rtl_pci *rtlpci = rtl_pcidev( rtl_pcipriv( hw ) );
 	struct rtl_mac *mac = rtl_mac( rtl_priv( hw ) );
 	struct rtl_hal *rtlhal = rtl_hal( rtl_priv( hw ) );
+	char *fw_name, *wowlan_fw_name;
 
 	rtl8821ae_bt_reg_init( hw );
-	rtlpci->msi_support = rtlpriv->cfg->mod_params->msi_support;
 	rtlpriv->btcoexist.btc_ops = rtl_btc_get_ops_pointer();
 
 	rtlpriv->dm.dm_initialgain_enable = 1;
@@ -174,11 +174,15 @@ int rtl8821ae_init_sw_vars( struct ieee80211_hw *hw )
 	rtlpriv->psc.swctrl_lps = rtlpriv->cfg->mod_params->swctrl_lps;
 	rtlpriv->psc.fwctrl_lps = rtlpriv->cfg->mod_params->fwctrl_lps;
 	rtlpci->msi_support = rtlpriv->cfg->mod_params->msi_support;
+	rtlpci->int_clear = rtlpriv->cfg->mod_params->int_clear;
+	rtlpriv->cfg->mod_params->sw_crypto =
+		rtlpriv->cfg->mod_params->sw_crypto;
+	rtlpriv->cfg->mod_params->disable_watchdog =
+		rtlpriv->cfg->mod_params->disable_watchdog;
 	if ( rtlpriv->cfg->mod_params->disable_watchdog )
 		pr_info( "watchdog disabled\n" );
 	rtlpriv->psc.reg_fwctrl_lps = 3;
 	rtlpriv->psc.reg_max_lps_awakeintvl = 5;
-	rtlpci->msi_support = rtlpriv->cfg->mod_params->msi_support;
 
 	/* for ASPM, you can close aspm through
 	 * set const_support_pciaspm = 0
@@ -207,17 +211,17 @@ int rtl8821ae_init_sw_vars( struct ieee80211_hw *hw )
 	}
 
 	if ( rtlhal->hw_type == HARDWARE_TYPE_RTL8812AE ) {
-		rtlpriv->cfg->fw_name = "rtlwifi/rtl8812aefw.bin";
-		rtlpriv->cfg->wowlan_fw_name = "rtlwifi/rtl8812aefw_wowlan.bin";
+		fw_name = "rtlwifi/rtl8812aefw.bin";
+		wowlan_fw_name = "rtlwifi/rtl8812aefw_wowlan.bin";
 	} else {
-		rtlpriv->cfg->fw_name = "rtlwifi/rtl8821aefw.bin";
-		rtlpriv->cfg->wowlan_fw_name = "rtlwifi/rtl8821aefw_wowlan.bin";
+		fw_name = "rtlwifi/rtl8821aefw.bin";
+		wowlan_fw_name = "rtlwifi/rtl8821aefw_wowlan.bin";
 	}
 
 	rtlpriv->max_fw_size = 0x8000;
 	/*load normal firmware*/
-	pr_info( "Using firmware %s\n", rtlpriv->cfg->fw_name );
-	err = request_firmware_nowait( THIS_MODULE, 1, rtlpriv->cfg->fw_name,
+	pr_info( "Using firmware %s\n", fw_name );
+	err = request_firmware_nowait( THIS_MODULE, 1, fw_name,
 				      rtlpriv->io.dev, GFP_KERNEL, hw,
 				      rtl_fw_cb );
 	if ( err ) {
@@ -226,9 +230,9 @@ int rtl8821ae_init_sw_vars( struct ieee80211_hw *hw )
 		return 1;
 	}
 	/*load wowlan firmware*/
-	pr_info( "Using firmware %s\n", rtlpriv->cfg->wowlan_fw_name );
+	pr_info( "Using firmware %s\n", wowlan_fw_name );
 	err = request_firmware_nowait( THIS_MODULE, 1,
-				      rtlpriv->cfg->wowlan_fw_name,
+				      wowlan_fw_name,
 				      rtlpriv->io.dev, GFP_KERNEL, hw,
 				      rtl_wowlan_fw_cb );
 	if ( err ) {
@@ -315,15 +319,15 @@ static struct rtl_mod_params rtl8821ae_mod_params = {
 	.swctrl_lps = false,
 	.fwctrl_lps = true,
 	.msi_support = true,
+	.int_clear = true,
 	.debug = DBG_EMERG,
 	.disable_watchdog = 0,
 };
 
-static struct rtl_hal_cfg rtl8821ae_hal_cfg = {
+static const struct rtl_hal_cfg rtl8821ae_hal_cfg = {
 	.bar_id = 2,
 	.write_readback = true,
 	.name = "rtl8821ae_pci",
-	.fw_name = "rtlwifi/rtl8821aefw.bin",
 	.ops = &rtl8821ae_hal_ops,
 	.mod_params = &rtl8821ae_mod_params,
 	.maps[SYS_ISO_CTRL] = REG_SYS_ISO_CTRL,
@@ -444,6 +448,7 @@ module_param_named( fwlps, rtl8821ae_mod_params.fwctrl_lps, bool, 0444 );
 module_param_named( msi, rtl8821ae_mod_params.msi_support, bool, 0444 );
 module_param_named( disable_watchdog, rtl8821ae_mod_params.disable_watchdog,
 		   bool, 0444 );
+module_param_named( int_clear, rtl8821ae_mod_params.int_clear, bool, 0444 );
 MODULE_PARM_DESC( swenc, "Set to 1 for software crypto (default 0)\n" );
 MODULE_PARM_DESC( ips, "Set to 0 to not use link power save (default 1)\n" );
 MODULE_PARM_DESC( swlps, "Set to 1 to use SW control power save (default 0)\n" );
@@ -451,6 +456,7 @@ MODULE_PARM_DESC( fwlps, "Set to 1 to use FW control power save (default 1)\n" )
 MODULE_PARM_DESC( msi, "Set to 1 to use MSI interrupts mode (default 1)\n" );
 MODULE_PARM_DESC( debug, "Set debug level (0-5) (default 0)" );
 MODULE_PARM_DESC( disable_watchdog, "Set to 1 to disable the watchdog (default 0)\n" );
+MODULE_PARM_DESC( int_clear, "Set to 0 to disable interrupt clear before set (default 1)\n" );
 
 static SIMPLE_DEV_PM_OPS( rtlwifi_pm_ops, rtl_pci_suspend, rtl_pci_resume );
 

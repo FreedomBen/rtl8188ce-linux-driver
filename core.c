@@ -42,38 +42,44 @@
 #include <linux/export.h>
 #include <net/cfg80211.h>
 
+u8 channel5g[CHANNEL_MAX_NUMBER_5G] = {
+	36, 38, 40, 42, 44, 46, 48,		/* Band 1 */
+	52, 54, 56, 58, 60, 62, 64,		/* Band 2 */
+	100, 102, 104, 106, 108, 110, 112,	/* Band 3 */
+	116, 118, 120, 122, 124, 126, 128,	/* Band 3 */
+	132, 134, 136, 138, 140, 142, 144,	/* Band 3 */
+	149, 151, 153, 155, 157, 159, 161,	/* Band 4 */
+	165, 167, 169, 171, 173, 175, 177	/* Band 4 */
+};
+EXPORT_SYMBOL( channel5g );
+
+u8 channel5g_80m[CHANNEL_MAX_NUMBER_5G_80M] = {
+	42, 58, 106, 122, 138, 155, 171
+};
+EXPORT_SYMBOL( channel5g_80m );
+
 void rtl_addr_delay( u32 addr )
 {
 	if ( addr == 0xfe )
 		mdelay( 50 );
 	else if ( addr == 0xfd )
-		mdelay( 5 );
+		msleep( 5 );
 	else if ( addr == 0xfc )
-		mdelay( 1 );
+		msleep( 1 );
 	else if ( addr == 0xfb )
-		udelay( 50 );
+		usleep_range( 50, 100 );
 	else if ( addr == 0xfa )
-		udelay( 5 );
+		usleep_range( 5, 10 );
 	else if ( addr == 0xf9 )
-		udelay( 1 );
+		usleep_range( 1, 2 );
 }
 EXPORT_SYMBOL( rtl_addr_delay );
 
 void rtl_rfreg_delay( struct ieee80211_hw *hw, enum radio_path rfpath, u32 addr,
 		     u32 mask, u32 data )
 {
-	if ( addr == 0xfe ) {
-		mdelay( 50 );
-	} else if ( addr == 0xfd ) {
-		mdelay( 5 );
-	} else if ( addr == 0xfc ) {
-		mdelay( 1 );
-	} else if ( addr == 0xfb ) {
-		udelay( 50 );
-	} else if ( addr == 0xfa ) {
-		udelay( 5 );
-	} else if ( addr == 0xf9 ) {
-		udelay( 1 );
+	if ( addr >= 0xf9 && addr <= 0xfe ) {
+		rtl_addr_delay( addr );
 	} else {
 		rtl_set_rfreg( hw, rfpath, addr, mask, data );
 		udelay( 1 );
@@ -83,18 +89,8 @@ EXPORT_SYMBOL( rtl_rfreg_delay );
 
 void rtl_bb_delay( struct ieee80211_hw *hw, u32 addr, u32 data )
 {
-	if ( addr == 0xfe ) {
-		mdelay( 50 );
-	} else if ( addr == 0xfd ) {
-		mdelay( 5 );
-	} else if ( addr == 0xfc ) {
-		mdelay( 1 );
-	} else if ( addr == 0xfb ) {
-		udelay( 50 );
-	} else if ( addr == 0xfa ) {
-		udelay( 5 );
-	} else if ( addr == 0xf9 ) {
-		udelay( 1 );
+	if ( addr >= 0xf9 && addr <= 0xfe ) {
+		rtl_addr_delay( addr );
 	} else {
 		rtl_set_bbreg( hw, addr, MASKDWORD, data );
 		udelay( 1 );
@@ -122,7 +118,7 @@ static void rtl_fw_do_work( const struct firmware *firmware, void *context,
 			if ( !err )
 				goto found_alt;
 		}
-		pr_err( "Firmware %s not available\n", rtlpriv->cfg->fw_name );
+		pr_err( "Selected firmware is not available\n" );
 		rtlpriv->max_fw_size = 0;
 		return;
 	}
@@ -537,7 +533,7 @@ static void _rtl_add_wowlan_patterns( struct ieee80211_hw *hw,
 		/* 3. calculate crc */
 		rtl_pattern.crc = _calculate_wol_pattern_crc( content, len );
 		RT_TRACE( rtlpriv, COMP_POWER, DBG_TRACE,
-			 "CRC_Remainder = 0x%x", rtl_pattern.crc );
+			 "CRC_Remainder = 0x%x\n", rtl_pattern.crc );
 
 		/* 4. write crc & mask_for_hw to hw */
 		rtlpriv->cfg->ops->add_wowlan_pattern( hw, &rtl_pattern, i );
@@ -776,7 +772,8 @@ static int rtl_op_config( struct ieee80211_hw *hw, u32 changed )
 					mac->bw_40 = false;
 					mac->bw_80 = false;
 					RT_TRACE( rtlpriv, COMP_ERR, DBG_EMERG,
-						 "switch case not processed\n" );
+						 "switch case %#x not processed\n",
+						 channel_type );
 					break;
 			}
 		}
@@ -1022,9 +1019,12 @@ static void send_beacon_frame( struct ieee80211_hw *hw,
 {
 	struct rtl_priv *rtlpriv = rtl_priv( hw );
 	struct sk_buff *skb = ieee80211_beacon_get( hw, vif );
+	struct rtl_tcb_desc tcb_desc;
 
-	if ( skb )
-		rtlpriv->intf_ops->adapter_tx( hw, NULL, skb, NULL );
+	if ( skb ) {
+		memset( &tcb_desc, 0, sizeof( struct rtl_tcb_desc ) );
+		rtlpriv->intf_ops->adapter_tx( hw, NULL, skb, &tcb_desc );
+	}
 }
 
 static void rtl_op_bss_info_changed( struct ieee80211_hw *hw,
@@ -1143,7 +1143,7 @@ static void rtl_op_bss_info_changed( struct ieee80211_hw *hw,
 					mac->mode = WIRELESS_MODE_AC_24G;
 			}
 
-			if ( vif->type == NL80211_IFTYPE_STATION && sta )
+			if ( vif->type == NL80211_IFTYPE_STATION )
 				rtlpriv->cfg->ops->update_rate_tbl( hw, sta, 0 );
 			rcu_read_unlock();
 
@@ -1375,11 +1375,13 @@ static void rtl_op_sta_notify( struct ieee80211_hw *hw,
 
 static int rtl_op_ampdu_action( struct ieee80211_hw *hw,
 			       struct ieee80211_vif *vif,
-			       enum ieee80211_ampdu_mlme_action action,
-			       struct ieee80211_sta *sta, u16 tid, u16 *ssn,
-			       u8 buf_size )
+			       struct ieee80211_ampdu_params *params )
 {
 	struct rtl_priv *rtlpriv = rtl_priv( hw );
+	struct ieee80211_sta *sta = params->sta;
+	enum ieee80211_ampdu_mlme_action action = params->action;
+	u16 tid = params->tid;
+	u16 *ssn = &params->ssn;
 
 	switch ( action ) {
 	case IEEE80211_AMPDU_TX_START:
@@ -1837,8 +1839,7 @@ bool rtl_cmd_send_packet( struct ieee80211_hw *hw, struct sk_buff *skb )
 
 	spin_lock_irqsave( &rtlpriv->locks.irq_th_lock, flags );
 	pskb = __skb_dequeue( &ring->queue );
-	if ( pskb )
-		kfree_skb( pskb );
+	kfree_skb( pskb );
 
 	/*this is wrong, fill_tx_cmddesc needs update*/
 	pdesc = &ring->desc[0];
