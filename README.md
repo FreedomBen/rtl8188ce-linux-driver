@@ -34,6 +34,8 @@ Well supported kernel releases:
         4.5.x
         4.6.x
         4.7.x
+        4.8.x
+        4.9.x
 
 Well supported Ubuntu (and Ubuntu-based) releases:
 
@@ -45,6 +47,7 @@ Well supported Ubuntu (and Ubuntu-based) releases:
         Ubuntu 15.04
         Ubuntu 15.10
         Ubuntu 16.04 (LTS)
+        Ubuntu 16.10
 
         Elementary OS Luna
         Elementary OS Isis
@@ -63,14 +66,17 @@ Well supported Fedora (and Fedora based) releases:
         Fedora 22
         Fedora 23
         Fedora 24
+        Fedora 25
 
         Red Hat Enterprise Linux 7.0 (LTS)
         Red Hat Enterprise Linux 7.1 (LTS)
         Red Hat Enterprise Linux 7.2 (LTS)
+        Red Hat Enterprise Linux 7.3 (LTS)
 
         CentOS 7.0 (LTS)
         CentOS 7.1 (LTS)
         CentOS 7.2 (LTS)
+        CentOS 7.3 (LTS)
 
 Arch is also supported, but tends to break each time the kernel is bumped up a minor version (like 3.13.x to 3.14.x).  I try to fix the breakage quickly but this is not how I support my family ;-)
 
@@ -206,6 +212,7 @@ Ex: "git checkout ubuntu-13.04"
     Ubuntu 15.04 | Kernel 3.19.x | ubuntu-15.04
     Ubuntu 15.10 | Kernel 4.2.x  | ubuntu-15.10
     Ubuntu 16.04 | Kernel 4.4.x  | ubuntu-16.04
+    Ubuntu 16.10 | Kernel 4.8.x  | ubuntu-16.10
     Mint 17      | Kernel 3.13.x | mint-17
     --------------------------------------------
     Any 3.13.x   | Kernel 3.13.x | generic-3.13.x
@@ -223,6 +230,8 @@ Ex: "git checkout ubuntu-13.04"
     Any 4.5.x    | Kernel 4.5.x  | generic-4.5.x
     Any 4.6.x    | Kernel 4.6.x  | generic-4.6.x
     Any 4.7.x    | Kernel 4.7.x  | generic-4.7.x
+    Any 4.8.x    | Kernel 4.8.x  | generic-4.8.x
+    Any 4.9.x    | Kernel 4.9.x  | generic-4.9.x
 
     * Note, if the Ubuntu/Mint release version and your kernel version conflict,
       go with the branch corresponding to your *kernel version* as
