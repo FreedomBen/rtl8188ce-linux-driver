@@ -38,8 +38,8 @@ inGitRepo ()
     done
 }
 
-runningFedora () 
-{ 
+runningFedora ()
+{
     if $(which lsb_release >/dev/null 2>&1); then
         lsb_release -d | grep --color=auto "Fedora" > /dev/null
     else
@@ -47,8 +47,8 @@ runningFedora ()
     fi
 }
 
-runningUbuntu () 
-{ 
+runningUbuntu ()
+{
     if $(which lsb_release >/dev/null 2>&1); then
         lsb_release -d | grep --color=auto "Ubuntu" > /dev/null
     else
@@ -85,6 +85,16 @@ runningUbuntuKernel ()
     uname -a | grep --color=auto "Ubuntu" > /dev/null
 }
 
+runningKernelLibre ()
+{
+    uname -r | grep --color=auto "libre" > /dev/null
+}
+
+hasDnf ()
+{
+    which dnf > /dev/null 2>&1
+}
+
 installBuildDependencies ()
 {
     if ! $(which sudo > /dev/null 2>&1); then
@@ -93,10 +103,15 @@ installBuildDependencies ()
     fi
 
     if runningFedora; then
-        sudo yum -y install kernel-devel kernel-headers
-        sudo yum -y groupinstall "Development Tools"
-        sudo yum -y groupinstall "C Development Tools and Libraries"
-        sudo yum -y install git
+        hasDnf && PKGMAN='dnf' || PKGMAN='yum'
+        if runningKernelLibre; then
+            sudo $PKGMAN -y install kernel-libre-devel kernel-libre-headers
+        else
+            sudo $PKGMAN -y install kernel-devel kernel-headers
+        fi
+        sudo $PKGMAN -y groupinstall "Development Tools"
+        sudo $PKGMAN -y groupinstall "C Development Tools and Libraries"
+        sudo $PKGMAN -y install git
         return $?
     elif runningArch; then
         sudo pacman -S --noconfirm --needed git
@@ -116,7 +131,7 @@ installBuildDependencies ()
     fi
 }
 
-makeModuleLoadPersistent () 
+makeModuleLoadPersistent ()
 {
     if runningFedora; then
         file="/etc/rc.modules"
@@ -212,7 +227,7 @@ runningStockRtl8192ce  ()
     runningAnyRtl8192ce && ! runningOurRtl8192ce
 }
 
-usingSystemd () 
+usingSystemd ()
 {
     which systemctl > /dev/null 2>&1
 }
