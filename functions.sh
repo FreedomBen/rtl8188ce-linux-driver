@@ -90,6 +90,11 @@ runningKernelLibre ()
     uname -r | grep --color=auto "libre" > /dev/null
 }
 
+hasDnf ()
+{
+    which dnf > /dev/null 2>&1
+}
+
 installBuildDependencies ()
 {
     if ! $(which sudo > /dev/null 2>&1); then
@@ -98,15 +103,15 @@ installBuildDependencies ()
     fi
 
     if runningFedora; then
+        hasDnf && PKGMAN='dnf' || PKGMAN='yum'
         if runningKernelLibre; then
-            sudo dnf install -y  kernel-libre-devel kernel-libre-headers
+            sudo $PKGMAN -y install kernel-libre-devel kernel-libre-headers
         else
-            sudo dnf -y install kernel-devel kernel-headers
+            sudo $PKGMAN -y install kernel-devel kernel-headers
         fi
-
-        sudo dnf -y groupinstall "Development Tools"
-        sudo dnf -y groupinstall "C Development Tools and Libraries"
-        sudo dnf -y install git
+        sudo $PKGMAN -y groupinstall "Development Tools"
+        sudo $PKGMAN -y groupinstall "C Development Tools and Libraries"
+        sudo $PKGMAN -y install git
         return $?
     elif runningArch; then
         sudo pacman -S --noconfirm --needed git
