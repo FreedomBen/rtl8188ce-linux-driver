@@ -31,7 +31,10 @@ is_ubuntu ()
 tag ()
 {
     if $(is_generic $1); then
-        if $(echo "$1" | grep "4\.10" >/dev/null 2>&1); then
+        if $(echo "$1" | grep "4\.11" >/dev/null 2>&1); then
+            echo "$(git tag | grep "v4\.11" | sort -n | ~/extract.rb)"
+            return
+        elif $(echo "$1" | grep "4\.10" >/dev/null 2>&1); then
             echo "$(git tag | grep "v4\.10" | sort -n | ~/extract.rb)"
             return
         elif $(echo "$1" | grep "4\.9" >/dev/null 2>&1); then
