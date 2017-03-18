@@ -36,6 +36,7 @@ Well supported kernel releases:
         4.7.x
         4.8.x
         4.9.x
+        4.10.x
 
 Well supported Ubuntu (and Ubuntu-based) releases:
 
@@ -232,6 +233,7 @@ Ex: "git checkout ubuntu-13.04"
     Any 4.7.x    | Kernel 4.7.x  | generic-4.7.x
     Any 4.8.x    | Kernel 4.8.x  | generic-4.8.x
     Any 4.9.x    | Kernel 4.9.x  | generic-4.9.x
+    Any 4.10.x   | Kernel 4.10.x | generic-4.10.x
 
     * Note, if the Ubuntu/Mint release version and your kernel version conflict,
       go with the branch corresponding to your *kernel version* as
