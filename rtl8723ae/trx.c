@@ -624,7 +624,7 @@ void rtl8723e_set_desc( struct ieee80211_hw *hw, u8 *pdesc,
 			SET_TX_DESC_NEXT_DESC_ADDRESS( pdesc, *( u32 * ) val );
 			break;
 		default:
-			RT_ASSERT( false, "ERR txdesc :%d not process\n",
+			WARN_ONCE( true, "rtl8723ae: ERR txdesc :%d not processed\n",
 				  desc_name );
 			break;
 		}
@@ -643,7 +643,7 @@ void rtl8723e_set_desc( struct ieee80211_hw *hw, u8 *pdesc,
 			SET_RX_DESC_EOR( pdesc, 1 );
 			break;
 		default:
-			RT_ASSERT( false, "ERR rxdesc :%d not process\n",
+			WARN_ONCE( true, "rtl8723ae: ERR rxdesc :%d not processed\n",
 				  desc_name );
 			break;
 		}
@@ -663,7 +663,7 @@ u32 rtl8723e_get_desc( u8 *pdesc, bool istx, u8 desc_name )
 			ret = GET_TX_DESC_TX_BUFFER_ADDRESS( pdesc );
 			break;
 		default:
-			RT_ASSERT( false, "ERR txdesc :%d not process\n",
+			WARN_ONCE( true, "rtl8723ae: ERR txdesc :%d not processed\n",
 				  desc_name );
 			break;
 		}
@@ -679,7 +679,7 @@ u32 rtl8723e_get_desc( u8 *pdesc, bool istx, u8 desc_name )
 			ret = GET_RX_DESC_BUFF_ADDR( pdesc );
 			break;
 		default:
-			RT_ASSERT( false, "ERR rxdesc :%d not process\n",
+			WARN_ONCE( true, "rtl8723ae: ERR rxdesc :%d not processed\n",
 				  desc_name );
 			break;
 		}
