@@ -20,6 +20,11 @@ hasChanges ()
     git status | grep "hanges not staged for commit" > /dev/null
 }
 
+hasUntracked ()
+{
+    git status | grep 'nothing added to commit but untracked files present' > /dev/null
+}
+
 [ -f README.md ] || die "Did not find README.md. Are you in the right directory?"
 
 git pull
@@ -38,7 +43,7 @@ for br in ${branches[@]}; do
     echo -e "${blue}Copying files onto ${br}${restore}"
     cp -r $DIR_NAME/* ./
 
-    if hasChanges; then
+    if hasChanges || hasUntracked; then
         echo -e "${yellow}There are updates to commit, committing...${br}${restore}"
         git add .
         git commit -m "Update tools to latest from master
