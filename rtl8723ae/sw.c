@@ -385,7 +385,6 @@ static struct pci_device_id rtl8723e_pci_ids[] = {
 MODULE_DEVICE_TABLE( pci, rtl8723e_pci_ids );
 
 MODULE_AUTHOR( "lizhaoming	<chaoming_li@realsil.com.cn>" );
-MODULE_AUTHOR( "Benjamin Porter   <BenjaminPorter86@gmail.com>" );
 MODULE_AUTHOR( "Realtek WlanFAE	<wlanfae@realtek.com>" );
 MODULE_LICENSE( "GPL" );
 MODULE_DESCRIPTION( "Realtek 8723E 802.11n PCI wireless" );
