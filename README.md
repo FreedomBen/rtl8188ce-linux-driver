@@ -37,6 +37,9 @@ Well supported kernel releases:
         4.8.x
         4.9.x
         4.10.x
+        4.11.x
+        4.12.x
+        4.13.x
 
 Well supported Ubuntu (and Ubuntu-based) releases:
 
@@ -69,6 +72,7 @@ Well supported Fedora (and Fedora based) releases:
         Fedora 23
         Fedora 24
         Fedora 25
+        Fedora 26
 
         Red Hat Enterprise Linux 7.0 (LTS)
         Red Hat Enterprise Linux 7.1 (LTS)
@@ -236,6 +240,9 @@ Ex: "git checkout ubuntu-13.04"
     Any 4.8.x    | Kernel 4.8.x  | generic-4.8.x
     Any 4.9.x    | Kernel 4.9.x  | generic-4.9.x
     Any 4.10.x   | Kernel 4.10.x | generic-4.10.x
+    Any 4.11.x   | Kernel 4.11.x | generic-4.11.x
+    Any 4.12.x   | Kernel 4.12.x | generic-4.12.x
+    Any 4.13.x   | Kernel 4.13.x | generic-4.13.x
 
     * Note, if the Ubuntu/Mint release version and your kernel version conflict,
       go with the branch corresponding to your *kernel version* as
