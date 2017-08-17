@@ -706,9 +706,9 @@ static bool _rtl92ee_llt_table_init( struct ieee80211_hw *hw )
 	u8 txpktbuf_bndy;
 	u8 u8tmp, testcnt = 0;
 
-	txpktbuf_bndy = 0xFA;
+	txpktbuf_bndy = 0xF7;
 
-	rtl_write_dword( rtlpriv, REG_RQPN, 0x80E90808 );
+	rtl_write_dword( rtlpriv, REG_RQPN, 0x80E60808 );
 
 	rtl_write_byte( rtlpriv, REG_TRXFF_BNDY, txpktbuf_bndy );
 	rtl_write_word( rtlpriv, REG_TRXFF_BNDY + 2, 0x3d00 - 1 );
@@ -742,9 +742,8 @@ static bool _rtl92ee_llt_table_init( struct ieee80211_hw *hw )
 static void _rtl92ee_gen_refresh_led_state( struct ieee80211_hw *hw )
 {
 	struct rtl_priv *rtlpriv = rtl_priv( hw );
-	struct rtl_pci_priv *pcipriv = rtl_pcipriv( hw );
 	struct rtl_ps_ctl *ppsc = rtl_psc( rtl_priv( hw ) );
-	struct rtl_led *pled0 = &pcipriv->ledctl.sw_led0;
+	struct rtl_led *pled0 = &rtlpriv->ledctl.sw_led0;
 
 	if ( rtlpriv->rtlhal.up_first_time )
 		return;
@@ -1013,7 +1012,7 @@ static void _rtl92ee_hw_configure( struct ieee80211_hw *hw )
 	rtl_write_word( rtlpriv, REG_SIFS_TRX, 0x100a );
 
 	/* Note Data sheet don't define */
-	rtl_write_word( rtlpriv, 0x4C7, 0x80 );
+	rtl_write_byte( rtlpriv, 0x4C7, 0x80 );
 
 	rtl_write_byte( rtlpriv, REG_RX_PKT_LIMIT, 0x20 );
 
@@ -1327,7 +1326,7 @@ int rtl92ee_hw_init( struct ieee80211_hw *hw )
 		rtl_write_byte( rtlpriv, 0x65, 1 );
 	}
 	if ( !rtstatus ) {
-		RT_TRACE( rtlpriv, COMP_ERR, DBG_EMERG, "Init MAC failed\n" );
+		pr_err( "Init MAC failed\n" );
 		err = 1;
 		return err;
 	}
@@ -1492,8 +1491,7 @@ static int _rtl92ee_set_media_status( struct ieee80211_hw *hw,
 			 "Set Network type to AP!\n" );
 		break;
 	default:
-		RT_TRACE( rtlpriv, COMP_ERR, DBG_EMERG,
-			 "Network type %d not support!\n", type );
+		pr_err( "Network type %d not support!\n", type );
 		return 1;
 	}
 
@@ -1589,7 +1587,7 @@ void rtl92ee_set_qos( struct ieee80211_hw *hw, int aci )
 		rtl_write_dword( rtlpriv, REG_EDCA_VO_PARAM, 0x2f3222 );
 		break;
 	default:
-		RT_ASSERT( false, "invalid aci: %d !\n", aci );
+		WARN_ONCE( true, "rtl8192ee: invalid aci: %d !\n", aci );
 		break;
 	}
 }
@@ -1679,7 +1677,8 @@ void rtl92ee_card_disable( struct ieee80211_hw *hw )
 	_rtl92ee_poweroff_adapter( hw );
 
 	/* after power off we should do iqk again */
-	rtlpriv->phy.iqk_initialized = false;
+	if ( !rtlpriv->cfg->ops->get_btc_status() )
+		rtlpriv->phy.iqk_initialized = false;
 }
 
 void rtl92ee_interrupt_recognized( struct ieee80211_hw *hw,
@@ -2174,10 +2173,9 @@ exit:
 static void _rtl92ee_hal_customized_behavior( struct ieee80211_hw *hw )
 {
 	struct rtl_priv *rtlpriv = rtl_priv( hw );
-	struct rtl_pci_priv *pcipriv = rtl_pcipriv( hw );
 	struct rtl_hal *rtlhal = rtl_hal( rtl_priv( hw ) );
 
-	pcipriv->ledctl.led_opendrain = true;
+	rtlpriv->ledctl.led_opendrain = true;
 
 	RT_TRACE( rtlpriv, COMP_INIT, DBG_DMESG,
 		 "RT Customized ID: 0x%02X\n", rtlhal->oem_id );
@@ -2213,7 +2211,7 @@ void rtl92ee_read_eeprom_info( struct ieee80211_hw *hw )
 		rtlefuse->autoload_failflag = false;
 		_rtl92ee_read_adapter_info( hw );
 	} else {
-		RT_TRACE( rtlpriv, COMP_ERR, DBG_EMERG, "Autoload ERR!!\n" );
+		pr_err( "Autoload ERR!!\n" );
 	}
 	_rtl92ee_hal_customized_behavior( hw );
 
@@ -2491,9 +2489,7 @@ void rtl92ee_set_key( struct ieee80211_hw *hw, u32 key_index,
 					entry_id = rtl_cam_get_free_entry( hw,
 								     p_macaddr );
 					if ( entry_id >=  TOTAL_CAM_ENTRY ) {
-						RT_TRACE( rtlpriv, COMP_SEC,
-							 DBG_EMERG,
-							 "Can not find free hw security cam entry\n" );
+						pr_err( "Can not find free hw security cam entry\n" );
 						return;
 					}
 				} else {
@@ -2518,7 +2514,7 @@ void rtl92ee_set_key( struct ieee80211_hw *hw, u32 key_index,
 				 "add one entry\n" );
 			if ( is_pairwise ) {
 				RT_TRACE( rtlpriv, COMP_SEC, DBG_DMESG,
-					 "set Pairwiase key\n" );
+					 "set Pairwise key\n" );
 
 				rtl_cam_add_one_entry( hw, macaddr, key_index,
 					       entry_id, enc_algo,

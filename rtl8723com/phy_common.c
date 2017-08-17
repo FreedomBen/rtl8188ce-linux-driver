@@ -106,7 +106,7 @@ u32 rtl8723_phy_rf_serial_read( struct ieee80211_hw *hw,
 	offset &= 0xff;
 	newoffset = offset;
 	if ( RT_CANNOT_IO( hw ) ) {
-		RT_TRACE( rtlpriv, COMP_ERR, DBG_EMERG, "return all one\n" );
+		pr_err( "return all one\n" );
 		return 0xFFFFFFFF;
 	}
 	tmplong = rtl_get_bbreg( hw, RFPGA0_XA_HSSIPARAMETER2, MASKDWORD );
@@ -154,7 +154,7 @@ void rtl8723_phy_rf_serial_write( struct ieee80211_hw *hw,
 	struct bb_reg_def *pphyreg = &rtlphy->phyreg_def[rfpath];
 
 	if ( RT_CANNOT_IO( hw ) ) {
-		RT_TRACE( rtlpriv, COMP_ERR, DBG_EMERG, "stop\n" );
+		pr_err( "stop\n" );
 		return;
 	}
 	offset &= 0xff;
@@ -290,7 +290,7 @@ bool rtl8723_phy_set_sw_chnl_cmdarray( struct swchnlcmd *cmdtable,
 	struct swchnlcmd *pcmd;
 
 	if ( cmdtable == NULL ) {
-		RT_ASSERT( false, "cmdtable cannot be NULL.\n" );
+		WARN_ONCE( true, "rtl8723-common: cmdtable cannot be NULL.\n" );
 		return false;
 	}
 
