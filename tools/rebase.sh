@@ -137,7 +137,7 @@ elif [ "$1" = "ubuntu-16.10" ]; then
     remote="$UBUNTU1610"
 elif [ "$1" = "ubuntu-17.04" ]; then
     remote="$UBUNTU1704"
-elif [ "$1" = "ubuntu-17.04" ]; then
+elif [ "$1" = "ubuntu-17.10" ]; then
     remote="$UBUNTU1710"
 elif [[ $1 =~ generic ]]; then
     remote="$GENERIC"
@@ -152,7 +152,7 @@ fi
 mkdir -p "$LOCATION"
 cd $LOCATION
 
-[ -n "$remote" ] || die "Uunsupported branch \"$1\""
+[ -n "$remote" ] || die "Unsupported branch \"$1\""
 
 [ -d "$(repo_dir $remote)" ] || git clone "$remote"
 [ -d "$(repo_dir $remote)" ] || die "could not clone $remote and the dir does not exist"
