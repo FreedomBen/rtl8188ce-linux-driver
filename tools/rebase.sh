@@ -11,6 +11,7 @@ UBUNTU1604='git://kernel.ubuntu.com/ubuntu/ubuntu-xenial.git'
 UBUNTU1610='git://kernel.ubuntu.com/ubuntu/ubuntu-yakkety.git'
 UBUNTU1704='git://kernel.ubuntu.com/ubuntu/ubuntu-zesty.git'
 UBUNTU1710='git://kernel.ubuntu.com/ubuntu/ubuntu-artful.git'
+UBUNTU1804='git://kernel.ubuntu.com/ubuntu/ubuntu-bionic.git'
 
 starting_dir="$(pwd)"
 
@@ -33,7 +34,13 @@ is_ubuntu ()
 tag ()
 {
     if $(is_generic $1); then
-        if $(echo "$1" | grep "4\.15" >/dev/null 2>&1); then
+        if $(echo "$1" | grep "4\.17" >/dev/null 2>&1); then
+            echo "$(git tag | grep "v4\.17" | sort -n | ~/extract.rb)"
+            return
+        elif $(echo "$1" | grep "4\.16" >/dev/null 2>&1); then
+            echo "$(git tag | grep "v4\.16" | sort -n | ~/extract.rb)"
+            return
+        elif $(echo "$1" | grep "4\.15" >/dev/null 2>&1); then
             echo "$(git tag | grep "v4\.15" | sort -n | ~/extract.rb)"
             return
         elif $(echo "$1" | grep "4\.14" >/dev/null 2>&1); then
@@ -116,6 +123,9 @@ tag ()
         elif $(echo "$1" | grep "17.10" >/dev/null 2>&1); then
             echo "$(git tag | grep Ubuntu-4.13 | sort -n | ~/extract.rb)"
             return
+        elif $(echo "$1" | grep "18.04" >/dev/null 2>&1); then
+            echo "$(git tag | grep Ubuntu-4.15 | sort -n | ~/extract.rb)"
+            return
         fi
     fi
     die "unknown tag for \"$1\""
@@ -142,6 +152,8 @@ elif [ "$1" = "ubuntu-17.04" ]; then
     remote="$UBUNTU1704"
 elif [ "$1" = "ubuntu-17.10" ]; then
     remote="$UBUNTU1710"
+elif [ "$1" = "ubuntu-18.04" ]; then
+    remote="$UBUNTU1804"
 elif [[ $1 =~ generic ]]; then
     remote="$GENERIC"
 fi
