@@ -251,11 +251,7 @@ static void _rtl_init_hw_vht_capab( struct ieee80211_hw *hw,
 	struct rtl_priv *rtlpriv = rtl_priv( hw );
 	struct rtl_hal *rtlhal = rtl_hal( rtlpriv );
 
-	if ( !( rtlpriv->cfg->spec_ver & RTL_SPEC_SUPPORT_VHT ) )
-		return;
-
-	if ( rtlhal->hw_type == HARDWARE_TYPE_RTL8812AE ||
-	    rtlhal->hw_type == HARDWARE_TYPE_RTL8822BE ) {
+	if ( rtlhal->hw_type == HARDWARE_TYPE_RTL8812AE ) {
 		u16 mcs_map;
 
 		vht_cap->vht_supported = true;
@@ -406,8 +402,6 @@ static void _rtl_init_mac80211( struct ieee80211_hw *hw )
 	ieee80211_hw_set( hw, CONNECTION_MONITOR );
 	ieee80211_hw_set( hw, MFP_CAPABLE );
 	ieee80211_hw_set( hw, REPORTS_TX_ACK_STATUS );
-	ieee80211_hw_set( hw, SUPPORTS_AMSDU_IN_AMPDU );
-	ieee80211_hw_set( hw, SUPPORT_FAST_XMIT );
 
 	/* swlps or hwlps has been set in diff chip in init_sw_vars */
 	if ( rtlpriv->psc.swctrl_lps ) {
@@ -564,8 +558,7 @@ int rtl_init_core( struct ieee80211_hw *hw )
 
 	/* <4> locks */
 	mutex_init( &rtlpriv->locks.conf_mutex );
-	mutex_init( &rtlpriv->locks.ips_mutex );
-	mutex_init( &rtlpriv->locks.lps_mutex );
+	spin_lock_init( &rtlpriv->locks.ips_lock );
 	spin_lock_init( &rtlpriv->locks.irq_th_lock );
 	spin_lock_init( &rtlpriv->locks.h2c_lock );
 	spin_lock_init( &rtlpriv->locks.rf_ps_lock );
@@ -575,7 +568,9 @@ int rtl_init_core( struct ieee80211_hw *hw )
 	spin_lock_init( &rtlpriv->locks.c2hcmd_lock );
 	spin_lock_init( &rtlpriv->locks.scan_list_lock );
 	spin_lock_init( &rtlpriv->locks.cck_and_rw_pagea_lock );
+	spin_lock_init( &rtlpriv->locks.check_sendpkt_lock );
 	spin_lock_init( &rtlpriv->locks.fw_ps_lock );
+	spin_lock_init( &rtlpriv->locks.lps_lock );
 	spin_lock_init( &rtlpriv->locks.iqk_lock );
 	/* <5> init list */
 	INIT_LIST_HEAD( &rtlpriv->entry_list );
@@ -709,94 +704,14 @@ static void _rtl_query_protection_mode( struct ieee80211_hw *hw,
 	}
 }
 
-u8 rtl_mrate_idx_to_arfr_id( struct ieee80211_hw *hw, u8 rate_index,
-			    enum wireless_mode wirelessmode )
-{
-	struct rtl_priv *rtlpriv = rtl_priv( hw );
-	struct rtl_phy *rtlphy = &rtlpriv->phy;
-	u8 ret = 0;
-
-	switch ( rate_index ) {
-	case RATR_INX_WIRELESS_NGB:
-		if ( rtlphy->rf_type == RF_1T1R )
-			ret = RATEID_IDX_BGN_40M_1SS;
-		else
-			ret = RATEID_IDX_BGN_40M_2SS;
-		; break;
-	case RATR_INX_WIRELESS_N:
-	case RATR_INX_WIRELESS_NG:
-		if ( rtlphy->rf_type == RF_1T1R )
-			ret = RATEID_IDX_GN_N1SS;
-		else
-			ret = RATEID_IDX_GN_N2SS;
-		; break;
-	case RATR_INX_WIRELESS_NB:
-		if ( rtlphy->rf_type == RF_1T1R )
-			ret = RATEID_IDX_BGN_20M_1SS_BN;
-		else
-			ret = RATEID_IDX_BGN_20M_2SS_BN;
-		; break;
-	case RATR_INX_WIRELESS_GB:
-		ret = RATEID_IDX_BG;
-		break;
-	case RATR_INX_WIRELESS_G:
-		ret = RATEID_IDX_G;
-		break;
-	case RATR_INX_WIRELESS_B:
-		ret = RATEID_IDX_B;
-		break;
-	case RATR_INX_WIRELESS_MC:
-		if ( wirelessmode == WIRELESS_MODE_B ||
-		    wirelessmode == WIRELESS_MODE_G ||
-		    wirelessmode == WIRELESS_MODE_N_24G ||
-		    wirelessmode == WIRELESS_MODE_AC_24G )
-			ret = RATEID_IDX_BG;
-		else
-			ret = RATEID_IDX_G;
-		break;
-	case RATR_INX_WIRELESS_AC_5N:
-		if ( rtlphy->rf_type == RF_1T1R )
-			ret = RATEID_IDX_VHT_1SS;
-		else
-			ret = RATEID_IDX_VHT_2SS;
-		break;
-	case RATR_INX_WIRELESS_AC_24N:
-		if ( rtlphy->current_chan_bw == HT_CHANNEL_WIDTH_80 ) {
-			if ( rtlphy->rf_type == RF_1T1R )
-				ret = RATEID_IDX_VHT_1SS;
-			else
-				ret = RATEID_IDX_VHT_2SS;
-		} else {
-			if ( rtlphy->rf_type == RF_1T1R )
-				ret = RATEID_IDX_MIX1;
-			else
-				ret = RATEID_IDX_MIX2;
-		}
-		break;
-	default:
-		ret = RATEID_IDX_BGN_40M_2SS;
-		break;
-	}
-	return ret;
-}
-EXPORT_SYMBOL( rtl_mrate_idx_to_arfr_id );
-
 static void _rtl_txrate_selectmode( struct ieee80211_hw *hw,
 				   struct ieee80211_sta *sta,
 				   struct rtl_tcb_desc *tcb_desc )
 {
-#define SET_RATE_ID( rate_id )					\
-	( {typeof( rate_id ) _id = rate_id;			\
-	  ( ( rtlpriv->cfg->spec_ver & RTL_SPEC_NEW_RATEID ) ?	\
-		rtl_mrate_idx_to_arfr_id( hw, _id,		\
-			( sta_entry ? sta_entry->wireless_mode :	\
-			 WIRELESS_MODE_G ) ) :			\
-		_id ); } )
-
 	struct rtl_priv *rtlpriv = rtl_priv( hw );
 	struct rtl_mac *mac = rtl_mac( rtl_priv( hw ) );
 	struct rtl_sta_info *sta_entry = NULL;
-	u8 ratr_index = SET_RATE_ID( RATR_INX_WIRELESS_MC );
+	u8 ratr_index = 7;
 
 	if ( sta ) {
 		sta_entry = ( struct rtl_sta_info * ) sta->drv_priv;
@@ -811,8 +726,7 @@ static void _rtl_txrate_selectmode( struct ieee80211_hw *hw,
 				tcb_desc->hw_rate =
 				    rtlpriv->cfg->maps[RTL_RC_CCK_RATE2M];
 				tcb_desc->use_driver_rate = 1;
-				tcb_desc->ratr_index =
-					SET_RATE_ID( RATR_INX_WIRELESS_MC );
+				tcb_desc->ratr_index = RATR_INX_WIRELESS_MC;
 			} else {
 				tcb_desc->ratr_index = ratr_index;
 			}
@@ -828,30 +742,22 @@ static void _rtl_txrate_selectmode( struct ieee80211_hw *hw,
 		    mac->opmode == NL80211_IFTYPE_MESH_POINT ) {
 			tcb_desc->mac_id = 0;
 
-			if ( sta &&
-			    ( rtlpriv->cfg->spec_ver & RTL_SPEC_NEW_RATEID ) )
-				;	/* use sta_entry->ratr_index */
-			else if ( mac->mode == WIRELESS_MODE_AC_5G )
+			if ( mac->mode == WIRELESS_MODE_AC_5G )
 				tcb_desc->ratr_index =
-					SET_RATE_ID( RATR_INX_WIRELESS_AC_5N );
+					RATR_INX_WIRELESS_AC_5N;
 			else if ( mac->mode == WIRELESS_MODE_AC_24G )
 				tcb_desc->ratr_index =
-					SET_RATE_ID( RATR_INX_WIRELESS_AC_24N );
+					RATR_INX_WIRELESS_AC_24N;
 			else if ( mac->mode == WIRELESS_MODE_N_24G )
-				tcb_desc->ratr_index =
-					SET_RATE_ID( RATR_INX_WIRELESS_NGB );
+				tcb_desc->ratr_index = RATR_INX_WIRELESS_NGB;
 			else if ( mac->mode == WIRELESS_MODE_N_5G )
-				tcb_desc->ratr_index =
-					SET_RATE_ID( RATR_INX_WIRELESS_NG );
+				tcb_desc->ratr_index = RATR_INX_WIRELESS_NG;
 			else if ( mac->mode & WIRELESS_MODE_G )
-				tcb_desc->ratr_index =
-					SET_RATE_ID( RATR_INX_WIRELESS_GB );
+				tcb_desc->ratr_index = RATR_INX_WIRELESS_GB;
 			else if ( mac->mode & WIRELESS_MODE_B )
-				tcb_desc->ratr_index =
-					SET_RATE_ID( RATR_INX_WIRELESS_B );
+				tcb_desc->ratr_index = RATR_INX_WIRELESS_B;
 			else if ( mac->mode & WIRELESS_MODE_A )
-				tcb_desc->ratr_index =
-					SET_RATE_ID( RATR_INX_WIRELESS_G );
+				tcb_desc->ratr_index = RATR_INX_WIRELESS_G;
 
 		} else if ( mac->opmode == NL80211_IFTYPE_AP ||
 			mac->opmode == NL80211_IFTYPE_ADHOC ) {
@@ -865,7 +771,6 @@ static void _rtl_txrate_selectmode( struct ieee80211_hw *hw,
 			}
 		}
 	}
-#undef SET_RATE_ID
 }
 
 static void _rtl_query_bandwidth_mode( struct ieee80211_hw *hw,
@@ -897,7 +802,8 @@ static void _rtl_query_bandwidth_mode( struct ieee80211_hw *hw,
 
 	tcb_desc->packet_bw = HT_CHANNEL_WIDTH_20_40;
 
-	if ( rtlpriv->cfg->spec_ver & RTL_SPEC_SUPPORT_VHT ) {
+	if ( rtlpriv->rtlhal.hw_type == HARDWARE_TYPE_RTL8812AE ||
+	    rtlpriv->rtlhal.hw_type == HARDWARE_TYPE_RTL8821AE ) {
 		if ( mac->opmode == NL80211_IFTYPE_AP ||
 		    mac->opmode == NL80211_IFTYPE_ADHOC ||
 		    mac->opmode == NL80211_IFTYPE_MESH_POINT ) {
@@ -960,8 +866,8 @@ static u8 _rtl_get_highest_n_rate( struct ieee80211_hw *hw,
 	struct rtl_phy *rtlphy = &rtlpriv->phy;
 	u8 hw_rate;
 
-	if ( get_rf_type( rtlphy ) == RF_2T2R &&
-	    sta->ht_cap.mcs.rx_mask[1] != 0 )
+	if ( ( get_rf_type( rtlphy ) == RF_2T2R ) &&
+	    ( sta->ht_cap.mcs.rx_mask[1] != 0 ) )
 		hw_rate = rtlpriv->cfg->maps[RTL_RC_HT_RATEMCS15];
 	else
 		hw_rate = rtlpriv->cfg->maps[RTL_RC_HT_RATEMCS7];
@@ -1241,19 +1147,9 @@ void rtl_get_tcb_desc( struct ieee80211_hw *hw,
 		      struct ieee80211_sta *sta,
 		      struct sk_buff *skb, struct rtl_tcb_desc *tcb_desc )
 {
-#define SET_RATE_ID( rate_id )					\
-	( {typeof( rate_id ) _id = rate_id;			\
-	  ( ( rtlpriv->cfg->spec_ver & RTL_SPEC_NEW_RATEID ) ?	\
-		rtl_mrate_idx_to_arfr_id( hw, _id,		\
-			( sta_entry ? sta_entry->wireless_mode :	\
-			 WIRELESS_MODE_G ) ) :			\
-		_id ); } )
-
 	struct rtl_priv *rtlpriv = rtl_priv( hw );
 	struct rtl_mac *rtlmac = rtl_mac( rtl_priv( hw ) );
 	struct ieee80211_hdr *hdr = rtl_get_hdr( skb );
-	struct rtl_sta_info *sta_entry =
-		( sta ? ( struct rtl_sta_info * )sta->drv_priv : NULL );
 
 	__le16 fc = rtl_get_fc( skb );
 
@@ -1276,8 +1172,7 @@ void rtl_get_tcb_desc( struct ieee80211_hw *hw,
 		if ( info->control.rates[0].idx == 0 ||
 				ieee80211_is_nullfunc( fc ) ) {
 			tcb_desc->use_driver_rate = true;
-			tcb_desc->ratr_index =
-					SET_RATE_ID( RATR_INX_WIRELESS_MC );
+			tcb_desc->ratr_index = RATR_INX_WIRELESS_MC;
 
 			tcb_desc->disable_ratefallback = 1;
 		} else {
@@ -1292,7 +1187,7 @@ void rtl_get_tcb_desc( struct ieee80211_hw *hw,
 				tcb_desc->hw_rate =
 				_rtl_get_vht_highest_n_rate( hw, sta );
 			} else {
-				if ( sta && sta->ht_cap.ht_supported ) {
+				if ( sta && ( sta->ht_cap.ht_supported ) ) {
 					tcb_desc->hw_rate =
 						_rtl_get_highest_n_rate( hw, sta );
 				} else {
@@ -1319,12 +1214,11 @@ void rtl_get_tcb_desc( struct ieee80211_hw *hw,
 		_rtl_query_protection_mode( hw, tcb_desc, info );
 	} else {
 		tcb_desc->use_driver_rate = true;
-		tcb_desc->ratr_index = SET_RATE_ID( RATR_INX_WIRELESS_MC );
+		tcb_desc->ratr_index = RATR_INX_WIRELESS_MC;
 		tcb_desc->disable_ratefallback = 1;
 		tcb_desc->mac_id = 0;
 		tcb_desc->packet_bw = false;
 	}
-#undef SET_RATE_ID
 }
 EXPORT_SYMBOL( rtl_get_tcb_desc );
 
@@ -1342,6 +1236,7 @@ bool rtl_tx_mgmt_proc( struct ieee80211_hw *hw, struct sk_buff *skb )
 	}
 	if ( ieee80211_is_auth( fc ) ) {
 		RT_TRACE( rtlpriv, COMP_SEND, DBG_DMESG, "MAC80211_LINKING\n" );
+		rtl_ips_nic_on( hw );
 
 		mac->link_state = MAC80211_LINKING;
 		/* Dul mac */
@@ -1433,10 +1328,6 @@ bool rtl_action_proc( struct ieee80211_hw *hw, struct sk_buff *skb, u8 is_tx )
 				  le16_to_cpu( mgmt->u.action.u.addba_req.capab );
 				tid = ( capab &
 				       IEEE80211_ADDBA_PARAM_TID_MASK ) >> 2;
-				if ( tid >= MAX_TID_COUNT ) {
-					rcu_read_unlock();
-					return true;
-				}
 				tid_data = &sta_entry->tids[tid];
 				if ( tid_data->agg.rx_agg_state ==
 				    RTL_RX_AGG_START )
@@ -1556,6 +1447,7 @@ u8 rtl_is_special_data( struct ieee80211_hw *hw, struct sk_buff *skb, u8 is_tx,
 		/* EAPOL is seens as in-4way */
 		rtlpriv->btcoexist.btc_info.in_4way = true;
 		rtlpriv->btcoexist.btc_info.in_4way_ts = jiffies;
+	rtlpriv->btcoexist.btc_info.in_4way_ts = jiffies;
 
 		RT_TRACE( rtlpriv, ( COMP_SEND | COMP_RECV ), DBG_DMESG,
 			 "802.1X %s EAPOL pkt!!\n", ( is_tx ) ? "Tx" : "Rx" );
@@ -1603,11 +1495,7 @@ static u16 rtl_get_tx_report_sn( struct ieee80211_hw *hw )
 	struct rtl_tx_report *tx_report = &rtlpriv->tx_report;
 	u16 sn;
 
-	/* SW_DEFINE[11:8] are reserved ( driver fills zeros )
-	 * SW_DEFINE[7:2] are used by driver
-	 * SW_DEFINE[1:0] are reserved for firmware ( driver fills zeros )
-	 */
-	sn = ( atomic_inc_return( &tx_report->sn ) & 0x003F ) << 2;
+	sn = atomic_inc_return( &tx_report->sn ) & 0x0FFF;
 
 	tx_report->last_sent_sn = sn;
 	tx_report->last_sent_time = jiffies;
@@ -1635,23 +1523,14 @@ void rtl_tx_report_handler( struct ieee80211_hw *hw, u8 *tmp_buf, u8 c2h_cmd_len
 	struct rtl_priv *rtlpriv = rtl_priv( hw );
 	struct rtl_tx_report *tx_report = &rtlpriv->tx_report;
 	u16 sn;
-	u8 st, retry;
 
-	if ( rtlpriv->cfg->spec_ver & RTL_SPEC_EXT_C2H ) {
-		sn = GET_TX_REPORT_SN_V2( tmp_buf );
-		st = GET_TX_REPORT_ST_V2( tmp_buf );
-		retry = GET_TX_REPORT_RETRY_V2( tmp_buf );
-	} else {
-		sn = GET_TX_REPORT_SN_V1( tmp_buf );
-		st = GET_TX_REPORT_ST_V1( tmp_buf );
-		retry = GET_TX_REPORT_RETRY_V1( tmp_buf );
-	}
+	sn = ( ( tmp_buf[7] & 0x0F ) << 8 ) | tmp_buf[6];
 
 	tx_report->last_recv_sn = sn;
 
 	RT_TRACE( rtlpriv, COMP_TX_REPORT, DBG_DMESG,
 		 "Recv TX-Report st=0x%02X sn=0x%X retry=0x%X\n",
-		 st, sn, retry );
+		 tmp_buf[0], sn, tmp_buf[2] );
 }
 EXPORT_SYMBOL_GPL( rtl_tx_report_handler );
 
@@ -1665,8 +1544,7 @@ bool rtl_check_tx_report_acked( struct ieee80211_hw *hw )
 
 	if ( time_before( tx_report->last_sent_time + 3 * HZ, jiffies ) ) {
 		RT_TRACE( rtlpriv, COMP_TX_REPORT, DBG_WARNING,
-			 "Check TX-Report timeout!! s_sn=0x%X r_sn=0x%X\n",
-			 tx_report->last_sent_sn, tx_report->last_recv_sn );
+			 "Check TX-Report timeout!!\n" );
 		return true;	/* 3 sec. ( timeout ) seen as acked */
 	}
 
@@ -2101,9 +1979,9 @@ void rtl_watchdog_wq_callback( void *data )
 		    rtlpriv->btcoexist.btc_ops->btc_is_bt_ctrl_lps( rtlpriv ) )
 			goto label_lps_done;
 
-		if ( rtlpriv->link_info.num_rx_inperiod +
-		      rtlpriv->link_info.num_tx_inperiod > 8 ||
-		    rtlpriv->link_info.num_rx_inperiod > 2 )
+		if ( ( ( rtlpriv->link_info.num_rx_inperiod +
+		      rtlpriv->link_info.num_tx_inperiod ) > 8 ) ||
+		    ( rtlpriv->link_info.num_rx_inperiod > 2 ) )
 			rtl_lps_leave( hw );
 		else
 			rtl_lps_enter( hw );
@@ -2354,7 +2232,9 @@ static struct sk_buff *rtl_make_smps_action( struct ieee80211_hw *hw,
 	case IEEE80211_SMPS_AUTOMATIC:/* 0 */
 	case IEEE80211_SMPS_NUM_MODES:/* 4 */
 		WARN_ON( 1 );
-	/* fall through */
+	/* Here will get a 'MISSING_BREAK' in Coverity Test, just ignore it.
+	 * According to Kernel Code, here is right.
+	 */
 	case IEEE80211_SMPS_OFF:/* 1 */ /*MIMO_PS_NOLIMIT*/
 		action_frame->u.action.u.ht_smps.smps_control =
 				WLAN_HT_SMPS_CONTROL_DISABLED;/* 0 */
@@ -2652,16 +2532,8 @@ EXPORT_SYMBOL_GPL( rtl_global_var );
 
 static int __init rtl_core_module_init( void )
 {
-	BUILD_BUG_ON( TX_PWR_BY_RATE_NUM_RATE < TX_PWR_BY_RATE_NUM_SECTION );
-	BUILD_BUG_ON( MAX_RATE_SECTION_NUM != MAX_RATE_SECTION );
-	BUILD_BUG_ON( MAX_BASE_NUM_IN_PHY_REG_PG_24G != MAX_RATE_SECTION );
-	BUILD_BUG_ON( MAX_BASE_NUM_IN_PHY_REG_PG_5G != ( MAX_RATE_SECTION - 1 ) );
-
 	if ( rtl_rate_control_register() )
 		pr_err( "rtl: Unable to register rtl_rc, use default RC !!\n" );
-
-	/* add debugfs */
-	rtl_debugfs_add_topdir();
 
 	/* init some global vars */
 	INIT_LIST_HEAD( &rtl_global_var.glb_priv_list );
@@ -2674,9 +2546,6 @@ static void __exit rtl_core_module_exit( void )
 {
 	/*RC*/
 	rtl_rate_control_unregister();
-
-	/* remove debugfs */
-	rtl_debugfs_remove_topdir();
 }
 
 module_init( rtl_core_module_init );

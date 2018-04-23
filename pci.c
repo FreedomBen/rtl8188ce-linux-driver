@@ -38,6 +38,7 @@
 #include "efuse.h"
 #include <linux/interrupt.h>
 #include <linux/export.h>
+#include <linux/kmemleak.h>
 #include <linux/module.h>
 
 MODULE_AUTHOR( "lizhaoming	<chaoming_li@realsil.com.cn>" );
@@ -66,7 +67,6 @@ static u8 _rtl_mac_to_hwqueue( struct ieee80211_hw *hw, struct sk_buff *skb )
 	struct rtl_hal *rtlhal = rtl_hal( rtl_priv( hw ) );
 	__le16 fc = rtl_get_fc( skb );
 	u8 queue_index = skb_get_queue_mapping( skb );
-	struct ieee80211_hdr *hdr;
 
 	if ( unlikely( ieee80211_is_beacon( fc ) ) )
 		return BEACON_QUEUE;
@@ -75,13 +75,6 @@ static u8 _rtl_mac_to_hwqueue( struct ieee80211_hw *hw, struct sk_buff *skb )
 	if ( rtlhal->hw_type == HARDWARE_TYPE_RTL8192SE )
 		if ( ieee80211_is_nullfunc( fc ) )
 			return HIGH_QUEUE;
-	if ( rtlhal->hw_type == HARDWARE_TYPE_RTL8822BE ) {
-		hdr = rtl_get_hdr( skb );
-
-		if ( is_multicast_ether_addr( hdr->addr1 ) ||
-		    is_broadcast_ether_addr( hdr->addr1 ) )
-			return HIGH_QUEUE;
-	}
 
 	return ac_to_hwq[queue_index];
 }
@@ -572,6 +565,13 @@ static void _rtl_pci_tx_isr( struct ieee80211_hw *hw, int prio )
 		else
 			entry = ( u8 * )( &ring->desc[ring->idx] );
 
+		if ( rtlpriv->cfg->ops->get_available_desc &&
+		    rtlpriv->cfg->ops->get_available_desc( hw, prio ) <= 1 ) {
+			RT_TRACE( rtlpriv, ( COMP_INTR | COMP_SEND ), DBG_DMESG,
+				 "no available desc!\n" );
+			return;
+		}
+
 		if ( !rtlpriv->cfg->ops->is_tx_desc_closed( hw, prio, ring->idx ) )
 			return;
 		ring->idx = ( ring->idx + 1 ) % ring->entries;
@@ -755,7 +755,7 @@ static void _rtl_pci_rx_interrupt( struct ieee80211_hw *hw )
 	u8 tmp_one;
 	bool unicast = false;
 	u8 hw_queue = 0;
-	unsigned int rx_remained_cnt = 0;
+	unsigned int rx_remained_cnt;
 	struct rtl_stats stats = {
 		.signal = 0,
 		.rate = 0,
@@ -776,8 +776,7 @@ static void _rtl_pci_rx_interrupt( struct ieee80211_hw *hw )
 		struct sk_buff *new_skb;
 
 		if ( rtlpriv->use_new_trx_flow ) {
-			if ( rx_remained_cnt == 0 )
-				rx_remained_cnt =
+			rx_remained_cnt =
 				rtlpriv->cfg->ops->rx_desc_buff_remained_cnt( hw,
 								      hw_queue );
 			if ( rx_remained_cnt == 0 )
@@ -933,8 +932,10 @@ static irqreturn_t _rtl_pci_interrupt( int irq, void *dev_id )
 	struct rtl_priv *rtlpriv = rtl_priv( hw );
 	struct rtl_hal *rtlhal = rtl_hal( rtl_priv( hw ) );
 	unsigned long flags;
-	struct rtl_int intvec = {0};
-
+	u32 inta = 0;
+	u32 intb = 0;
+	u32 intc = 0;
+	u32 intd = 0;
 	irqreturn_t ret = IRQ_HANDLED;
 
 	if ( rtlpci->irq_enabled == 0 )
@@ -944,47 +945,47 @@ static irqreturn_t _rtl_pci_interrupt( int irq, void *dev_id )
 	rtlpriv->cfg->ops->disable_interrupt( hw );
 
 	/*read ISR: 4/8bytes */
-	rtlpriv->cfg->ops->interrupt_recognized( hw, &intvec );
+	rtlpriv->cfg->ops->interrupt_recognized( hw, &inta, &intb, &intc, &intd );
 
 	/*Shared IRQ or HW disappeared */
-	if ( !intvec.inta || intvec.inta == 0xffff )
+	if ( !inta || inta == 0xffff )
 		goto done;
 
 	/*<1> beacon related */
-	if ( intvec.inta & rtlpriv->cfg->maps[RTL_IMR_TBDOK] )
+	if ( inta & rtlpriv->cfg->maps[RTL_IMR_TBDOK] )
 		RT_TRACE( rtlpriv, COMP_INTR, DBG_TRACE,
 			 "beacon ok interrupt!\n" );
 
-	if ( unlikely( intvec.inta & rtlpriv->cfg->maps[RTL_IMR_TBDER] ) )
+	if ( unlikely( inta & rtlpriv->cfg->maps[RTL_IMR_TBDER] ) )
 		RT_TRACE( rtlpriv, COMP_INTR, DBG_TRACE,
 			 "beacon err interrupt!\n" );
 
-	if ( intvec.inta & rtlpriv->cfg->maps[RTL_IMR_BDOK] )
+	if ( inta & rtlpriv->cfg->maps[RTL_IMR_BDOK] )
 		RT_TRACE( rtlpriv, COMP_INTR, DBG_TRACE, "beacon interrupt!\n" );
 
-	if ( intvec.inta & rtlpriv->cfg->maps[RTL_IMR_BCNINT] ) {
+	if ( inta & rtlpriv->cfg->maps[RTL_IMR_BCNINT] ) {
 		RT_TRACE( rtlpriv, COMP_INTR, DBG_TRACE,
 			 "prepare beacon for interrupt!\n" );
 		tasklet_schedule( &rtlpriv->works.irq_prepare_bcn_tasklet );
 	}
 
 	/*<2> Tx related */
-	if ( unlikely( intvec.intb & rtlpriv->cfg->maps[RTL_IMR_TXFOVW] ) )
+	if ( unlikely( intb & rtlpriv->cfg->maps[RTL_IMR_TXFOVW] ) )
 		RT_TRACE( rtlpriv, COMP_ERR, DBG_WARNING, "IMR_TXFOVW!\n" );
 
-	if ( intvec.inta & rtlpriv->cfg->maps[RTL_IMR_MGNTDOK] ) {
+	if ( inta & rtlpriv->cfg->maps[RTL_IMR_MGNTDOK] ) {
 		RT_TRACE( rtlpriv, COMP_INTR, DBG_TRACE,
 			 "Manage ok interrupt!\n" );
 		_rtl_pci_tx_isr( hw, MGNT_QUEUE );
 	}
 
-	if ( intvec.inta & rtlpriv->cfg->maps[RTL_IMR_HIGHDOK] ) {
+	if ( inta & rtlpriv->cfg->maps[RTL_IMR_HIGHDOK] ) {
 		RT_TRACE( rtlpriv, COMP_INTR, DBG_TRACE,
 			 "HIGH_QUEUE ok interrupt!\n" );
 		_rtl_pci_tx_isr( hw, HIGH_QUEUE );
 	}
 
-	if ( intvec.inta & rtlpriv->cfg->maps[RTL_IMR_BKDOK] ) {
+	if ( inta & rtlpriv->cfg->maps[RTL_IMR_BKDOK] ) {
 		rtlpriv->link_info.num_tx_inperiod++;
 
 		RT_TRACE( rtlpriv, COMP_INTR, DBG_TRACE,
@@ -992,7 +993,7 @@ static irqreturn_t _rtl_pci_interrupt( int irq, void *dev_id )
 		_rtl_pci_tx_isr( hw, BK_QUEUE );
 	}
 
-	if ( intvec.inta & rtlpriv->cfg->maps[RTL_IMR_BEDOK] ) {
+	if ( inta & rtlpriv->cfg->maps[RTL_IMR_BEDOK] ) {
 		rtlpriv->link_info.num_tx_inperiod++;
 
 		RT_TRACE( rtlpriv, COMP_INTR, DBG_TRACE,
@@ -1000,7 +1001,7 @@ static irqreturn_t _rtl_pci_interrupt( int irq, void *dev_id )
 		_rtl_pci_tx_isr( hw, BE_QUEUE );
 	}
 
-	if ( intvec.inta & rtlpriv->cfg->maps[RTL_IMR_VIDOK] ) {
+	if ( inta & rtlpriv->cfg->maps[RTL_IMR_VIDOK] ) {
 		rtlpriv->link_info.num_tx_inperiod++;
 
 		RT_TRACE( rtlpriv, COMP_INTR, DBG_TRACE,
@@ -1008,7 +1009,7 @@ static irqreturn_t _rtl_pci_interrupt( int irq, void *dev_id )
 		_rtl_pci_tx_isr( hw, VI_QUEUE );
 	}
 
-	if ( intvec.inta & rtlpriv->cfg->maps[RTL_IMR_VODOK] ) {
+	if ( inta & rtlpriv->cfg->maps[RTL_IMR_VODOK] ) {
 		rtlpriv->link_info.num_tx_inperiod++;
 
 		RT_TRACE( rtlpriv, COMP_INTR, DBG_TRACE,
@@ -1017,7 +1018,7 @@ static irqreturn_t _rtl_pci_interrupt( int irq, void *dev_id )
 	}
 
 	if ( rtlhal->hw_type == HARDWARE_TYPE_RTL8822BE ) {
-		if ( intvec.intd & rtlpriv->cfg->maps[RTL_IMR_H2CDOK] ) {
+		if ( intd & rtlpriv->cfg->maps[RTL_IMR_H2CDOK] ) {
 			rtlpriv->link_info.num_tx_inperiod++;
 
 			RT_TRACE( rtlpriv, COMP_INTR, DBG_TRACE,
@@ -1027,7 +1028,7 @@ static irqreturn_t _rtl_pci_interrupt( int irq, void *dev_id )
 	}
 
 	if ( rtlhal->hw_type == HARDWARE_TYPE_RTL8192SE ) {
-		if ( intvec.inta & rtlpriv->cfg->maps[RTL_IMR_COMDOK] ) {
+		if ( inta & rtlpriv->cfg->maps[RTL_IMR_COMDOK] ) {
 			rtlpriv->link_info.num_tx_inperiod++;
 
 			RT_TRACE( rtlpriv, COMP_INTR, DBG_TRACE,
@@ -1037,25 +1038,25 @@ static irqreturn_t _rtl_pci_interrupt( int irq, void *dev_id )
 	}
 
 	/*<3> Rx related */
-	if ( intvec.inta & rtlpriv->cfg->maps[RTL_IMR_ROK] ) {
+	if ( inta & rtlpriv->cfg->maps[RTL_IMR_ROK] ) {
 		RT_TRACE( rtlpriv, COMP_INTR, DBG_TRACE, "Rx ok interrupt!\n" );
 		_rtl_pci_rx_interrupt( hw );
 	}
 
-	if ( unlikely( intvec.inta & rtlpriv->cfg->maps[RTL_IMR_RDU] ) ) {
+	if ( unlikely( inta & rtlpriv->cfg->maps[RTL_IMR_RDU] ) ) {
 		RT_TRACE( rtlpriv, COMP_ERR, DBG_WARNING,
 			 "rx descriptor unavailable!\n" );
 		_rtl_pci_rx_interrupt( hw );
 	}
 
-	if ( unlikely( intvec.intb & rtlpriv->cfg->maps[RTL_IMR_RXFOVW] ) ) {
+	if ( unlikely( intb & rtlpriv->cfg->maps[RTL_IMR_RXFOVW] ) ) {
 		RT_TRACE( rtlpriv, COMP_ERR, DBG_WARNING, "rx overflow !\n" );
 		_rtl_pci_rx_interrupt( hw );
 	}
 
 	/*<4> fw related*/
 	if ( rtlhal->hw_type == HARDWARE_TYPE_RTL8723AE ) {
-		if ( intvec.inta & rtlpriv->cfg->maps[RTL_IMR_C2HCMD] ) {
+		if ( inta & rtlpriv->cfg->maps[RTL_IMR_C2HCMD] ) {
 			RT_TRACE( rtlpriv, COMP_INTR, DBG_TRACE,
 				 "firmware interrupt!\n" );
 			queue_delayed_work( rtlpriv->works.rtl_wq,
@@ -1071,8 +1072,7 @@ static irqreturn_t _rtl_pci_interrupt( int irq, void *dev_id )
 	 */
 	if ( rtlhal->hw_type == HARDWARE_TYPE_RTL8188EE ||
 	    rtlhal->hw_type == HARDWARE_TYPE_RTL8723BE ) {
-		if ( unlikely( intvec.inta &
-		    rtlpriv->cfg->maps[RTL_IMR_HSISR_IND] ) ) {
+		if ( unlikely( inta & rtlpriv->cfg->maps[RTL_IMR_HSISR_IND] ) ) {
 			RT_TRACE( rtlpriv, COMP_INTR, DBG_TRACE,
 				 "hsisr interrupt!\n" );
 			_rtl_pci_hs_interrupt( hw );
@@ -1258,6 +1258,7 @@ static int _rtl_pci_init_tx_ring( struct ieee80211_hw *hw,
 
 		rtlpci->tx_ring[prio].cur_tx_rp = 0;
 		rtlpci->tx_ring[prio].cur_tx_wp = 0;
+		rtlpci->tx_ring[prio].avl_desc = entries;
 	}
 
 	/* alloc dma for this ring */
@@ -1801,7 +1802,6 @@ static int rtl_pci_start( struct ieee80211_hw *hw )
 	struct rtl_pci *rtlpci = rtl_pcidev( rtl_pcipriv( hw ) );
 	struct rtl_ps_ctl *ppsc = rtl_psc( rtl_priv( hw ) );
 	struct rtl_mac *rtlmac = rtl_mac( rtl_priv( hw ) );
-	struct rtl_btc_ops *btc_ops = rtlpriv->btcoexist.btc_ops;
 
 	int err;
 
@@ -1811,12 +1811,9 @@ static int rtl_pci_start( struct ieee80211_hw *hw )
 	if ( rtlpriv->cfg->ops->get_btc_status &&
 	    rtlpriv->cfg->ops->get_btc_status() ) {
 		rtlpriv->btcoexist.btc_info.ap_num = 36;
-		btc_ops->btc_init_variables( rtlpriv );
-		btc_ops->btc_init_hal_vars( rtlpriv );
-	} else if ( btc_ops ) {
-		btc_ops->btc_init_variables_wifi_only( rtlpriv );
+		rtlpriv->btcoexist.btc_ops->btc_init_variables( rtlpriv );
+		rtlpriv->btcoexist.btc_ops->btc_init_hal_vars( rtlpriv );
 	}
-
 	err = rtlpriv->cfg->ops->hw_init( hw );
 	if ( err ) {
 		RT_TRACE( rtlpriv, COMP_INIT, DBG_DMESG,
@@ -1852,10 +1849,7 @@ static void rtl_pci_stop( struct ieee80211_hw *hw )
 	u8 rf_timeout = 0;
 
 	if ( rtlpriv->cfg->ops->get_btc_status() )
-		rtlpriv->btcoexist.btc_ops->btc_halt_notify( rtlpriv );
-
-	if ( rtlpriv->btcoexist.btc_ops )
-		rtlpriv->btcoexist.btc_ops->btc_deinit_variables( rtlpriv );
+		rtlpriv->btcoexist.btc_ops->btc_halt_notify();
 
 	/*should be before disable interrupt&adapter
 	 *and will do it immediately.
@@ -2245,7 +2239,6 @@ int rtl_pci_probe( struct pci_dev *pdev,
 	rtlpriv->cfg = ( struct rtl_hal_cfg * )( id->driver_data );
 	rtlpriv->intf_ops = &rtl_pci_ops;
 	rtlpriv->glb_var = &rtl_global_var;
-	rtl_efuse_ops_init( hw );
 
 	/* MEM map */
 	err = pci_request_regions( pdev, KBUILD_MODNAME );
@@ -2324,9 +2317,6 @@ int rtl_pci_probe( struct pci_dev *pdev,
 	}
 	rtlpriv->mac80211.mac80211_registered = 1;
 
-	/* add for debug */
-	rtl_debug_add_one( hw );
-
 	/*init rfkill */
 	rtl_init_rfkill( hw );	/* Init PCI sw */
 
@@ -2374,9 +2364,6 @@ void rtl_pci_disconnect( struct pci_dev *pdev )
 	/* just in case driver is removed before firmware callback */
 	wait_for_completion( &rtlpriv->firmware_loading_complete );
 	clear_bit( RTL_STATUS_INTERFACE_START, &rtlpriv->status );
-
-	/* remove form debug */
-	rtl_debug_remove_one( hw );
 
 	/*ieee80211_unregister_hw will call ops_stop */
 	if ( rtlmac->mac80211_registered == 1 ) {
