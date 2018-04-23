@@ -41,6 +41,9 @@ Well supported kernel releases:
         4.12.x
         4.13.x
         4.14.x
+        4.15.x
+        4.16.x
+        4.17.x
 
 Well supported Ubuntu (and Ubuntu-based) releases:
 
@@ -54,6 +57,8 @@ Well supported Ubuntu (and Ubuntu-based) releases:
         Ubuntu 16.04 (LTS)
         Ubuntu 16.10
         Ubuntu 17.04
+        Ubuntu 17.10
+        Ubuntu 18.04 (LTS)
 
         Elementary OS Luna
         Elementary OS Isis
@@ -74,6 +79,7 @@ Well supported Fedora (and Fedora based) releases:
         Fedora 24
         Fedora 25
         Fedora 26
+        Fedora 27
 
         Red Hat Enterprise Linux 7.0 (LTS)
         Red Hat Enterprise Linux 7.1 (LTS)
@@ -221,6 +227,8 @@ Ex: "git checkout ubuntu-13.04"
     Ubuntu 16.04 | Kernel 4.4.x  | ubuntu-16.04
     Ubuntu 16.10 | Kernel 4.8.x  | ubuntu-16.10
     Ubuntu 17.04 | Kernel 4.10.x | ubuntu-17.04
+    Ubuntu 17.10 | Kernel 4.13.x | ubuntu-17.10
+    Ubuntu 18.04 | Kernel 4.15.x | ubuntu-18.04
     Mint 17      | Kernel 3.13.x | mint-17
     --------------------------------------------
     Any 3.13.x   | Kernel 3.13.x | generic-3.13.x
@@ -245,6 +253,9 @@ Ex: "git checkout ubuntu-13.04"
     Any 4.12.x   | Kernel 4.12.x | generic-4.12.x
     Any 4.13.x   | Kernel 4.13.x | generic-4.13.x
     Any 4.14.x   | Kernel 4.14.x | generic-4.14.x
+    Any 4.15.x   | Kernel 4.15.x | generic-4.15.x
+    Any 4.16.x   | Kernel 4.16.x | generic-4.16.x
+    Any 4.17.x   | Kernel 4.17.x | generic-4.17.x
 
     * Note, if the Ubuntu/Mint release version and your kernel version conflict,
       go with the branch corresponding to your *kernel version* as
