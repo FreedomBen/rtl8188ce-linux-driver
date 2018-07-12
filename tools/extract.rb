@@ -1,4 +1,4 @@
-#!/usr/bin/ruby
+#!/usr/bin/env ruby
 
 # ARGF is a cool way to handle either stdin or file input
 # http://stackoverflow.com/a/273841/2062384
