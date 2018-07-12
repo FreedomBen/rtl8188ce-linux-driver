@@ -1,10 +1,10 @@
-#/bin/bash
+#!/bin/bash
 
 if [ ! -f "functions.sh" ]; then
     echo "Error: Required file functions.sh not present" >&2
     exit 1
 else
-    . $(readlink -f functions.sh)
+    . "$(readlink -f functions.sh)"
 fi
 
 
@@ -34,8 +34,64 @@ doSwitch ()
 echo "Verifying a sane branch for your kernel version..."
 
 if inGitRepo; then
-    if $(uname -r | grep "4.2" > /dev/null); then
-        doSwitch "generic-4.2.x"
+    if $(uname -r | grep "4.18" > /dev/null); then
+        doSwitch "generic-4.18.x"
+    elif $(uname -r | grep "4.17" > /dev/null); then
+        doSwitch "generic-4.17.x"
+    elif $(uname -r | grep "4.16" > /dev/null); then
+        doSwitch "generic-4.16.x"
+    elif $(uname -r | grep "4.15" > /dev/null); then
+        if runningUbuntuKernel; then
+            doSwitch "ubuntu-18.04"
+        else
+            doSwitch "generic-4.15.x"
+        fi
+    elif $(uname -r | grep "4.14" > /dev/null); then
+        doSwitch "generic-4.14.x"
+    elif $(uname -r | grep "4.13" > /dev/null); then
+        if runningUbuntuKernel; then
+            doSwitch "ubuntu-17.10"
+        else
+            doSwitch "generic-4.13.x"
+        fi
+    elif $(uname -r | grep "4.12" > /dev/null); then
+        doSwitch "generic-4.12.x"
+    elif $(uname -r | grep "4.11" > /dev/null); then
+        doSwitch "generic-4.11.x"
+    elif $(uname -r | grep "4.10" > /dev/null); then
+        if runningUbuntuKernel; then
+            doSwitch "ubuntu-17.04"
+        else
+            doSwitch "generic-4.10.x"
+        fi
+    elif $(uname -r | grep "4.9" > /dev/null); then
+        doSwitch "generic-4.9.x"
+    elif $(uname -r | grep "4.8" > /dev/null); then
+        if runningUbuntuKernel; then
+            doSwitch "ubuntu-16.10"
+        else
+            doSwitch "generic-4.8.x"
+        fi
+    elif $(uname -r | grep "4.7" > /dev/null); then
+        doSwitch "generic-4.7.x"
+    elif $(uname -r | grep "4.6" > /dev/null); then
+        doSwitch "generic-4.6.x"
+    elif $(uname -r | grep "4.5" > /dev/null); then
+        doSwitch "generic-4.5.x"
+    elif $(uname -r | grep "4.4" > /dev/null); then
+        if runningUbuntuKernel; then
+            doSwitch "ubuntu-16.04"
+        else
+            doSwitch "generic-4.4.x"
+        fi
+    elif $(uname -r | grep "4.3" > /dev/null); then
+        doSwitch "generic-4.3.x"
+    elif $(uname -r | grep "4.2" > /dev/null); then
+        if runningUbuntuKernel; then
+            doSwitch "ubuntu-15.10"
+        else
+            doSwitch "generic-4.2.x"
+        fi
     elif $(uname -r | grep "4.1" > /dev/null); then
         doSwitch "generic-4.1.x"
     elif $(uname -r | grep "4.0" > /dev/null); then
@@ -57,13 +113,9 @@ if inGitRepo; then
             doSwitch "generic-3.16.x"
         fi
     elif $(uname -r | grep "3.15" > /dev/null); then
-        doSwitch "fedora-20"
+        doSwitch "generic-3.15.x"
     elif $(uname -r | grep "3.14" > /dev/null); then
-        if runningFedora; then
-            doSwitch "fedora-19"
-        else
-            doSwitch "generic-3.14.x"
-        fi
+        doSwitch "generic-3.14.x"
     elif $(uname -r | grep "3.13" > /dev/null); then
         if runningMint171; then
             doSwitch "mint-17.1"
@@ -74,8 +126,6 @@ if inGitRepo; then
         else
             doSwitch "generic-3.13.x"
         fi
-    elif $(uname -r | grep "3.12" > /dev/null); then
-        doSwitch "fedora-20"
     elif $(uname -r | grep "3.11" > /dev/null); then
         doSwitch "ubuntu-13.10"
     elif $(uname -r | grep "3.8" > /dev/null); then
@@ -92,7 +142,23 @@ if inGitRepo; then
     fi
 else
     base="$(basename $(pwd))"
-    if ( $(uname -r | grep "4.2"  > /dev/null) && ! $(echo "$base" | grep "generic-4.2.x"  > /dev/null) ) ||                                                          \
+    if ( $(uname -r | grep "4.18" > /dev/null) && ! $(echo "$base" | grep "generic-4.18.x" > /dev/null) ) ||                                                          \
+       ( $(uname -r | grep "4.17" > /dev/null) && ! $(echo "$base" | grep "generic-4.17.x" > /dev/null) ) ||                                                          \
+       ( $(uname -r | grep "4.16" > /dev/null) && ! $(echo "$base" | grep "generic-4.16.x" > /dev/null) ) ||                                                          \
+       ( $(uname -r | grep "4.15" > /dev/null) && ! $(echo "$base" | grep "generic-4.15.x" > /dev/null) ) && ! $(echo "$base" | grep "ubuntu-18.04"   > /dev/null) || \
+       ( $(uname -r | grep "4.14" > /dev/null) && ! $(echo "$base" | grep "generic-4.14.x" > /dev/null) ) ||                                                          \
+       ( $(uname -r | grep "4.13" > /dev/null) && ! $(echo "$base" | grep "generic-4.13.x" > /dev/null) ) && ! $(echo "$base" | grep "ubuntu-17.10"   > /dev/null) || \
+       ( $(uname -r | grep "4.12" > /dev/null) && ! $(echo "$base" | grep "generic-4.12.x" > /dev/null) ) ||                                                          \
+       ( $(uname -r | grep "4.11" > /dev/null) && ! $(echo "$base" | grep "generic-4.11.x" > /dev/null) ) ||                                                          \
+       ( $(uname -r | grep "4.10" > /dev/null) && ! $(echo "$base" | grep "generic-4.10.x" > /dev/null) ) && ! $(echo "$base" | grep "ubuntu-17.04"   > /dev/null) || \
+       ( $(uname -r | grep "4.9"  > /dev/null) && ! $(echo "$base" | grep "generic-4.9.x"  > /dev/null) ) ||                                                          \
+       ( $(uname -r | grep "4.8"  > /dev/null) && ! $(echo "$base" | grep "generic-4.8.x"  > /dev/null) ) && ! $(echo "$base" | grep "ubuntu-16.10"   > /dev/null) || \
+       ( $(uname -r | grep "4.7"  > /dev/null) && ! $(echo "$base" | grep "generic-4.7.x"  > /dev/null) ) ||                                                          \
+       ( $(uname -r | grep "4.6"  > /dev/null) && ! $(echo "$base" | grep "generic-4.6.x"  > /dev/null) ) ||                                                          \
+       ( $(uname -r | grep "4.5"  > /dev/null) && ! $(echo "$base" | grep "generic-4.5.x"  > /dev/null) ) ||                                                          \
+       ( $(uname -r | grep "4.4"  > /dev/null) && ! $(echo "$base" | grep "generic-4.4.x"  > /dev/null) ) && ! $(echo "$base" | grep "ubuntu-16.04"   > /dev/null) || \
+       ( $(uname -r | grep "4.3"  > /dev/null) && ! $(echo "$base" | grep "generic-4.3.x"  > /dev/null) ) ||                                                          \
+       ( $(uname -r | grep "4.2"  > /dev/null) && ! $(echo "$base" | grep "generic-4.2.x"  > /dev/null) ) && ! $(echo "$base" | grep "ubuntu-15.10"   > /dev/null) || \
        ( $(uname -r | grep "4.1"  > /dev/null) && ! $(echo "$base" | grep "generic-4.1.x"  > /dev/null) ) ||                                                          \
        ( $(uname -r | grep "4.0"  > /dev/null) && ! $(echo "$base" | grep "generic-4.0.x"  > /dev/null) ) ||                                                          \
        ( $(uname -r | grep "3.19" > /dev/null) && ! $(echo "$base" | grep "generic-3.19.x" > /dev/null) ) && ! $(echo "$base" | grep "ubuntu-15.04"   > /dev/null) || \
@@ -103,7 +169,6 @@ else
        ( $(uname -r | grep "3.14" > /dev/null) && ! $(echo "$base" | grep "generic-3.14.x" > /dev/null) ) ||                                                          \
        ( $(uname -r | grep "3.13" > /dev/null) && ! $(echo "$base" | grep "ubuntu-14.04"   > /dev/null) ) && ! $(echo "$base" | grep "generic-3.13.x" > /dev/null) || \
        # Add a check for mint-17 and mint-17.1 branches
-       ( $(uname -r | grep "3.12" > /dev/null) && ! $(echo "$base" | grep "fedora-20"      > /dev/null) ) ||                                                          \
        ( $(uname -r | grep "3.11" > /dev/null) && ! $(echo "$base" | grep "fedora-20"      > /dev/null) ) && ! $(echo "$base" | grep "ubuntu-13.10"   > /dev/null) || \
        ( $(uname -r | grep "3.8"  > /dev/null) && ! $(echo "$base" | grep "ubuntu-13.04"   > /dev/null) ) ||                                                          \
        ( $(uname -r | grep "3.2"  > /dev/null) && ! $(echo "$base" | grep "ubuntu-12.04"   > /dev/null) )

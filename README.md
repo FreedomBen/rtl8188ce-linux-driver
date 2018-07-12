@@ -1,16 +1,13 @@
 rtl8188ce-linux-driver
 ======================
 
-
 This modified version of the RealTek WiFi driver fixes some issues with RealTek cards on Linux.
-
 
 **Why use this driver?**
 
 1.  It has been modified to allow you to transmit at up to 33 dBm instead of the stock driver hard limit of 20 dBm, regardless of your CRDA regulatory domain.  This is a substantial increase in capability because every 3 dB increase is equivalent to a doubling of the power.  IOW, you can pump out 4x more Tx power than before.  This is subject to CRDA restrictions however (though you can set that to whatever you want, just make sure you're staying legal)
 2.  It has a few default settings that generally increase stability
 3.  Some helpful fixes are backported from newer kernels so that they can be enjoyed without upgrading the entire kernel (very useful for staying on your distros current kernel while benefitting from fixes relating to this driver)
-
 
 Well supported RealTek cards:
 
@@ -22,7 +19,6 @@ Well supported kernel releases:
         3.2.x
         3.8.x
         3.11.x
-        3.12.x
         3.13.x
         3.14.x
         3.15.x
@@ -32,6 +28,23 @@ Well supported kernel releases:
         3.19.x
         4.0.x
         4.1.x
+        4.2.x
+        4.3.x
+        4.4.x
+        4.5.x
+        4.6.x
+        4.7.x
+        4.8.x
+        4.9.x
+        4.10.x
+        4.11.x
+        4.12.x
+        4.13.x
+        4.14.x
+        4.15.x
+        4.16.x
+        4.17.x
+        4.18.x
 
 Well supported Ubuntu (and Ubuntu-based) releases:
 
@@ -41,6 +54,12 @@ Well supported Ubuntu (and Ubuntu-based) releases:
         Ubuntu 14.04 (LTS)
         Ubuntu 14.10
         Ubuntu 15.04
+        Ubuntu 15.10
+        Ubuntu 16.04 (LTS)
+        Ubuntu 16.10
+        Ubuntu 17.04
+        Ubuntu 17.10
+        Ubuntu 18.04 (LTS)
 
         Elementary OS Luna
         Elementary OS Isis
@@ -57,10 +76,24 @@ Well supported Fedora (and Fedora based) releases:
         Fedora 20
         Fedora 21
         Fedora 22
+        Fedora 23
+        Fedora 24
+        Fedora 25
+        Fedora 26
+        Fedora 27
+        Fedora 28
 
-        Red Hat Enterprise Linux 7 (LTS)
+        Red Hat Enterprise Linux 7.0 (LTS)
+        Red Hat Enterprise Linux 7.1 (LTS)
+        Red Hat Enterprise Linux 7.2 (LTS)
+        Red Hat Enterprise Linux 7.3 (LTS)
+        Red Hat Enterprise Linux 7.4 (LTS)
 
-        CentOS 7 (LTS)
+        CentOS 7.0 (LTS)
+        CentOS 7.1 (LTS)
+        CentOS 7.2 (LTS)
+        CentOS 7.3 (LTS)
+        CentOS 7.4 (LTS)
 
 Arch is also supported, but tends to break each time the kernel is bumped up a minor version (like 3.13.x to 3.14.x).  I try to fix the breakage quickly but this is not how I support my family ;-)
 
@@ -85,7 +118,7 @@ Other RealTek cards, kernel releases, and Linux flavors/releases are supported, 
         android 2.2 (froyo-x86), etc.
         
 
-Please note that I have only tested the driver on Ubuntu and Fedora (the well supported releases).  If you are NOT using Ubuntu, pay close attention to your kernel version when selecting branches.  You also need to substitute your package manager whenever you see `apt-get install`, so Fedora would be `yum install xxx`.  Most package names are the same but there may be some difference.
+Please note that I have only tested the driver on Ubuntu and Fedora (the well supported releases).  If you are NOT using Ubuntu, pay close attention to your kernel version when selecting branches.  You also need to substitute your package manager whenever you see `apt-get install`, so Fedora would be `dnf install xxx`.  Most package names are the same but there may be some difference.
 
 
 Automatic Installation:
@@ -119,6 +152,9 @@ To use DKMS:
 
 1. Follow steps 0-2 in the "Manual Installation" section below.
 
+1. Copy the repo `cp -rv . /usr/src/rtlwifi-1.0.0`
+
+
 2. Run the following command to register the sources with DKMS (the `1.0.0` can be any numbers): (note the period at the end!)
 
     sudo dkms add rtlwifi/1.0.0 .
@@ -150,24 +186,24 @@ Install git if necessary:
     
     or
 
-    yum install git
+    dnf install git
 
 Clone the repo (Basically it makes a copy of the current source code)
 
     git clone https://github.com/FreedomBen/rtl8188ce-linux-driver.git
 
 
-1\.  Install build dependencies (pay attention to the backticks!):
+1\.  Install build dependencies:
 
     Ubuntu:
 
-    apt-get install gcc build-essential linux-headers-generic linux-headers-`uname -r`
+    apt-get install gcc build-essential linux-headers-generic linux-headers-$(uname -r)
 
     Fedora:
 
-    yum install kernel-devel kernel-headers
-    yum groupinstall "Development Tools"
-    yum groupinstall "C Development Tools and Libraries"
+    dnf install kernel-devel kernel-headers
+    dnf groupinstall "Development Tools"
+    dnf groupinstall "C Development Tools and Libraries"
 
     Arch:
 
@@ -191,23 +227,44 @@ Ex: "git checkout ubuntu-13.04"
     Ubuntu 14.04 | Kernel 3.13.x | ubuntu-14.04
     Ubuntu 14.10 | Kernel 3.16.x | ubuntu-14.10
     Ubuntu 15.04 | Kernel 3.19.x | ubuntu-15.04
-    Fedora 19    | Kernel 3.14.x | fedora-19
-    Fedora 20    | Kernel 3.15.x | fedora-20
+    Ubuntu 15.10 | Kernel 4.2.x  | ubuntu-15.10
+    Ubuntu 16.04 | Kernel 4.4.x  | ubuntu-16.04
+    Ubuntu 16.10 | Kernel 4.8.x  | ubuntu-16.10
+    Ubuntu 17.04 | Kernel 4.10.x | ubuntu-17.04
+    Ubuntu 17.10 | Kernel 4.13.x | ubuntu-17.10
+    Ubuntu 18.04 | Kernel 4.15.x | ubuntu-18.04
     Mint 17      | Kernel 3.13.x | mint-17
     --------------------------------------------
     Any 3.13.x   | Kernel 3.13.x | generic-3.13.x
     Any 3.14.x   | Kernel 3.14.x | generic-3.14.x
+    Any 3.15.x   | Kernel 3.14.x | generic-3.14.x
     Any 3.16.x   | Kernel 3.16.x | generic-3.16.x
     Any 3.17.x   | Kernel 3.17.x | generic-3.17.x
     Any 3.18.x   | Kernel 3.18.x | generic-3.18.x
     Any 3.19.x   | Kernel 3.19.x | generic-3.19.x
     Any 4.0.x    | Kernel 4.0.x  | generic-4.0.x
     Any 4.1.x    | Kernel 4.1.x  | generic-4.1.x
+    Any 4.2.x    | Kernel 4.2.x  | generic-4.2.x
+    Any 4.3.x    | Kernel 4.3.x  | generic-4.3.x
+    Any 4.4.x    | Kernel 4.4.x  | generic-4.4.x
+    Any 4.5.x    | Kernel 4.5.x  | generic-4.5.x
+    Any 4.6.x    | Kernel 4.6.x  | generic-4.6.x
+    Any 4.7.x    | Kernel 4.7.x  | generic-4.7.x
+    Any 4.8.x    | Kernel 4.8.x  | generic-4.8.x
+    Any 4.9.x    | Kernel 4.9.x  | generic-4.9.x
+    Any 4.10.x   | Kernel 4.10.x | generic-4.10.x
+    Any 4.11.x   | Kernel 4.11.x | generic-4.11.x
+    Any 4.12.x   | Kernel 4.12.x | generic-4.12.x
+    Any 4.13.x   | Kernel 4.13.x | generic-4.13.x
+    Any 4.14.x   | Kernel 4.14.x | generic-4.14.x
+    Any 4.15.x   | Kernel 4.15.x | generic-4.15.x
+    Any 4.16.x   | Kernel 4.16.x | generic-4.16.x
+    Any 4.17.x   | Kernel 4.17.x | generic-4.17.x
+    Any 4.18.x   | Kernel 4.18.x | generic-4.18.x
 
-    * Note, if the Ubuntu/Fedora release version and your kernel version conflict,
+    * Note, if the Ubuntu/Mint release version and your kernel version conflict,
       go with the branch corresponding to your *kernel version* as
       that is what really matters!
-
 
 3\. Compile:
 
@@ -248,13 +305,13 @@ Or tarball it up:
 NOTE: Unlike the stock driver, `rtl8192c_common` is only required with kernel >= 3.14
 
 
-8\. Make persistent by adding this to the end of "/etc/modules" (for Ubuntu), or "/etc/rc.modules" (for Fedora) (if Fedora make sure /etc/rc.modules is executable), or "/etc/modules-load.d/rtlwifi.conf" (for Arch). If you don't have an RTL8188CE or RTL8192CE, then substitute the correct kernel module in place of `rtl8192ce`:
+8\. Make persistent by adding this to the end of `/etc/modules` (for Ubuntu), or `/etc/rc.modules` (for Fedora) (if Fedora make sure `/etc/rc.modules` is executable), or `/etc/modules-load.d/rtlwifi.conf` (for Arch). If you don't have an RTL8188CE or RTL8192CE, then substitute the correct kernel module in place of `rtl8192ce`:
 
     rtl8192ce
 
 NOTE:  By "make persistent", I mean making the loading of the RLT8192CE kernel modules happen automatically at boot time so you don't have to modprobe them in yourself.  If `udev` is seeing your Realtek card (which is usually the case), then it will load the kernel modules for you without this, but putting this in hurts nothing.
 
-You may want to verify your CRDA domain.  For example if you were in Bolivia it would be: "iw reg set BO"
+You may want to verify your CRDA domain.  For example if you were in Bolivia it would be: `iw reg set BO`
 There is more information about CRDA available at: http://ttys1.wordpress.com/2012/04/12/fixing-regulatory-domain-crda-of-realtec-wireless-device-drivers/
 
 
@@ -342,7 +399,7 @@ You might also consider using DKMS if your kernel changes often.  There are inst
 
 You basically have two choices.  Either will get the job done.  When you run `sudo make uninstall`, the make script will try to restore your backup from when you installed.  The system works like this:
 
-* When you run `sudo make install`, the existing drivers are backup up to `~/.rtlwifi-backups` as a precaution (this is new as of 29-May-2014, so if you installed before then, you have no backups.  Sorry)
+* When you run `sudo make install`, the existing drivers are backed up to `~/.rtlwifi-backups` as a precaution (this is new as of 29-May-2014, so if you installed before then, you have no backups.  Sorry)
 * When you run `sudo make uninstall`, this location is checked for a backup that matches your current kernel version.  If one cannot be found, then you are stuck with choice #2.  If a suitable backup is found, the script will offer to restore it for you. 
 
 Choice #1 - Use the backup that the install script made for you:\*
@@ -353,7 +410,7 @@ or
 
     ./restore_backup.sh
 
-* Note that this will look in the home directory of whichever user you are when you run it, so if it doesn't see a backup, try it again with sudo so that it will check root's home directory, or as a regular user so it will check that user's directory.*
+* Note that this will look in the home directory of whichever user you are when you run it, so if it doesn't see a backup, try it again with `sudo` so that it will check root's home directory, or as a regular user so it will check that user's directory.*
 
 Choice #2 - Reinstall your distro's kernel package:
 
