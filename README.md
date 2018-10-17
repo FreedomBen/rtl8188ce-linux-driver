@@ -45,6 +45,7 @@ Well supported kernel releases:
         4.16.x
         4.17.x
         4.18.x
+        4.19.x
 
 Well supported Ubuntu (and Ubuntu-based) releases:
 
@@ -261,6 +262,7 @@ Ex: "git checkout ubuntu-13.04"
     Any 4.16.x   | Kernel 4.16.x | generic-4.16.x
     Any 4.17.x   | Kernel 4.17.x | generic-4.17.x
     Any 4.18.x   | Kernel 4.18.x | generic-4.18.x
+    Any 4.19.x   | Kernel 4.19.x | generic-4.19.x
 
     * Note, if the Ubuntu/Mint release version and your kernel version conflict,
       go with the branch corresponding to your *kernel version* as
