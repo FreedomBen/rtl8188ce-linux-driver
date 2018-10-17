@@ -12,7 +12,6 @@ UBUNTU1610='git://kernel.ubuntu.com/ubuntu/ubuntu-yakkety.git'
 UBUNTU1704='git://kernel.ubuntu.com/ubuntu/ubuntu-zesty.git'
 UBUNTU1710='git://kernel.ubuntu.com/ubuntu/ubuntu-artful.git'
 UBUNTU1804='git://kernel.ubuntu.com/ubuntu/ubuntu-bionic.git'
-UBUNTU1810='git://kernel.ubuntu.com/ubuntu/ubuntu-cosmic.git'
 
 starting_dir="$(pwd)"
 
@@ -133,9 +132,6 @@ tag ()
         elif $(echo "$1" | grep "18.04" >/dev/null 2>&1); then
             echo "$(git tag | grep Ubuntu-4.15 | sort -n | ~/bin/extract.rb)"
             return
-        elif $(echo "$1" | grep "18.10" >/dev/null 2>&1); then
-            echo "$(git tag | grep Ubuntu-4.18 | sort -n | ~/bin/extract.rb)"
-            return
         fi
     fi
     die "unknown tag for \"$1\""
@@ -169,8 +165,6 @@ elif [ "$1" = "ubuntu-17.10" ]; then
     remote="$UBUNTU1710"
 elif [ "$1" = "ubuntu-18.04" ]; then
     remote="$UBUNTU1804"
-elif [ "$1" = "ubuntu-18.10" ]; then
-    remote="$UBUNTU1810"
 elif [[ $1 =~ generic ]]; then
     remote="$GENERIC"
 fi
