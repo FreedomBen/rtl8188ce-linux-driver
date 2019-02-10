@@ -352,7 +352,7 @@ runningStockRtl8821ae ()
     runningAnyRtl8821ae && ! runningOurRtl8821ae
 }
 
-readonly rtlwifi_orig="/lib/modules/$(uname -r)/kernel/drivers/net/wireless/rtlwifi"
+readonly rtlwifi_orig="/lib/modules/$(uname -r)/kernel/drivers/net/wireless/realtek/rtlwifi"
 readonly rtlwifi_backup_dir="$HOME/.rtlwifi-backup"
 readonly rtlwifi_backup_outfile="$rtlwifi_backup_dir/$(uname -r).tar.gz"
 
