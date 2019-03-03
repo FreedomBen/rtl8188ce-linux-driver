@@ -56,6 +56,15 @@ runningUbuntu ()
     fi
 }
 
+runningDebian ()
+{
+    if $(which lsb_release >/dev/null 2>&1); then
+        lsb_release -d | grep --color=auto "Debian" > /dev/null
+    else
+        uname -a | grep --color=auto "Debian" > /dev/null
+    fi
+}
+
 runningArch ()
 {
     if $(which lsb_release >/dev/null 2>&1); then
@@ -125,6 +134,12 @@ installBuildDependencies ()
         sudo apt-get -y install gcc build-essential $LHG $LHUR
         sudo apt-get -y install git
         return $?
+    elif runningDebian; then
+        LHG=''; LHUR=''
+        $(sudo dpkg -s linux-headers-$(uname -r) >/dev/null 2>&1) && LHUR="linux-headers-$(uname -r)"
+        sudo apt-get -y install gcc build-essential $LHG $LHUR
+        sudo apt-get -y install git
+        return $?
     else
         echo "Unknown distro. Please ensure all build dependencies are installed before proceeding (or the compile will fail).  Roughly you need gcc build essentials, linux headers, and git." >&2
         return 1
@@ -139,25 +154,48 @@ makeModuleLoadPersistent ()
         file="/etc/modules"
     elif runningArch; then
         file="/etc/modules-load.d/rtlwifi.conf"
+    elif runningDebian; then
+        file="/etc/modules"
     else
         echo "Cannot make persistent; unknown module file" >&2
         return 1
     fi
-
+    
     not_present="1"
-    if [ -f "$file" ]; then
-        while read line; do
-            if $(echo "$line" | grep "rtl8192ce" > /dev/null); then
+        
+    if runningAnyRtl8821ae; then
+        if [ -f "$file" ]; then
+            while read line; do
+                if $(echo "$line" | grep "rtl8821ae" > /dev/null); then
                 not_present="0"
-            fi
-        done < "$file"
-    fi
+                fi
+            done < "$file"
+        fi
 
-    if [ "$not_present" = "1" ]; then
-        if [ "$(id -u)" = "0" ]; then
-            echo "rtl8192ce" >> "$file"
-        else
-            sudo sh -c "echo 'rtl8192ce' >> $file"
+        if [ "$not_present" = "1" ]; then
+            if [ "$(id -u)" = "0" ]; then
+                echo "rtl8821ae" >> "$file"
+            else
+                sudo sh -c "echo 'rtl8821ae' >> $file"
+            fi
+        fi
+    fi
+    
+    if runningAnyRtl8192; then
+        if [ -f "$file" ]; then
+            while read line; do
+                if $(echo "$line" | grep "rtl8192ce" > /dev/null); then
+                not_present="0"
+                fi
+            done < "$file"
+        fi
+
+        if [ "$not_present" = "1" ]; then
+            if [ "$(id -u)" = "0" ]; then
+                echo "rtl8192ce" >> "$file"
+            else
+                sudo sh -c "echo 'rtl8192ce' >> $file"
+            fi
         fi
     fi
 }
@@ -180,6 +218,11 @@ pciDetectsRtl8192ce ()
 pciDetectsRtl8188ce ()
 {
     lspci | grep -i "RTL8188CE" > /dev/null
+}
+
+pciDetectsRtl8821ae ()
+{
+    lspci | grep -i "rtl8821ae" > /dev/null
 }
 
 runningAnyRtl8192ce ()
@@ -307,6 +350,11 @@ runningStockRtl8192se ()
     runningAnyRtl8192se && ! runningOurRtl8192se
 }
 
+runningAnyRtl8192 ()
+{
+    lspci | grep -i "rtl8192" > /dev/null
+}
+
 runningAnyRtl8723ae ()
 {
     lsmod | grep "rtl8723ae" > /dev/null
@@ -337,11 +385,6 @@ runningStockRtl8723be ()
     runningAnyRtl8723be && ! runningOurRtl8723be
 }
 
-runningAnyRtl8821ae ()
-{
-    lsmod | grep "rtl8821ae" > /dev/null
-}
-
 runningOurRtl8821ae ()
 {
     modinfo rtl8821ae | grep "Benjamin Porter" > /dev/null
@@ -350,6 +393,11 @@ runningOurRtl8821ae ()
 runningStockRtl8821ae ()
 {
     runningAnyRtl8821ae && ! runningOurRtl8821ae
+}
+
+runningAnyRtl8821ae () 
+{
+    lspci | grep -i "rtl8821ae" > /dev/null
 }
 
 readonly rtlwifi_orig="/lib/modules/$(uname -r)/kernel/drivers/net/wireless/rtlwifi"

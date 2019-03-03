@@ -2,11 +2,24 @@
 CC = gcc
 KVER  := $(shell uname -r)
 KSRC := /lib/modules/$(KVER)/build
-MODDESTDIR := /lib/modules/$(KVER)/kernel/drivers/net/wireless/rtlwifi
 FIRMWAREDIR := /lib/firmware/
 PWD := $(shell pwd)
 CLR_MODULE_FILES := *.mod.c *.mod *.o .*.cmd *.ko *~ .tmp_versions* modules.order Module.symvers
 SYMBOL_FILE := Module.symvers
+
+# Handle the move of the entire rtlwifi tree
+ifneq ("","$(wildcard /lib/modules/$(KVER)/kernel/drivers/net/wireless/realtek)")
+MODDESTDIR := /lib/modules/$(KVER)/kernel/drivers/net/wireless/realtek/rtlwifi
+else
+MODDESTDIR := /lib/modules/$(KVER)/kernel/drivers/net/wireless/rtlwifi
+endif
+#Handle the compression option for modules in 3.18+
+ifneq ("","$(wildcard $(MODDESTDIR)/*.ko.gz)")
+COMPRESS_GZIP := y
+endif
+ifneq ("","$(wildcard $(MODDESTDIR)/*.ko.xz)")
+COMPRESS_XZ := y
+endif
 
 EXTRA_CFLAGS += -O2
 obj-m := rtlwifi.o
@@ -43,6 +56,8 @@ all:
 	@make -C rtl8192de/
 	@cp $(SYMBOL_FILE) rtl8188ee/
 	@make -C rtl8188ee/
+	@cp $(SYMBOL_FILE) rtl8821ae/
+	@make -C rtl8821ae/
 install: all
 
 	if [ -e backup_existing.sh ] ; \
@@ -55,6 +70,7 @@ install: all
 	find /lib/modules/$(shell uname -r) -name "r8192cu_*.ko" -exec rm {} \;
 	find /lib/modules/$(shell uname -r) -name "r8723e_*.ko" -exec rm {} \;
 	find /lib/modules/$(shell uname -r) -name "r8188ee_*.ko" -exec rm {} \;
+	find /lib/modules/$(shell uname -r) -name "rtl8821ae_*.ko" -exec rm {} \;
 	@rm -fr $(FIRMWAREDIR)/`uname -r`/rtlwifi
 
 	$(shell rm -fr $(MODDESTDIR))
@@ -65,6 +81,7 @@ install: all
 	$(shell mkdir $(MODDESTDIR)/rtl8192cu)
 	$(shell mkdir $(MODDESTDIR)/rtl8192de)
 	$(shell mkdir $(MODDESTDIR)/rtl8188ee)
+	$(shell mkdir $(MODDESTDIR)/rtl8821ae)
 	@install -p -m 644 rtlwifi.ko $(MODDESTDIR)	
 	@install -p -m 644 ./rtl8192c/rtl8192c_common.ko $(MODDESTDIR)/rtl8192c
 	@install -p -m 644 ./rtl8192se/rtl8192se.ko $(MODDESTDIR)/rtl8192se
@@ -72,7 +89,16 @@ install: all
 	@install -p -m 644 ./rtl8192cu/rtl8192cu.ko $(MODDESTDIR)/rtl8192cu
 	@install -p -m 644 ./rtl8192de/rtl8192de.ko $(MODDESTDIR)/rtl8192de
 	@install -p -m 644 ./rtl8188ee/rtl8188ee.ko $(MODDESTDIR)/rtl8188ee
-	
+	@install -p -m 644 ./rtl8821ae/rtl8821ae.ko $(MODDESTDIR)/rtl8821ae
+ifeq ($(COMPRESS_GZIP), y)
+	@gzip -f $(MODDESTDIR)/*.ko
+	@gzip -f $(MODDESTDIR)/rtl8*/*.ko
+endif
+ifeq ($(COMPRESS_XZ), y)
+	@xz -f $(MODDESTDIR)/*.ko
+	@xz -f $(MODDESTDIR)/rtl8*/*.ko
+endif
+
 	@depmod -a
 
 	@#copy firmware img to target fold
@@ -116,3 +142,4 @@ clean:
 	@make -C rtl8192se/ clean
 	@make -C rtl8192de/ clean
 	@make -C rtl8188ee/ clean
+	@make -C rtl8821ae/ clean
