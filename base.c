@@ -476,6 +476,11 @@ static void _rtl_init_deferred_work( struct ieee80211_hw *hw )
 	/* <2> work queue */
 	rtlpriv->works.hw = hw;
 	rtlpriv->works.rtl_wq = alloc_workqueue( "%s", 0, 0, rtlpriv->cfg->name );
+	if ( unlikely( !rtlpriv->works.rtl_wq ) ) {
+		pr_err( "Failed to allocate work queue\n" );
+		return;
+	}
+
 	INIT_DELAYED_WORK( &rtlpriv->works.watchdog_wq,
 			  ( void * )rtl_watchdog_wq_callback );
 	INIT_DELAYED_WORK( &rtlpriv->works.ips_nic_off_wq,
@@ -2296,6 +2301,7 @@ void rtl_c2hcmd_enqueue( struct ieee80211_hw *hw, struct sk_buff *skb )
 
 	if ( rtl_c2h_fast_cmd( hw, skb ) ) {
 		rtl_c2h_content_parsing( hw, skb );
+		kfree_skb( skb );
 		return;
 	}
 
