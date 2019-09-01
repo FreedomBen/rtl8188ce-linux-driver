@@ -34,7 +34,15 @@ doSwitch ()
 echo "Verifying a sane branch for your kernel version..."
 
 if inGitRepo; then
-    if $(uname -r | grep "4.20" > /dev/null); then
+    if $(uname -r | grep "5.3" > /dev/null); then
+        doSwitch "generic-5.3.x"
+    elif $(uname -r | grep "5.2" > /dev/null); then
+        doSwitch "generic-5.2.x"
+    elif $(uname -r | grep "5.1" > /dev/null); then
+        doSwitch "generic-5.1.x"
+    elif $(uname -r | grep "5.0" > /dev/null); then
+        doSwitch "generic-5.0.x"
+    elif $(uname -r | grep "4.20" > /dev/null); then
         doSwitch "generic-4.20.x"
     elif $(uname -r | grep "4.19" > /dev/null); then
         doSwitch "generic-4.19.x"
