@@ -36,7 +36,6 @@
 #include "../stats.h"
 #include "reg.h"
 #include "def.h"
-#include "phy.h"
 #include "trx.h"
 #include "led.h"
 #include "dm.h"
