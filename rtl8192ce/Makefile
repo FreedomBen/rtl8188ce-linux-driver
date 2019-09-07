@@ -2,7 +2,7 @@
 CC = gcc
 KVER  := $(shell uname -r)
 KSRC := /lib/modules/$(KVER)/build
-MODDESTDIR := /lib/modules/$(KVER)/kernel/drivers/net/wireless/
+MODDESTDIR := /lib/modules/$(KVER)/kernel/drivers/net/wireless/realtek
 PWD := $(shell pwd)
 
 EXTRA_CFLAGS += -O2
