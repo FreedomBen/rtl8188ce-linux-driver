@@ -51,6 +51,8 @@ Well supported kernel releases:
         5.1.x
         5.2.x
         5.3.x
+        5.4.x
+        5.5.x
 
 Well supported Ubuntu (and Ubuntu-based) releases:
 
@@ -90,18 +92,31 @@ Well supported Fedora (and Fedora based) releases:
         Fedora 28
         Fedora 29
         Fedora 30
+        Fedora 31
 
         Red Hat Enterprise Linux 7.0 (LTS)
         Red Hat Enterprise Linux 7.1 (LTS)
         Red Hat Enterprise Linux 7.2 (LTS)
         Red Hat Enterprise Linux 7.3 (LTS)
         Red Hat Enterprise Linux 7.4 (LTS)
+        Red Hat Enterprise Linux 7.5 (LTS)
+        Red Hat Enterprise Linux 7.6 (LTS)
+        Red Hat Enterprise Linux 7.7 (LTS)
+        Red Hat Enterprise Linux 8.0 (LTS)
+        Red Hat Enterprise Linux 8.1 (LTS)
+        Red Hat Enterprise Linux 8.2 (LTS)
 
         CentOS 7.0 (LTS)
         CentOS 7.1 (LTS)
         CentOS 7.2 (LTS)
         CentOS 7.3 (LTS)
         CentOS 7.4 (LTS)
+        CentOS 7.5 (LTS)
+        CentOS 7.6 (LTS)
+        CentOS 7.7 (LTS)
+        CentOS 8.0 (LTS)
+        CentOS 8.1 (LTS)
+        CentOS 8.2 (LTS)
 
 Arch is also supported, but tends to break each time the kernel is bumped up a minor version (like 3.13.x to 3.14.x).  I try to fix the breakage quickly but this is not how I support my family ;-)
 
@@ -275,6 +290,8 @@ Ex: "git checkout ubuntu-13.04"
     Any 5.1.x    | Kernel 5.1.x  | generic-5.1.x
     Any 5.2.x    | Kernel 5.2.x  | generic-5.2.x
     Any 5.3.x    | Kernel 5.3.x  | generic-5.3.x
+    Any 5.4.x    | Kernel 5.4.x  | generic-5.4.x
+    Any 5.5.x    | Kernel 5.5.x  | generic-5.5.x
 
     * Note, if the Ubuntu/Mint release version and your kernel version conflict,
       go with the branch corresponding to your *kernel version* as
