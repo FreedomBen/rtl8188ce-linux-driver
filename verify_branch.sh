@@ -34,7 +34,11 @@ doSwitch ()
 echo "Verifying a sane branch for your kernel version..."
 
 if inGitRepo; then
-    if $(uname -r | grep "5.3" > /dev/null); then
+    if $(uname -r | grep "5.5" > /dev/null); then
+        doSwitch "generic-5.5.x"
+    elif $(uname -r | grep "5.4" > /dev/null); then
+        doSwitch "generic-5.4.x"
+    elif $(uname -r | grep "5.3" > /dev/null); then
         doSwitch "generic-5.3.x"
     elif $(uname -r | grep "5.2" > /dev/null); then
         doSwitch "generic-5.2.x"
@@ -154,7 +158,13 @@ if inGitRepo; then
     fi
 else
     base="$(basename $(pwd))"
-    if ( $(uname -r | grep "4.20" > /dev/null) && ! $(echo "$base" | grep "generic-4.20.x" > /dev/null) ) ||                                                          \
+    if ( $(uname -r | grep "5.5"  > /dev/null) && ! $(echo "$base" | grep "generic-5.5.x"  > /dev/null) ) ||                                                          \
+       ( $(uname -r | grep "5.4"  > /dev/null) && ! $(echo "$base" | grep "generic-5.4.x"  > /dev/null) ) ||                                                          \
+       ( $(uname -r | grep "5.3"  > /dev/null) && ! $(echo "$base" | grep "generic-5.3.x"  > /dev/null) ) ||                                                          \
+       ( $(uname -r | grep "5.2"  > /dev/null) && ! $(echo "$base" | grep "generic-5.2.x"  > /dev/null) ) ||                                                          \
+       ( $(uname -r | grep "5.1"  > /dev/null) && ! $(echo "$base" | grep "generic-5.1.x"  > /dev/null) ) ||                                                          \
+       ( $(uname -r | grep "5.0"  > /dev/null) && ! $(echo "$base" | grep "generic-5.0.x"  > /dev/null) ) ||                                                          \
+       ( $(uname -r | grep "4.20" > /dev/null) && ! $(echo "$base" | grep "generic-4.20.x" > /dev/null) ) ||                                                          \
        ( $(uname -r | grep "4.19" > /dev/null) && ! $(echo "$base" | grep "generic-4.19.x" > /dev/null) ) ||                                                          \
        ( $(uname -r | grep "4.18" > /dev/null) && ! $(echo "$base" | grep "generic-4.18.x" > /dev/null) ) ||                                                          \
        ( $(uname -r | grep "4.17" > /dev/null) && ! $(echo "$base" | grep "generic-4.17.x" > /dev/null) ) ||                                                          \
