@@ -53,6 +53,9 @@ Well supported kernel releases:
         5.3.x
         5.4.x
         5.5.x
+        5.6.x
+        5.7.x
+        5.8.x
 
 Well supported Ubuntu (and Ubuntu-based) releases:
 
@@ -68,6 +71,7 @@ Well supported Ubuntu (and Ubuntu-based) releases:
         Ubuntu 17.04
         Ubuntu 17.10
         Ubuntu 18.04 (LTS)
+        Ubuntu 20.04 (LTS)
 
         Elementary OS Luna
         Elementary OS Isis
@@ -93,6 +97,7 @@ Well supported Fedora (and Fedora based) releases:
         Fedora 29
         Fedora 30
         Fedora 31
+        Fedora 32
 
         Red Hat Enterprise Linux 7.0 (LTS)
         Red Hat Enterprise Linux 7.1 (LTS)
@@ -105,6 +110,8 @@ Well supported Fedora (and Fedora based) releases:
         Red Hat Enterprise Linux 8.0 (LTS)
         Red Hat Enterprise Linux 8.1 (LTS)
         Red Hat Enterprise Linux 8.2 (LTS)
+        Red Hat Enterprise Linux 8.3 (LTS)
+        Red Hat Enterprise Linux 8.4 (LTS)
 
         CentOS 7.0 (LTS)
         CentOS 7.1 (LTS)
@@ -117,6 +124,8 @@ Well supported Fedora (and Fedora based) releases:
         CentOS 8.0 (LTS)
         CentOS 8.1 (LTS)
         CentOS 8.2 (LTS)
+        CentOS 8.3 (LTS)
+        CentOS 8.4 (LTS)
 
 Arch is also supported, but tends to break each time the kernel is bumped up a minor version (like 3.13.x to 3.14.x).  I try to fix the breakage quickly but this is not how I support my family ;-)
 
@@ -256,6 +265,7 @@ Ex: "git checkout ubuntu-13.04"
     Ubuntu 17.04 | Kernel 4.10.x | ubuntu-17.04
     Ubuntu 17.10 | Kernel 4.13.x | ubuntu-17.10
     Ubuntu 18.04 | Kernel 4.15.x | ubuntu-18.04
+    Ubuntu 20.04 | Kernel 5.3.x  | ubuntu-20.04
     Mint 17      | Kernel 3.13.x | mint-17
     --------------------------------------------
     Any 3.13.x   | Kernel 3.13.x | generic-3.13.x
@@ -292,6 +302,9 @@ Ex: "git checkout ubuntu-13.04"
     Any 5.3.x    | Kernel 5.3.x  | generic-5.3.x
     Any 5.4.x    | Kernel 5.4.x  | generic-5.4.x
     Any 5.5.x    | Kernel 5.5.x  | generic-5.5.x
+    Any 5.6.x    | Kernel 5.6.x  | generic-5.6.x
+    Any 5.7.x    | Kernel 5.7.x  | generic-5.7.x
+    Any 5.8.x    | Kernel 5.8.x  | generic-5.8.x
 
     * Note, if the Ubuntu/Mint release version and your kernel version conflict,
       go with the branch corresponding to your *kernel version* as
