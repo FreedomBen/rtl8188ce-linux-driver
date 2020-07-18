@@ -380,7 +380,7 @@ After running:
     
 You may have invalid configuration options in `/etc/modprobe.d/rtl8192ce.conf`.  You can either remove the file or remove any options that are not supported.
 
-**3\. If you're connection seems unstable:**
+**3\. If your connection seems unstable:**
 
 This driver has been modified to allow up to 33 dBm Tx power (instead of the stock driver limit of 20).  This allows you to crank up the Tx power, which *vastly* improves performance for me. 
 
