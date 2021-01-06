@@ -47,6 +47,17 @@ Well supported kernel releases:
         4.18.x
         4.19.x
         4.20.x
+        5.0.x
+        5.1.x
+        5.2.x
+        5.3.x
+        5.4.x
+        5.5.x
+        5.6.x
+        5.7.x
+        5.8.x
+        5.9.x
+        5.10.x
 
 Well supported Ubuntu (and Ubuntu-based) releases:
 
@@ -62,6 +73,7 @@ Well supported Ubuntu (and Ubuntu-based) releases:
         Ubuntu 17.04
         Ubuntu 17.10
         Ubuntu 18.04 (LTS)
+        Ubuntu 20.04 (LTS)
 
         Elementary OS Luna
         Elementary OS Isis
@@ -85,18 +97,38 @@ Well supported Fedora (and Fedora based) releases:
         Fedora 27
         Fedora 28
         Fedora 29
+        Fedora 30
+        Fedora 31
+        Fedora 32
+        Fedora 33
 
         Red Hat Enterprise Linux 7.0 (LTS)
         Red Hat Enterprise Linux 7.1 (LTS)
         Red Hat Enterprise Linux 7.2 (LTS)
         Red Hat Enterprise Linux 7.3 (LTS)
         Red Hat Enterprise Linux 7.4 (LTS)
+        Red Hat Enterprise Linux 7.5 (LTS)
+        Red Hat Enterprise Linux 7.6 (LTS)
+        Red Hat Enterprise Linux 7.7 (LTS)
+        Red Hat Enterprise Linux 8.0 (LTS)
+        Red Hat Enterprise Linux 8.1 (LTS)
+        Red Hat Enterprise Linux 8.2 (LTS)
+        Red Hat Enterprise Linux 8.3 (LTS)
+        Red Hat Enterprise Linux 8.4 (LTS)
 
         CentOS 7.0 (LTS)
         CentOS 7.1 (LTS)
         CentOS 7.2 (LTS)
         CentOS 7.3 (LTS)
         CentOS 7.4 (LTS)
+        CentOS 7.5 (LTS)
+        CentOS 7.6 (LTS)
+        CentOS 7.7 (LTS)
+        CentOS 8.0 (LTS)
+        CentOS 8.1 (LTS)
+        CentOS 8.2 (LTS)
+        CentOS 8.3 (LTS)
+        CentOS 8.4 (LTS)
 
 Arch is also supported, but tends to break each time the kernel is bumped up a minor version (like 3.13.x to 3.14.x).  I try to fix the breakage quickly but this is not how I support my family ;-)
 
@@ -236,6 +268,7 @@ Ex: "git checkout ubuntu-13.04"
     Ubuntu 17.04 | Kernel 4.10.x | ubuntu-17.04
     Ubuntu 17.10 | Kernel 4.13.x | ubuntu-17.10
     Ubuntu 18.04 | Kernel 4.15.x | ubuntu-18.04
+    Ubuntu 20.04 | Kernel 5.3.x  | ubuntu-20.04
     Mint 17      | Kernel 3.13.x | mint-17
     --------------------------------------------
     Any 3.13.x   | Kernel 3.13.x | generic-3.13.x
@@ -266,6 +299,17 @@ Ex: "git checkout ubuntu-13.04"
     Any 4.18.x   | Kernel 4.18.x | generic-4.18.x
     Any 4.19.x   | Kernel 4.19.x | generic-4.19.x
     Any 4.20.x   | Kernel 4.20.x | generic-4.20.x
+    Any 5.0.x    | Kernel 5.0.x  | generic-5.0.x
+    Any 5.1.x    | Kernel 5.1.x  | generic-5.1.x
+    Any 5.2.x    | Kernel 5.2.x  | generic-5.2.x
+    Any 5.3.x    | Kernel 5.3.x  | generic-5.3.x
+    Any 5.4.x    | Kernel 5.4.x  | generic-5.4.x
+    Any 5.5.x    | Kernel 5.5.x  | generic-5.5.x
+    Any 5.6.x    | Kernel 5.6.x  | generic-5.6.x
+    Any 5.7.x    | Kernel 5.7.x  | generic-5.7.x
+    Any 5.8.x    | Kernel 5.8.x  | generic-5.8.x
+    Any 5.9.x    | Kernel 5.9.x  | generic-5.9.x
+    Any 5.10.x   | Kernel 5.10.x | generic-5.10.x
 
     * Note, if the Ubuntu/Mint release version and your kernel version conflict,
       go with the branch corresponding to your *kernel version* as
@@ -341,7 +385,7 @@ After running:
     
 You may have invalid configuration options in `/etc/modprobe.d/rtl8192ce.conf`.  You can either remove the file or remove any options that are not supported.
 
-**3\. If you're connection seems unstable:**
+**3\. If your connection seems unstable:**
 
 This driver has been modified to allow up to 33 dBm Tx power (instead of the stock driver limit of 20).  This allows you to crank up the Tx power, which *vastly* improves performance for me. 
 
