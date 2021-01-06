@@ -1,0 +1,2 @@
+drivers/net/wireless/realtek/rtlwifi/btcoexist/halbtc8192e2ant.o drivers/net/wireless/realtek/rtlwifi/btcoexist/halbtc8723b1ant.o drivers/net/wireless/realtek/rtlwifi/btcoexist/halbtc8723b2ant.o drivers/net/wireless/realtek/rtlwifi/btcoexist/halbtc8821a1ant.o drivers/net/wireless/realtek/rtlwifi/btcoexist/halbtc8821a2ant.o drivers/net/wireless/realtek/rtlwifi/btcoexist/halbtcoutsrc.o drivers/net/wireless/realtek/rtlwifi/btcoexist/rtl_btc.o
+

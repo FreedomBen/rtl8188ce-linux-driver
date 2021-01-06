@@ -1,0 +1,1 @@
+cmd_drivers/net/wireless/realtek/rtlwifi/rtl8192se/modules.order := {   echo drivers/net/wireless/realtek/rtlwifi/rtl8192se/rtl8192se.ko; :; } | awk '!x[$$0]++' - > drivers/net/wireless/realtek/rtlwifi/rtl8192se/modules.order
