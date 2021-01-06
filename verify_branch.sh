@@ -34,10 +34,24 @@ doSwitch ()
 echo "Verifying a sane branch for your kernel version..."
 
 if inGitRepo; then
-    if $(uname -r | grep "5.5" > /dev/null); then
+    if $(uname -r | grep "5.10" > /dev/null); then
+        doSwitch "generic-5.10.x"
+    elif $(uname -r | grep "5.9" > /dev/null); then
+        doSwitch "generic-5.9.x"
+    elif $(uname -r | grep "5.8" > /dev/null); then
+        doSwitch "generic-5.8.x"
+    elif $(uname -r | grep "5.7" > /dev/null); then
+        doSwitch "generic-5.7.x"
+    elif $(uname -r | grep "5.6" > /dev/null); then
+        doSwitch "generic-5.6.x"
+    elif $(uname -r | grep "5.5" > /dev/null); then
         doSwitch "generic-5.5.x"
     elif $(uname -r | grep "5.4" > /dev/null); then
-        doSwitch "generic-5.4.x"
+        if runningUbuntuKernel; then
+            doSwitch "ubuntu-20.04"
+        else
+            doSwitch "generic-5.4.x"
+        fi
     elif $(uname -r | grep "5.3" > /dev/null); then
         doSwitch "generic-5.3.x"
     elif $(uname -r | grep "5.2" > /dev/null); then
@@ -158,8 +172,13 @@ if inGitRepo; then
     fi
 else
     base="$(basename $(pwd))"
-    if ( $(uname -r | grep "5.5"  > /dev/null) && ! $(echo "$base" | grep "generic-5.5.x"  > /dev/null) ) ||                                                          \
-       ( $(uname -r | grep "5.4"  > /dev/null) && ! $(echo "$base" | grep "generic-5.4.x"  > /dev/null) ) ||                                                          \
+    if ( $(uname -r | grep "5.10" > /dev/null) && ! $(echo "$base" | grep "generic-5.10.x" > /dev/null) ) ||                                                          \
+       ( $(uname -r | grep "5.9"  > /dev/null) && ! $(echo "$base" | grep "generic-5.9.x"  > /dev/null) ) ||                                                          \
+       ( $(uname -r | grep "5.8"  > /dev/null) && ! $(echo "$base" | grep "generic-5.8.x"  > /dev/null) ) ||                                                          \
+       ( $(uname -r | grep "5.7"  > /dev/null) && ! $(echo "$base" | grep "generic-5.7.x"  > /dev/null) ) ||                                                          \
+       ( $(uname -r | grep "5.6"  > /dev/null) && ! $(echo "$base" | grep "generic-5.6.x"  > /dev/null) ) ||                                                          \
+       ( $(uname -r | grep "5.5"  > /dev/null) && ! $(echo "$base" | grep "generic-5.5.x"  > /dev/null) ) ||                                                          \
+       ( $(uname -r | grep "5.4"  > /dev/null) && ! $(echo "$base" | grep "generic-5.4.x"  > /dev/null) ) && ! $(echo "$base" | grep "ubuntu-20.04"   > /dev/null) || \
        ( $(uname -r | grep "5.3"  > /dev/null) && ! $(echo "$base" | grep "generic-5.3.x"  > /dev/null) ) ||                                                          \
        ( $(uname -r | grep "5.2"  > /dev/null) && ! $(echo "$base" | grep "generic-5.2.x"  > /dev/null) ) ||                                                          \
        ( $(uname -r | grep "5.1"  > /dev/null) && ! $(echo "$base" | grep "generic-5.1.x"  > /dev/null) ) ||                                                          \
