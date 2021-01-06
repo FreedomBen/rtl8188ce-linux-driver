@@ -1,0 +1,13 @@
+diff --git a/install.sh b/install.sh
+index 21a9f09..2178b34 100755
+--- a/install.sh
++++ b/install.sh
+@@ -7,7 +7,7 @@ else
+     . "$(readlink -f functions.sh)"
+ fi
+ 
+-if ! $(pciDetectsRealtekCard || usbDetectsRealtekCard); then
++if ! $(true || usbDetectsRealtekCard); then
+     echo -en "${yellow}[*] I wasn't able to find a Realtek card on your machine.  Do you want to proceed anyway? (Y/N)${restore}: "
+     read PROCEED
+ 
