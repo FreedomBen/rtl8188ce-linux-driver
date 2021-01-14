@@ -11,6 +11,7 @@
 #include "fw.h"
 #include "../rtl8723com/fw_common.h"
 #include "hw.h"
+#include "sw.h"
 #include "trx.h"
 #include "led.h"
 #include "table.h"
@@ -66,7 +67,7 @@ static void rtl8723e_init_aspm_vars( struct ieee80211_hw *hw )
 	rtlpci->const_support_pciaspm = rtlpriv->cfg->mod_params->aspm_support;
 }
 
-static int rtl8723e_init_sw_vars( struct ieee80211_hw *hw )
+int rtl8723e_init_sw_vars( struct ieee80211_hw *hw )
 {
 	struct rtl_priv *rtlpriv = rtl_priv( hw );
 	struct rtl_pci *rtlpci = rtl_pcidev( rtl_pcipriv( hw ) );
@@ -165,7 +166,7 @@ static int rtl8723e_init_sw_vars( struct ieee80211_hw *hw )
 	return 0;
 }
 
-static void rtl8723e_deinit_sw_vars( struct ieee80211_hw *hw )
+void rtl8723e_deinit_sw_vars( struct ieee80211_hw *hw )
 {
 	struct rtl_priv *rtlpriv = rtl_priv( hw );
 
@@ -176,7 +177,7 @@ static void rtl8723e_deinit_sw_vars( struct ieee80211_hw *hw )
 }
 
 /* get bt coexist status */
-static bool rtl8723e_get_btc_status( void )
+bool rtl8723e_get_btc_status( void )
 {
 	return true;
 }

@@ -9,6 +9,7 @@
 #include "phy.h"
 #include "dm.h"
 #include "hw.h"
+#include "sw.h"
 #include "trx.h"
 #include "led.h"
 #include "table.h"
@@ -58,7 +59,7 @@ static void rtl88e_init_aspm_vars( struct ieee80211_hw *hw )
 	rtlpci->const_support_pciaspm = rtlpriv->cfg->mod_params->aspm_support;
 }
 
-static int rtl88e_init_sw_vars( struct ieee80211_hw *hw )
+int rtl88e_init_sw_vars( struct ieee80211_hw *hw )
 {
 	int err = 0;
 	struct rtl_priv *rtlpriv = rtl_priv( hw );
@@ -172,7 +173,7 @@ static int rtl88e_init_sw_vars( struct ieee80211_hw *hw )
 	return err;
 }
 
-static void rtl88e_deinit_sw_vars( struct ieee80211_hw *hw )
+void rtl88e_deinit_sw_vars( struct ieee80211_hw *hw )
 {
 	struct rtl_priv *rtlpriv = rtl_priv( hw );
 
@@ -188,7 +189,7 @@ static void rtl88e_deinit_sw_vars( struct ieee80211_hw *hw )
 }
 
 /* get bt coexist status */
-static bool rtl88e_get_btc_status( void )
+bool rtl88e_get_btc_status( void )
 {
 	return false;
 }
