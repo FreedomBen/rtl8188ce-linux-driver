@@ -203,7 +203,7 @@ elif [ "$1" = "ubuntu-17.10" ]; then
 elif [ "$1" = "ubuntu-18.04" ]; then
     remote="$UBUNTU1804"
 elif [ "$1" = "ubuntu-20.04" ]; then
-    remote="$UBUNTU1804"
+    remote="$UBUNTU2004"
 elif [[ $1 =~ generic ]]; then
     remote="$GENERIC"
 fi
