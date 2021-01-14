@@ -167,7 +167,7 @@ tag ()
             echo "$(git tag | grep Ubuntu-4.15 | sort -n | ~/bin/extract.rb)"
             return
         elif $(echo "$1" | grep "20.04" >/dev/null 2>&1); then
-            echo "$(git tag | grep Ubuntu-5.4 | sort -n | ~/bin/extract.rb)"
+            echo "$(git tag | grep Ubuntu-5.4.0 | sort -n | ~/bin/extract.rb)"
             return
         fi
     fi
