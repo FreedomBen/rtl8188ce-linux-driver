@@ -45,17 +45,19 @@ if [ "$?" != "0" ]; then
     exit 1
 fi
 
-if pciDetectsRtl8188ce || pciDetectsRtl8192ce; then
+if pciDetectsRtl8188ce || pciDetectsRtl8192ce || pciDetectsRtl8821ae ; then
     input="y"
     if pciDetectsRtl8188ce; then
         CARD="RTL8188CE"
     elif pciDetectsRtl8192ce; then
         CARD="RTL8192CE"
+    elif pciDetectsRtl8821ae; then
+        CARD="RTL8821AE"
     fi
 
     echo -e "${blue}[*] I see you have an $CARD card${restore}"
 else
-    read -p "[*] Is your wireless card either the RTL8188CE or RTL8192CE? (Y/N): " input
+    read -p "[*] Is your wireless card either the RTL8188CE or RTL8192CE or RTL8821AE? (Y/N): " input
 fi
 
 if [ "$input" = "y" -o "$input" = "Y" ]; then
@@ -63,12 +65,21 @@ if [ "$input" = "y" -o "$input" = "Y" ]; then
     makeModuleLoadPersistent
 
     echo -e "\n${blue}[*] Time to modprobe in your new driver...${restore}"
-
-    sudo modprobe -r rtl8192ce
-    sudo modprobe -r rtlwifi
-    sudo modprobe rtlwifi
-    sudo modprobe rtl8192ce
-
+    
+    if pciDetectsRtl8192ce; then
+        sudo modprobe -r rtl8192ce
+        sudo modprobe -r rtlwifi
+        sudo modprobe rtlwifi
+        sudo modprobe rtl8192ce
+    fi
+    
+    if pciDetectsRtl8821ae; then
+        sudo modprobe -r rtl8821ae
+        sudo modprobe -r rtlwifi
+        sudo modprobe rtlwifi
+        sudo modprobe rtl8821ae
+    fi
+    
     if usingSystemd; then
         sudo systemctl restart wpa_supplicant
     fi
