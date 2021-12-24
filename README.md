@@ -62,6 +62,7 @@ Well supported kernel releases:
         5.12.x
         5.13.x
         5.14.x
+        5.15.x
 
 Well supported Ubuntu (and Ubuntu-based) releases:
 
@@ -106,6 +107,7 @@ Well supported Fedora (and Fedora based) releases:
         Fedora 32
         Fedora 33
         Fedora 34
+        Fedora 35
 
         Red Hat Enterprise Linux 7.0 (LTS)
         Red Hat Enterprise Linux 7.1 (LTS)
@@ -319,6 +321,7 @@ Ex: "git checkout ubuntu-13.04"
     Any 5.12.x   | Kernel 5.12.x | generic-5.12.x
     Any 5.13.x   | Kernel 5.13.x | generic-5.13.x
     Any 5.14.x   | Kernel 5.14.x | generic-5.14.x
+    Any 5.15.x   | Kernel 5.15.x | generic-5.15.x
 
     * Note, if the Ubuntu/Mint release version and your kernel version conflict,
       go with the branch corresponding to your *kernel version* as
