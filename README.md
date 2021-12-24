@@ -65,7 +65,7 @@ Well supported kernel releases:
         5.15.x
         5.16.x
 
-Well supported Ubuntu (and Ubuntu-based) releases:
+Well supported [Ubuntu](https://ubuntu.com/) (and Ubuntu-based) releases:
 
         Ubuntu 12.04 (LTS)
         Ubuntu 13.04
@@ -90,7 +90,7 @@ Well supported Ubuntu (and Ubuntu-based) releases:
         Linux Mint 17   Qiana (LTS)
         Linux Mint 17.1 Rebecca (LTS)
 
-Well supported Fedora (and Fedora based) releases:
+Well supported [Fedora](https://getfedora.org/) (and Fedora based) releases:
 
         Fedora 19
         Fedora 20
