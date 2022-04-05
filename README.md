@@ -284,7 +284,7 @@ Ex: "git checkout ubuntu-13.04"
     Ubuntu 17.10 | Kernel 4.13.x | ubuntu-17.10
     Ubuntu 18.04 | Kernel 4.15.x | ubuntu-18.04
     Ubuntu 20.04 | Kernel 5.4.x  | ubuntu-20.04
-    Ubuntu 22.04 | Kernel 5.14.x  | ubuntu-22.04
+    Ubuntu 22.04 | Kernel 5.15.x | ubuntu-22.04
     Mint 17      | Kernel 3.13.x | mint-17
     --------------------------------------------
     Any 3.13.x   | Kernel 3.13.x | generic-3.13.x
