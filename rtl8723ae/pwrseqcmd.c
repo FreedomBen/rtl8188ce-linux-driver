@@ -63,7 +63,7 @@ bool rtl_hal_pwrseqcmdparsing( struct rtl_priv *rtlpriv, u8 cut_version,
 
 	do {
 		cfg_cmd = pwrcfgcmd[ary_idx];
-		RT_TRACE( rtlpriv, COMP_INIT, DBG_TRACE,
+		rtl_dbg( rtlpriv, COMP_INIT, DBG_TRACE,
 			"rtl_hal_pwrseqcmdparsing(): offset(%#x),cut_msk(%#x), famsk(%#x),"
 			"interface_msk(%#x), base(%#x), cmd(%#x), msk(%#x), value(%#x)\n",
 			GET_PWR_CFG_OFFSET( cfg_cmd ),
@@ -78,11 +78,11 @@ bool rtl_hal_pwrseqcmdparsing( struct rtl_priv *rtlpriv, u8 cut_version,
 		    ( GET_PWR_CFG_INTF_MASK( cfg_cmd )&interface_type ) ) {
 			switch ( GET_PWR_CFG_CMD( cfg_cmd ) ) {
 			case PWR_CMD_READ:
-				RT_TRACE( rtlpriv, COMP_INIT, DBG_TRACE,
+				rtl_dbg( rtlpriv, COMP_INIT, DBG_TRACE,
 					"rtl_hal_pwrseqcmdparsing(): PWR_CMD_READ\n" );
 				break;
 			case PWR_CMD_WRITE:
-				RT_TRACE( rtlpriv, COMP_INIT, DBG_TRACE,
+				rtl_dbg( rtlpriv, COMP_INIT, DBG_TRACE,
 					"rtl_hal_pwrseqcmdparsing(): PWR_CMD_WRITE\n" );
 				offset = GET_PWR_CFG_OFFSET( cfg_cmd );
 
@@ -96,7 +96,7 @@ bool rtl_hal_pwrseqcmdparsing( struct rtl_priv *rtlpriv, u8 cut_version,
 				rtl_write_byte( rtlpriv, offset, value );
 				break;
 			case PWR_CMD_POLLING:
-				RT_TRACE( rtlpriv, COMP_INIT, DBG_TRACE,
+				rtl_dbg( rtlpriv, COMP_INIT, DBG_TRACE,
 					"rtl_hal_pwrseqcmdparsing(): PWR_CMD_POLLING\n" );
 				polling_bit = false;
 				offset = GET_PWR_CFG_OFFSET( cfg_cmd );
@@ -117,7 +117,7 @@ bool rtl_hal_pwrseqcmdparsing( struct rtl_priv *rtlpriv, u8 cut_version,
 				} while ( !polling_bit );
 				break;
 			case PWR_CMD_DELAY:
-				RT_TRACE( rtlpriv, COMP_INIT, DBG_TRACE,
+				rtl_dbg( rtlpriv, COMP_INIT, DBG_TRACE,
 					"rtl_hal_pwrseqcmdparsing(): PWR_CMD_DELAY\n" );
 				if ( GET_PWR_CFG_VALUE( cfg_cmd ) ==
 				    PWRSEQ_DELAY_US )
@@ -126,7 +126,7 @@ bool rtl_hal_pwrseqcmdparsing( struct rtl_priv *rtlpriv, u8 cut_version,
 					mdelay( GET_PWR_CFG_OFFSET( cfg_cmd ) );
 				break;
 			case PWR_CMD_END:
-				RT_TRACE( rtlpriv, COMP_INIT, DBG_TRACE,
+				rtl_dbg( rtlpriv, COMP_INIT, DBG_TRACE,
 					 "rtl_hal_pwrseqcmdparsing(): PWR_CMD_END\n" );
 				return true;
 			default:
