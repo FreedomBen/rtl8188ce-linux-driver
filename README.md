@@ -62,8 +62,13 @@ Well supported kernel releases:
         5.12.x
         5.13.x
         5.14.x
+        5.15.x
+        5.16.x
+        5.17.x
+        5.18.x
+        5.19.x
 
-Well supported Ubuntu (and Ubuntu-based) releases:
+Well supported [Ubuntu](https://ubuntu.com/) (and Ubuntu-based) releases:
 
         Ubuntu 12.04 (LTS)
         Ubuntu 13.04
@@ -78,6 +83,7 @@ Well supported Ubuntu (and Ubuntu-based) releases:
         Ubuntu 17.10
         Ubuntu 18.04 (LTS)
         Ubuntu 20.04 (LTS)
+        Ubuntu 22.04 (LTS)
 
         Elementary OS Luna
         Elementary OS Isis
@@ -88,7 +94,7 @@ Well supported Ubuntu (and Ubuntu-based) releases:
         Linux Mint 17   Qiana (LTS)
         Linux Mint 17.1 Rebecca (LTS)
 
-Well supported Fedora (and Fedora based) releases:
+Well supported [Fedora](https://getfedora.org/) (and Fedora based) releases:
 
         Fedora 19
         Fedora 20
@@ -106,6 +112,8 @@ Well supported Fedora (and Fedora based) releases:
         Fedora 32
         Fedora 33
         Fedora 34
+        Fedora 35
+        Fedora 36
 
         Red Hat Enterprise Linux 7.0 (LTS)
         Red Hat Enterprise Linux 7.1 (LTS)
@@ -120,6 +128,7 @@ Well supported Fedora (and Fedora based) releases:
         Red Hat Enterprise Linux 8.2 (LTS)
         Red Hat Enterprise Linux 8.3 (LTS)
         Red Hat Enterprise Linux 8.4 (LTS)
+        Red Hat Enterprise Linux 8.5 (LTS)
 
         CentOS 7.0 (LTS)
         CentOS 7.1 (LTS)
@@ -134,6 +143,10 @@ Well supported Fedora (and Fedora based) releases:
         CentOS 8.2 (LTS)
         CentOS 8.3 (LTS)
         CentOS 8.4 (LTS)
+        CentOS 8.5 (LTS)
+        CentOS 8.6 (LTS)
+
+AlmaLinux and Rocky Linux versions that match above CentOS should work fine but are not specifically tested.
 
 Arch is also supported, but tends to break each time the kernel is bumped up a minor version (like 3.13.x to 3.14.x).  I try to fix the breakage quickly but this is not how I support my family ;-)
 
@@ -273,7 +286,8 @@ Ex: "git checkout ubuntu-13.04"
     Ubuntu 17.04 | Kernel 4.10.x | ubuntu-17.04
     Ubuntu 17.10 | Kernel 4.13.x | ubuntu-17.10
     Ubuntu 18.04 | Kernel 4.15.x | ubuntu-18.04
-    Ubuntu 20.04 | Kernel 5.3.x  | ubuntu-20.04
+    Ubuntu 20.04 | Kernel 5.4.x  | ubuntu-20.04
+    Ubuntu 22.04 | Kernel 5.15.x | ubuntu-22.04
     Mint 17      | Kernel 3.13.x | mint-17
     --------------------------------------------
     Any 3.13.x   | Kernel 3.13.x | generic-3.13.x
@@ -319,6 +333,11 @@ Ex: "git checkout ubuntu-13.04"
     Any 5.12.x   | Kernel 5.12.x | generic-5.12.x
     Any 5.13.x   | Kernel 5.13.x | generic-5.13.x
     Any 5.14.x   | Kernel 5.14.x | generic-5.14.x
+    Any 5.15.x   | Kernel 5.15.x | generic-5.15.x
+    Any 5.16.x   | Kernel 5.16.x | generic-5.16.x
+    Any 5.17.x   | Kernel 5.17.x | generic-5.17.x
+    Any 5.18.x   | Kernel 5.18.x | generic-5.18.x
+    Any 5.19.x   | Kernel 5.19.x | generic-5.19.x
 
     * Note, if the Ubuntu/Mint release version and your kernel version conflict,
       go with the branch corresponding to your *kernel version* as
