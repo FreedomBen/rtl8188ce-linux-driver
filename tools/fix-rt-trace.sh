@@ -17,7 +17,8 @@ files()
   | awk -F : '{ print $1 }' \
   | sort \
   | uniq \
-  | sed '/fix-rt-trace.sh$/d'
+  | sed '/fix-rt-trace.sh$/d' \
+  | sed '/^.git\//d'
 }
 
 for f in $(files); do
