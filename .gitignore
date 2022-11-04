@@ -32,3 +32,33 @@ modules.order
 # YouCompleteMe config file
 *.ycm_extra_conf.pyc
 
+
+rtl8188ee/.modules.order.cmd
+rtl8188ee/.rtl8188ee.mod.cmd
+rtl8188ee/rtl8188ee.mod
+rtl8192c/.modules.order.cmd
+rtl8192ce/.modules.order.cmd
+rtl8192ce/.rtl8192ce.mod.cmd
+rtl8192ce/rtl8192ce.mod
+rtl8192cu/.modules.order.cmd
+rtl8192cu/.rtl8192cu.mod.cmd
+rtl8192cu/rtl8192cu.mod
+rtl8192de/.modules.order.cmd
+rtl8192de/.rtl8192de.mod.cmd
+rtl8192de/rtl8192de.mod
+rtl8192se/.modules.order.cmd
+rtl8192se/.rtl8192se.mod.cmd
+rtl8192se/rtl8192se.mod
+rtlwifi.mod
+.Module.symvers.cmd
+.modules.order.cmd
+.rtlwifi.mod.cmd
+rtl8188ee/.Module.symvers.cmd
+rtl8192c/.Module.symvers.cmd
+rtl8192c/.rtl8192c_common.mod.cmd
+rtl8192c/rtl8192c_common.mod
+rtl8192ce/.Module.symvers.cmd
+rtl8192cu/.Module.symvers.cmd
+rtl8192de/.Module.symvers.cmd
+rtl8192se/.Module.symvers.cmd
+
