@@ -67,6 +67,7 @@ Well supported kernel releases:
         5.17.x
         5.18.x
         5.19.x
+        6.0.x
 
 Well supported [Ubuntu](https://ubuntu.com/) (and Ubuntu-based) releases:
 
@@ -129,6 +130,8 @@ Well supported [Fedora](https://getfedora.org/) (and Fedora based) releases:
         Red Hat Enterprise Linux 8.3 (LTS)
         Red Hat Enterprise Linux 8.4 (LTS)
         Red Hat Enterprise Linux 8.5 (LTS)
+        Red Hat Enterprise Linux 8.6 (LTS)
+        Red Hat Enterprise Linux 9.0 (LTS)
 
         CentOS 7.0 (LTS)
         CentOS 7.1 (LTS)
@@ -145,6 +148,7 @@ Well supported [Fedora](https://getfedora.org/) (and Fedora based) releases:
         CentOS 8.4 (LTS)
         CentOS 8.5 (LTS)
         CentOS 8.6 (LTS)
+        CentOS 9.0 (LTS)
 
 AlmaLinux and Rocky Linux versions that match above CentOS should work fine but are not specifically tested.
 
@@ -338,6 +342,7 @@ Ex: "git checkout ubuntu-13.04"
     Any 5.17.x   | Kernel 5.17.x | generic-5.17.x
     Any 5.18.x   | Kernel 5.18.x | generic-5.18.x
     Any 5.19.x   | Kernel 5.19.x | generic-5.19.x
+    Any 6.0.x    | Kernel 6.0.x  | generic-6.0.x
 
     * Note, if the Ubuntu/Mint release version and your kernel version conflict,
       go with the branch corresponding to your *kernel version* as

@@ -34,7 +34,9 @@ doSwitch ()
 echo "Verifying a sane branch for your kernel version..."
 
 if inGitRepo; then
-    if $(uname -r | grep "5.19" > /dev/null); then
+    if $(uname -r | grep "6.0" > /dev/null); then
+        doSwitch "generic-6.0.x"
+    elif $(uname -r | grep "5.19" > /dev/null); then
         doSwitch "generic-5.19.x"
     elif $(uname -r | grep "5.18" > /dev/null); then
         doSwitch "generic-5.18.x"
@@ -190,7 +192,8 @@ if inGitRepo; then
     fi
 else
     base="$(basename $(pwd))"
-    if ( $(uname -r | grep "5.19" > /dev/null) && ! $(echo "$base" | grep "generic-5.19.x" > /dev/null) ) ||                                                          \
+    if ( $(uname -r | grep "6.0"  > /dev/null) && ! $(echo "$base" | grep "generic-6.0.x"  > /dev/null) ) ||                                                          \
+       ( $(uname -r | grep "5.19" > /dev/null) && ! $(echo "$base" | grep "generic-5.19.x" > /dev/null) ) ||                                                          \
        ( $(uname -r | grep "5.18" > /dev/null) && ! $(echo "$base" | grep "generic-5.18.x" > /dev/null) ) ||                                                          \
        ( $(uname -r | grep "5.17" > /dev/null) && ! $(echo "$base" | grep "generic-5.17.x" > /dev/null) ) ||                                                          \
        ( $(uname -r | grep "5.16" > /dev/null) && ! $(echo "$base" | grep "generic-5.16.x" > /dev/null) ) ||                                                          \
