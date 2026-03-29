@@ -36,61 +36,7 @@ is_ubuntu ()
 tag ()
 {
     if $(is_generic $1); then
-        if $(echo "$1" | grep "6\.18" >/dev/null 2>&1); then
-            echo "$(git tag | grep "v6\.18" | sort -n | ~/bin/extract.rb)"
-            return
-        elif $(echo "$1" | grep "6\.17" >/dev/null 2>&1); then
-            echo "$(git tag | grep "v6\.17" | sort -n | ~/bin/extract.rb)"
-            return
-        elif $(echo "$1" | grep "6\.16" >/dev/null 2>&1); then
-            echo "$(git tag | grep "v6\.16" | sort -n | ~/bin/extract.rb)"
-            return
-        elif $(echo "$1" | grep "6\.15" >/dev/null 2>&1); then
-            echo "$(git tag | grep "v6\.15" | sort -n | ~/bin/extract.rb)"
-            return
-        elif $(echo "$1" | grep "6\.14" >/dev/null 2>&1); then
-            echo "$(git tag | grep "v6\.14" | sort -n | ~/bin/extract.rb)"
-            return
-        elif $(echo "$1" | grep "6\.13" >/dev/null 2>&1); then
-            echo "$(git tag | grep "v6\.13" | sort -n | ~/bin/extract.rb)"
-            return
-        elif $(echo "$1" | grep "6\.12" >/dev/null 2>&1); then
-            echo "$(git tag | grep "v6\.12" | sort -n | ~/bin/extract.rb)"
-            return
-        elif $(echo "$1" | grep "6\.11" >/dev/null 2>&1); then
-            echo "$(git tag | grep "v6\.11" | sort -n | ~/bin/extract.rb)"
-            return
-        elif $(echo "$1" | grep "6\.10" >/dev/null 2>&1); then
-            echo "$(git tag | grep "v6\.10" | sort -n | ~/bin/extract.rb)"
-            return
-        elif $(echo "$1" | grep "6\.9" >/dev/null 2>&1); then
-            echo "$(git tag | grep "v6\.9" | sort -n | ~/bin/extract.rb)"
-            return
-        elif $(echo "$1" | grep "6\.8" >/dev/null 2>&1); then
-            echo "$(git tag | grep "v6\.8" | sort -n | ~/bin/extract.rb)"
-            return
-        elif $(echo "$1" | grep "6\.7" >/dev/null 2>&1); then
-            echo "$(git tag | grep "v6\.7" | sort -n | ~/bin/extract.rb)"
-            return
-        elif $(echo "$1" | grep "6\.6" >/dev/null 2>&1); then
-            echo "$(git tag | grep "v6\.6" | sort -n | ~/bin/extract.rb)"
-            return
-        elif $(echo "$1" | grep "6\.5" >/dev/null 2>&1); then
-            echo "$(git tag | grep "v6\.5" | sort -n | ~/bin/extract.rb)"
-            return
-        elif $(echo "$1" | grep "6\.4" >/dev/null 2>&1); then
-            echo "$(git tag | grep "v6\.4" | sort -n | ~/bin/extract.rb)"
-            return
-        elif $(echo "$1" | grep "6\.3" >/dev/null 2>&1); then
-            echo "$(git tag | grep "v6\.3" | sort -n | ~/bin/extract.rb)"
-            return
-        elif $(echo "$1" | grep "6\.2" >/dev/null 2>&1); then
-            echo "$(git tag | grep "v6\.2" | sort -n | ~/bin/extract.rb)"
-            return
-        elif $(echo "$1" | grep "6\.1" >/dev/null 2>&1); then
-            echo "$(git tag | grep "v6\.1" | sort -n | ~/bin/extract.rb)"
-            return
-        elif $(echo "$1" | grep "6\.0" >/dev/null 2>&1); then
+        if $(echo "$1" | grep "6\.0" >/dev/null 2>&1); then
             echo "$(git tag | grep "v6\.0" | sort -n | ~/bin/extract.rb)"
             return
         elif $(echo "$1" | grep "5\.19" >/dev/null 2>&1); then
