@@ -68,6 +68,23 @@ Well supported kernel releases:
         5.18.x
         5.19.x
         6.0.x
+        6.1.x
+        6.3.x
+        6.4.x
+        6.5.x
+        6.6.x
+        6.7.x
+        6.8.x
+        6.9.x
+        6.10.x
+        6.11.x
+        6.12.x
+        6.13.x
+        6.14.x
+        6.15.x
+        6.16.x
+        6.17.x
+        6.18.x
 
 Well supported [Ubuntu](https://ubuntu.com/) (and Ubuntu-based) releases:
 
@@ -115,6 +132,13 @@ Well supported [Fedora](https://getfedora.org/) (and Fedora based) releases:
         Fedora 34
         Fedora 35
         Fedora 36
+        Fedora 37
+        Fedora 38
+        Fedora 39
+        Fedora 40
+        Fedora 41
+        Fedora 42
+        Fedora 43
 
         Red Hat Enterprise Linux 7.0 (LTS)
         Red Hat Enterprise Linux 7.1 (LTS)
@@ -131,7 +155,20 @@ Well supported [Fedora](https://getfedora.org/) (and Fedora based) releases:
         Red Hat Enterprise Linux 8.4 (LTS)
         Red Hat Enterprise Linux 8.5 (LTS)
         Red Hat Enterprise Linux 8.6 (LTS)
+        Red Hat Enterprise Linux 8.7 (LTS)
+        Red Hat Enterprise Linux 8.8 (LTS)
+        Red Hat Enterprise Linux 8.9 (LTS)
+        Red Hat Enterprise Linux 8.10 (LTS)
         Red Hat Enterprise Linux 9.0 (LTS)
+        Red Hat Enterprise Linux 9.1 (LTS)
+        Red Hat Enterprise Linux 9.2 (LTS)
+        Red Hat Enterprise Linux 9.3 (LTS)
+        Red Hat Enterprise Linux 9.4 (LTS)
+        Red Hat Enterprise Linux 9.5 (LTS)
+        Red Hat Enterprise Linux 9.6 (LTS)
+        Red Hat Enterprise Linux 9.7 (LTS)
+        Red Hat Enterprise Linux 10.0 (LTS)
+        Red Hat Enterprise Linux 10.1 (LTS)
 
         CentOS 7.0 (LTS)
         CentOS 7.1 (LTS)
@@ -148,7 +185,42 @@ Well supported [Fedora](https://getfedora.org/) (and Fedora based) releases:
         CentOS 8.4 (LTS)
         CentOS 8.5 (LTS)
         CentOS 8.6 (LTS)
+        CentOS 8.7 (LTS)
+        CentOS 8.8 (LTS)
+        CentOS 8.9 (LTS)
+        CentOS 8.10 (LTS)
         CentOS 9.0 (LTS)
+        CentOS 9.1 (LTS)
+        CentOS 9.2 (LTS)
+        CentOS 9.3 (LTS)
+        CentOS 9.4 (LTS)
+        CentOS 9.5 (LTS)
+        CentOS 9.6 (LTS)
+        CentOS 9.7 (LTS)
+        CentOS 10.0 (LTS)
+        CentOS 10.1 (LTS)
+
+        AlmaLinux 8.0 (LTS)
+        AlmaLinux 8.1 (LTS)
+        AlmaLinux 8.2 (LTS)
+        AlmaLinux 8.3 (LTS)
+        AlmaLinux 8.4 (LTS)
+        AlmaLinux 8.5 (LTS)
+        AlmaLinux 8.6 (LTS)
+        AlmaLinux 8.7 (LTS)
+        AlmaLinux 8.8 (LTS)
+        AlmaLinux 8.9 (LTS)
+        AlmaLinux 8.10 (LTS)
+        AlmaLinux 9.0 (LTS)
+        AlmaLinux 9.1 (LTS)
+        AlmaLinux 9.2 (LTS)
+        AlmaLinux 9.3 (LTS)
+        AlmaLinux 9.4 (LTS)
+        AlmaLinux 9.5 (LTS)
+        AlmaLinux 9.6 (LTS)
+        AlmaLinux 9.7 (LTS)
+        AlmaLinux 10.0 (LTS)
+        AlmaLinux 10.1 (LTS)
 
 AlmaLinux and Rocky Linux versions that match above CentOS should work fine but are not specifically tested.
 
